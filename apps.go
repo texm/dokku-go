@@ -19,23 +19,22 @@ const (
 )
 
 const (
-	appCloneCommand    = "apps:clone %s %s"
-	appCreateCommand   = "apps:create %s"
-	appDestroyCommand  = "apps:destroy --force %s"
-	appExistsCommand   = "apps:exists %s"
-	appListCommand     = "apps:list"
-	appLockCommand     = "apps:lock %s"
-	appIsLockedCommand = "apps:locked %s"
-	appRenameCommand   = "apps:rename --skip-deploy %s %s"
-	appReportCommand   = "apps:report %s"
-	appUnlockCommand   = "apps:unlock %s"
+	appCloneCommand     = "apps:clone %s %s"
+	appCreateCommand    = "apps:create %s"
+	appDestroyCommand   = "apps:destroy --force %s"
+	appExistsCommand    = "apps:exists %s"
+	appListCommand      = "apps:list"
+	appLockCommand      = "apps:lock %s"
+	appIsLockedCommand  = "apps:locked %s"
+	appRenameCommand    = "apps:rename --skip-deploy %s %s"
+	appReportCommand    = "apps:report %s"
+	appReportAllCommand = "apps:report"
+	appUnlockCommand    = "apps:unlock %s"
 )
 
 var (
-	InvalidAppError     = errors.New("App does not exist")
-	NotImplementedError = errors.New("Method not implemented")
-	NameTakenError      = errors.New("App name already in use")
-	WeirdMessageError   = errors.New("Unexpected confirmation message")
+	NameTakenError    = errors.New("App name already in use")
+	WeirdMessageError = errors.New("Unexpected confirmation message")
 )
 
 func (c *Client) CloneApp(oldName, newName string) error {
@@ -136,6 +135,7 @@ func rowValue(row string) string {
 }
 
 type AppInfo struct {
+	Name                 string
 	CreatedAt            time.Time
 	DeploySource         string
 	DeploySourceMetadata string
@@ -143,14 +143,20 @@ type AppInfo struct {
 	IsLocked             bool
 }
 
-func (c *Client) AppReport(name string) (*AppInfo, error) {
-	cmd := fmt.Sprintf(appReportCommand, name)
-	out, err := c.exec(cmd)
-	if err != nil {
-		return nil, err
+var appNameRe = regexp.MustCompile(`^=====> (.*) app information`)
+
+func parseAppReport(report string) *AppInfo {
+	lines := strings.Split(report, "\n")
+	if len(lines) < 6 {
+		return nil
 	}
 
-	lines := strings.Split(out, "\n")
+	appNameMatch := appNameRe.FindStringSubmatch(lines[0])
+	if len(appNameMatch) < 2 {
+		return nil
+	}
+
+	appName := appNameMatch[1]
 	createdAt := rowValue(lines[1])
 	deploySource := rowValue(lines[2])
 	deploySourceMetadata := rowValue(lines[3])
@@ -163,6 +169,7 @@ func (c *Client) AppReport(name string) (*AppInfo, error) {
 	}
 
 	info := &AppInfo{
+		Name:                 appName,
 		CreatedAt:            time.Unix(stamp, 0),
 		DeploySource:         deploySource,
 		DeploySourceMetadata: deploySourceMetadata,
@@ -170,7 +177,38 @@ func (c *Client) AppReport(name string) (*AppInfo, error) {
 		IsLocked:             isLocked == "true",
 	}
 
+	return info
+}
+
+func (c *Client) GetAppInfo(name string) (*AppInfo, error) {
+	cmd := fmt.Sprintf(appReportCommand, name)
+	out, err := c.exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	info := parseAppReport(out)
+
 	return info, nil
+}
+
+var appReportSectionsRe = regexp.MustCompile(`(=====> [. \w\n:/]+)`)
+
+func (c *Client) GetAllAppInfo() ([]*AppInfo, error) {
+	cmd := fmt.Sprintf(appReportAllCommand)
+	out, err := c.exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var infos []*AppInfo
+
+	matches := appReportSectionsRe.FindAllString(out, -1)
+	for _, match := range matches {
+		infos = append(infos, parseAppReport(match))
+	}
+
+	return infos, nil
 }
 
 func (c *Client) UnlockApp(name string) error {

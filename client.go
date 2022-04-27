@@ -24,6 +24,7 @@ type ClientConfig struct {
 	Host                string
 	Port                string
 	PrivateKey          []byte
+	PrivateKeyFileName  string
 	PrivateKeyFilePath  string
 	PrivateKeyPassphare string
 	HostKeyCallback     ssh.HostKeyCallback
@@ -54,12 +55,22 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 		hostKeyCallback = cb
 	}
 
-	privateKey := cfg.PrivateKey
-	if len(privateKey) == 0 && cfg.PrivateKeyFilePath != "" {
+	var privateKey []byte
+	if len(privateKey) > 0 {
+		privateKey = cfg.PrivateKey
+	} else if cfg.PrivateKeyFilePath != "" {
 		privateKey, err = ioutil.ReadFile(cfg.PrivateKeyFilePath)
 		if err != nil {
 			return nil, err
 		}
+	} else if cfg.PrivateKeyFileName != "" {
+		filePath := path.Join(homeDir, ".ssh", cfg.PrivateKeyFileName)
+		privateKey, err = ioutil.ReadFile(filePath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, errors.New("no valid private key")
 	}
 	signer, err := ssh.ParsePrivateKey(privateKey)
 
@@ -100,7 +111,7 @@ func (c *Client) exec(cmd string) (string, error) {
 	if err != nil {
 		var exitCodeErr *ssh.ExitError
 		if errors.As(err, &exitCodeErr) {
-			return cleaned, dokkuError(cleaned)
+			return cleaned, newDokkuError(cleaned)
 		}
 		return "", err
 	}
@@ -110,8 +121,4 @@ func (c *Client) exec(cmd string) (string, error) {
 
 func (c *Client) Close() error {
 	return c.conn.Close()
-}
-
-func dokkuError(msg string) error {
-	return errors.New("dokku error: '" + msg + "'")
 }
