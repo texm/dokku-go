@@ -2,7 +2,7 @@ name: Build & Publish Test Image
 on: workflow_dispatch
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: testing-env
 
 jobs:
   build:
