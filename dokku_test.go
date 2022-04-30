@@ -23,34 +23,13 @@ type DokkuTestSuite struct {
 func (s *DokkuTestSuite) SetupSuite() {
 	ctx := context.Background()
 
-	dc, err := testutils.CreateDokkuContainer(ctx)
-	if err != nil {
+	if err := s.createTestContainer(ctx); err != nil {
 		log.Fatal("Failed to create dokku container", err)
 	}
 
-	keyPair, err := testutils.GenerateRSAKeyPair()
-	if err != nil {
-		log.Fatal("Failed to create keypair", err)
+	if err := s.createTestClient(ctx); err != nil {
+		log.Fatal("Failed to create default dokku client", err)
 	}
-	dc.AttachLogConsumer(ctx)
-	dc.RegisterDokkuPublicKey(ctx, keyPair.PublicKey)
-
-	cfg := &ClientConfig{
-		Host:            dc.Host,
-		Port:            dc.SSHPort,
-		PrivateKey:      keyPair.PrivateKey,
-		HostKeyCallback: dc.HostKeyFunc(),
-	}
-	client, err := NewClient(cfg)
-	if err != nil {
-		log.Fatal("Failed to create dokku client", err)
-	}
-	if err := client.Dial(); err != nil {
-		log.Fatal("Failed to create dokku client", err)
-	}
-
-	s.Dokku = dc
-	s.Client = client
 }
 
 func (s *DokkuTestSuite) TearDownSuite() {
@@ -63,4 +42,38 @@ func (s *DokkuTestSuite) TearDownSuite() {
 	if s.Client != nil {
 		s.Client.Close()
 	}
+}
+
+func (s *DokkuTestSuite) createTestContainer(ctx context.Context) error {
+	dc, err := testutils.CreateDokkuContainer(ctx)
+	if err != nil {
+		return err
+	}
+	dc.AttachLogConsumer(ctx)
+	return nil
+}
+
+func (s *DokkuTestSuite) createTestClient(ctx context.Context) error {
+	keyPair, err := testutils.GenerateRSAKeyPair()
+	if err != nil {
+		return err
+	}
+	s.Dokku.RegisterDokkuPublicKey(ctx, keyPair.PublicKey)
+
+	cfg := &ClientConfig{
+		Host:            s.Dokku.Host,
+		Port:            s.Dokku.SSHPort,
+		PrivateKey:      keyPair.PrivateKey,
+		HostKeyCallback: s.Dokku.HostKeyFunc(),
+	}
+	client, err := NewClient(cfg)
+	if err != nil {
+		return err
+	}
+	if err := client.Dial(); err != nil {
+		return err
+	}
+
+	s.Client = client
+	return nil
 }
