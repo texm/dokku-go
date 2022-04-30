@@ -31,9 +31,9 @@ jobs:
 
       - name: Build and push Docker image
         id: build-and-push
-        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        uses: docker/build-push-action@v2
         with:
           context: build
           push: true
-          tags: "testing-env"
+          tags: ${{ env.IMAGE_NAME }}:testing-env
           labels: ${{ steps.meta.outputs.labels }}
