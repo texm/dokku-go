@@ -10,6 +10,11 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+const (
+	testKeyPath     = "/home/dokku/test_key.pub"
+	testKeyFileMode = 0666
+)
+
 type DokkuContainer struct {
 	testcontainers.Container
 	Host        string
@@ -62,8 +67,8 @@ func (dc *DokkuContainer) HostKeyFunc() func(string, net.Addr, ssh.PublicKey) er
 	}
 }
 
-func (dc *DokkuContainer) RegisterDokkuPublicKey(ctx context.Context, key []byte) error {
-	err := dc.CopyToContainer(ctx, key, testKeyPath, 0666)
+func (dc *DokkuContainer) RegisterPublicKey(ctx context.Context, key []byte) error {
+	err := dc.CopyToContainer(ctx, key, testKeyPath, testKeyFileMode)
 	if err != nil {
 		return err
 	}

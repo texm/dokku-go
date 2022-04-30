@@ -12,8 +12,7 @@ import (
 
 const (
 	colimaSocket   = ".colima/docker.sock"
-	containerHash  = "sha256:d5eb1a4a2d713ba28a8afeed6126cebfba6086881101536076dd30f10d28f30e"
-	testKeyPath    = "/home/dokku/test_key.pub"
+	testingImage   = "ghcr.io/texm/dokku-go:testing-environment"
 	startupTimeout = time.Second * 8
 )
 
@@ -25,7 +24,7 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 
 	waitStrategy := wait.ForListeningPort("22").WithStartupTimeout(startupTimeout)
 	req := testcontainers.ContainerRequest{
-		Image:        containerHash,
+		Image:        testingImage,
 		Privileged:   false,
 		SkipReaper:   true,
 		ExposedPorts: []string{"22/tcp"},

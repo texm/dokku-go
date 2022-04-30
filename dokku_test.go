@@ -50,6 +50,8 @@ func (s *DokkuTestSuite) createTestContainer(ctx context.Context) error {
 		return err
 	}
 	dc.AttachLogConsumer(ctx)
+
+	s.Dokku = dc
 	return nil
 }
 
@@ -58,7 +60,8 @@ func (s *DokkuTestSuite) createTestClient(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	s.Dokku.RegisterDokkuPublicKey(ctx, keyPair.PublicKey)
+
+	s.Dokku.RegisterPublicKey(ctx, keyPair.PublicKey)
 
 	cfg := &ClientConfig{
 		Host:            s.Dokku.Host,
