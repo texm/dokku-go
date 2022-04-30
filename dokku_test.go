@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-func TestDokkuTestSuite(t *testing.T) {
+func TestRunDokkuTestSuite(t *testing.T) {
 	suite.Run(t, new(DokkuTestSuite))
 }
 

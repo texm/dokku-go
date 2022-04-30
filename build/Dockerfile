@@ -1,3 +1,6 @@
-FROM dokku/dokku:0.27.1
+FROM debian:stable-slim
 LABEL org.opencontainers.image.description 'A testing environment with dokku already set up.'
-RUN /etc/my_init.d/10_dokku_init
+RUN  apt-get update \
+  && apt-get install -y wget \
+  && rm -rf /var/lib/apt/lists/*
+RUN wget https://raw.githubusercontent.com/dokku/dokku/v0.27.1/bootstrap.sh && DOKKU_TAG=v0.27.1 bash bootstrap.sh

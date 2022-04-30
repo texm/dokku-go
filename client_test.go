@@ -1,14 +1,27 @@
 package dokku
 
-const (
-	testAppName = "test-app"
+import (
+	"context"
+
+	"github.com/texm/dokku-go/internal/testutils"
 )
 
-func (s *DokkuTestSuite) TestCanCreateApp() {
-	err := s.Client.CreateApp(testAppName)
-	s.NoError(err, "Failed to create app")
+func (s *DokkuTestSuite) TestCanCreateClient() {
+	r := s.Require()
+	ctx := context.Background()
 
-	info, err := s.Client.GetAppInfo(testAppName)
-	s.NoError(err, "Failed to get app info")
-	s.Equal(testAppName, info.Name, "AppInfo.Name does not match")
+	keyPair, err := testutils.GenerateRSAKeyPair()
+	r.Nil(err, "failed to create keypair")
+
+	s.Dokku.RegisterPublicKey(ctx, keyPair.PublicKey)
+
+	cfg := &ClientConfig{
+		Host:            s.Dokku.Host,
+		Port:            s.Dokku.SSHPort,
+		PrivateKey:      keyPair.PrivateKey,
+		HostKeyCallback: s.Dokku.HostKeyFunc(),
+	}
+	client, err := NewClient(cfg)
+	r.Nil(err, "error while creating client")
+	r.NotNil(client, "returned client is nil")
 }
