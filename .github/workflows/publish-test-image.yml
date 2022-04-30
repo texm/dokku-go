@@ -1,8 +1,5 @@
-name: Build & Publish Test Image
+name: Build & Publish Testing Image
 on: workflow_dispatch
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -17,17 +14,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Log into registry
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        uses: docker/login-action@v1
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -35,5 +26,4 @@ jobs:
         with:
           context: build
           push: true
-          tags: ${{ env.IMAGE_NAME }}:testing-env
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: texm/dokku-preconfigured:latest
