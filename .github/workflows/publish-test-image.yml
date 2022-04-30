@@ -2,7 +2,7 @@ name: Build & Publish Test Image
 on: workflow_dispatch
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: testing-env
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -13,9 +13,6 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
       - name: Log into registry
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
         with:
@@ -35,5 +32,5 @@ jobs:
         with:
           context: build
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: "testing-env"
           labels: ${{ steps.meta.outputs.labels }}
