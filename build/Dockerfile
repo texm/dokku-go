@@ -10,5 +10,5 @@ RUN  apt-get update \
   && echo "bionic focal" | grep -q "$OS_ID" || OS_ID="bionic" \
   && echo "deb $SOURCE $OS_ID main" | tee /etc/apt/sources.list.d/dokku.list \
   && apt-get update \
-  && apt-get install dokku \
+  && apt-get install -y dokku \
   && dokku plugin:install-dependencies --core
