@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:stable
 LABEL org.opencontainers.image.description 'A testing environment with dokku already set up.'
 RUN  apt-get update \
   && apt-get install -y wget \
