@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path"
+	"runtime"
 	"time"
 
 	"github.com/testcontainers/testcontainers-go"
@@ -11,15 +12,15 @@ import (
 )
 
 const (
-	colimaSocket   = ".colima/docker.sock"
 	testingImage   = "ghcr.io/texm/dokku-go:testing-environment"
 	startupTimeout = time.Second * 8
 )
 
 func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
-	// check platform
-	if err := setupColimaEnv(); err != nil {
-		return nil, err
+	if runtime.GOOS == "darwin" {
+		if err := setupColimaEnv(); err != nil {
+			return nil, err
+		}
 	}
 
 	waitStrategy := wait.ForListeningPort("22").WithStartupTimeout(startupTimeout)
@@ -66,7 +67,7 @@ func setupColimaEnv() error {
 		return err
 	}
 
-	socketFile := path.Join(home, colimaSocket)
+	socketFile := path.Join(home, ".colima/docker.sock")
 	os.Setenv("DOCKER_HOST", "unix://"+socketFile)
 	os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", socketFile)
 	return nil
