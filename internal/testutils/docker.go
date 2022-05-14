@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	testingImage   = "ghcr.io/texm/dokku-go:testing-environment"
-	startupTimeout = time.Second * 8
+	testingImage   = "ghcr.io/texm/dokku-go:testing-env"
+	startupTimeout = time.Second * 5
 )
 
 func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
@@ -23,13 +23,12 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 		}
 	}
 
-	waitStrategy := wait.ForListeningPort("22").WithStartupTimeout(startupTimeout)
 	req := testcontainers.ContainerRequest{
 		Image:        testingImage,
 		Privileged:   false,
 		SkipReaper:   true,
 		ExposedPorts: []string{"22/tcp"},
-		WaitingFor:   waitStrategy,
+		WaitingFor:   wait.ForListeningPort("22").WithStartupTimeout(startupTimeout),
 	}
 	gReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: req,

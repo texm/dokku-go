@@ -24,11 +24,11 @@ func (s *DokkuTestSuite) SetupSuite() {
 	ctx := context.Background()
 
 	if err := s.createTestContainer(ctx); err != nil {
-		log.Fatal("Failed to create dokku container", err)
+		log.Fatal("Failed to create dokku container: ", err)
 	}
 
 	if err := s.createTestClient(ctx); err != nil {
-		log.Fatal("Failed to create default dokku client", err)
+		log.Fatal("Failed to create default dokku client: ", err)
 	}
 }
 
