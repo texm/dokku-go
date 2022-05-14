@@ -26,4 +26,4 @@ jobs:
         with:
           context: build
           push: true
-          tags: ghcr.io/texm/dokku-go:testing-environment
+          tags: ghcr.io/texm/dokku-go:test-env
