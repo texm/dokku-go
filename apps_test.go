@@ -11,6 +11,10 @@ func (s *DokkuTestSuite) TestCanManageApp() {
 
 	err = s.Client.DestroyApp(testAppName)
 	r.Nil(err, "failed to destroy app")
+
+	exists, err := s.Client.CheckAppExists(testAppName)
+	r.Nil(err, "failed to check if app exists")
+	r.False(exists, "app was not correctly destroyed")
 }
 
 func (s *DokkuTestSuite) TestCanGetAppInfo() {

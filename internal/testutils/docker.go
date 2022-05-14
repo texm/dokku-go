@@ -12,8 +12,13 @@ import (
 )
 
 const (
-	testingImage   = "ghcr.io/texm/dokku-go:testing-env"
-	startupTimeout = time.Second * 5
+	testingImage            = "ghcr.io/texm/dokku-go:test-env"
+	startupTimeout          = time.Second * 5
+	defaultDockerSocketFile = "/var/run/docker.sock"
+)
+
+var (
+	dockerSocketFile = defaultDockerSocketFile
 )
 
 func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
@@ -23,12 +28,18 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 		}
 	}
 
+	// this is gross
+	// mounting the host socket is easier than running some kind of VM setup, although it is somewhat insecure as
+	// the test container now needs to run privileged
+	// socketMount := testcontainers.BindMount(dockerSocketFile, defaultDockerSocketFile)
+
 	req := testcontainers.ContainerRequest{
 		Image:        testingImage,
 		Privileged:   false,
 		SkipReaper:   true,
 		ExposedPorts: []string{"22/tcp"},
-		WaitingFor:   wait.ForListeningPort("22").WithStartupTimeout(startupTimeout),
+		// Mounts:       testcontainers.ContainerMounts{socketMount},
+		WaitingFor: wait.ForListeningPort("22").WithStartupTimeout(startupTimeout),
 	}
 	gReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
@@ -66,8 +77,8 @@ func setupColimaEnv() error {
 		return err
 	}
 
-	socketFile := path.Join(home, ".colima/docker.sock")
-	os.Setenv("DOCKER_HOST", "unix://"+socketFile)
-	os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", socketFile)
+	dockerSocketFile = path.Join(home, ".colima/docker.sock")
+	os.Setenv("DOCKER_HOST", "unix://"+dockerSocketFile)
+	os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", dockerSocketFile)
 	return nil
 }

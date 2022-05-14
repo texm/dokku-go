@@ -65,8 +65,6 @@ func (c *Client) DestroyApp(name string) error {
 		return err
 	}
 
-	fmt.Println(out)
-
 	return nil
 }
 
