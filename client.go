@@ -115,6 +115,11 @@ func (c *Client) DialWithTimeout(timeout time.Duration) error {
 	return c.Dial()
 }
 
+func isInvalidAppError(out string) bool {
+	return strings.HasPrefix(out, "!     App") &&
+		strings.HasSuffix(out, "does not exist")
+}
+
 func (c *Client) exec(cmd string) (string, error) {
 	session, err := c.conn.NewSession()
 	if err != nil {
@@ -125,11 +130,15 @@ func (c *Client) exec(cmd string) (string, error) {
 	output, err := session.CombinedOutput(cmd)
 	cleaned := strings.TrimSpace(string(output))
 	if err != nil {
+		if isInvalidAppError(cleaned) {
+			return cleaned, InvalidAppError
+		}
+
 		var exitCodeErr *ssh.ExitError
 		if errors.As(err, &exitCodeErr) {
 			return cleaned, newDokkuError(cleaned)
 		}
-		return "", err
+		return cleaned, err
 	}
 
 	return cleaned, nil

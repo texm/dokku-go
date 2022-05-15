@@ -37,13 +37,6 @@ var (
 	WeirdMessageError = errors.New("Unexpected confirmation message")
 )
 
-func checkAppExistsError(appName string, output string) error {
-	if output == fmt.Sprintf(appNotExistsMessageTemplate, appName) {
-		return InvalidAppError
-	}
-	return nil
-}
-
 func (c *Client) CloneApp(oldName, newName string) error {
 	// cmd := fmt.Sprintf(cloneAppCommand, oldName, newName)
 
@@ -192,10 +185,6 @@ func (c *Client) GetAppInfo(name string) (*AppInfo, error) {
 	out, err := c.exec(cmd)
 	if err != nil {
 		return nil, err
-	}
-	// todo: generalise to exec method for all calls?
-	if notExistsErr := checkAppExistsError(name, out); notExistsErr != nil {
-		return nil, notExistsErr
 	}
 
 	info := parseAppReport(out)
