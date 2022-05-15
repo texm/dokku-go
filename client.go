@@ -25,12 +25,14 @@ var (
 )
 
 type ClientConfig struct {
-	Host                 string
+	Host string
+	// optional, defaults to 22
 	Port                 string
 	PrivateKey           *rsa.PrivateKey
 	PrivateKeyBytes      []byte
-	PrivateKeyPassphrase string
-	HostKeyCallback      ssh.HostKeyCallback
+	PrivateKeyPassphrase []byte
+	// optional
+	HostKeyCallback ssh.HostKeyCallback
 }
 
 type Client struct {
@@ -61,18 +63,22 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 	}
 
 	var signer ssh.Signer
+	var signerError error
 	if cfg.PrivateKey != nil {
-		signer, err = ssh.NewSignerFromKey(cfg.PrivateKey)
-		if err != nil {
-			return nil, err
-		}
+		signer, signerError = ssh.NewSignerFromKey(cfg.PrivateKey)
+
 	} else if len(cfg.PrivateKeyBytes) > 0 {
-		signer, err = ssh.ParsePrivateKey(cfg.PrivateKeyBytes)
-		if err != nil {
-			return nil, err
+		if len(cfg.PrivateKeyPassphrase) > 0 {
+			signer, signerError = ssh.ParsePrivateKeyWithPassphrase(cfg.PrivateKeyBytes, cfg.PrivateKeyPassphrase)
+		} else {
+			signer, signerError = ssh.ParsePrivateKey(cfg.PrivateKeyBytes)
 		}
 	} else {
 		return nil, InvalidPrivateKeyError
+	}
+
+	if signerError != nil {
+		return nil, signerError
 	}
 
 	sshConfig := &ssh.ClientConfig{
