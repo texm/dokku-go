@@ -70,8 +70,8 @@ func (c *Client) DestroyApp(name string) error {
 
 func (c *Client) CheckAppExists(name string) (bool, error) {
 	cmd := fmt.Sprintf(appExistsCommand, name)
-	out, err := c.exec(cmd)
-	if checkAppExistsError(name, out) != nil {
+	_, err := c.exec(cmd)
+	if err == InvalidAppError {
 		return false, nil
 	} else if err != nil {
 		return false, err
