@@ -3,14 +3,12 @@ package dokku
 import (
 	"errors"
 	"fmt"
-	"regexp"
-	"strconv"
 	"strings"
-	"time"
+
+	"github.com/texm/dokku-go/internal/reports"
 )
 
 const (
-	noAppsMessage               = " !     You haven't deployed any applications yet"
 	nameTakenMessage            = " !     Name is already taken"
 	lockCreatedMessage          = "-----> Deploy lock created"
 	deployLockExistsMessage     = "Deploy lock exists"
@@ -83,16 +81,14 @@ func (c *Client) CheckAppExists(name string) (bool, error) {
 func (c *Client) ListApps() ([]string, error) {
 	output, err := c.exec(appListCommand)
 	if err != nil {
+		if err == NoDeployedAppsError {
+			return []string{}, nil
+		}
 		return nil, err
 	}
 
-	var apps []string
 	split := strings.Split(output, "\n")
 	appList := split[1:]
-
-	if len(appList) == 1 && appList[0] == noAppsMessage {
-		return apps, nil
-	}
 
 	return appList, nil
 }
@@ -124,91 +120,48 @@ func (c *Client) RenameApp(oldName, newName string) error {
 	return NotImplementedError
 }
 
-var rowRe = regexp.MustCompile(`^\s+([\s\w]*):\s*(\S+)$`)
-
-func rowValue(row string) string {
-	matches := rowRe.FindStringSubmatch(row)
-	if matches == nil || len(matches) < 3 {
-		return ""
-	}
-	return matches[2]
+type AppReport struct {
+	CreatedAtTimestamp   int64  `dokku:"App created at"`
+	DeploySource         string `dokku:"App deploy source"`
+	DeploySourceMetadata string `dokku:"App deploy source metadata"`
+	Directory            string `dokku:"App dir"`
+	IsLocked             bool   `dokku:"App locked"`
 }
+type AppsReport map[string]*AppReport
 
-type AppInfo struct {
-	Name                 string
-	CreatedAt            time.Time
-	DeploySource         string
-	DeploySourceMetadata string
-	Directory            string
-	IsLocked             bool
-}
-
-var appNameRe = regexp.MustCompile(`^=====> (.*) app information`)
-
-func parseAppReport(report string) *AppInfo {
-	lines := strings.Split(report, "\n")
-	if len(lines) < 6 {
-		return nil
-	}
-
-	appNameMatch := appNameRe.FindStringSubmatch(lines[0])
-	if len(appNameMatch) < 2 {
-		return nil
-	}
-
-	appName := appNameMatch[1]
-	createdAt := rowValue(lines[1])
-	deploySource := rowValue(lines[2])
-	deploySourceMetadata := rowValue(lines[3])
-	directory := rowValue(lines[4])
-	isLocked := rowValue(lines[5])
-
-	stamp, err := strconv.ParseInt(createdAt, 10, 64)
-	if err != nil {
-		stamp = 0
-	}
-
-	info := &AppInfo{
-		Name:                 appName,
-		CreatedAt:            time.Unix(stamp, 0),
-		DeploySource:         deploySource,
-		DeploySourceMetadata: deploySourceMetadata,
-		Directory:            directory,
-		IsLocked:             isLocked == "true",
-	}
-
-	return info
-}
-
-func (c *Client) GetAppInfo(name string) (*AppInfo, error) {
+func (c *Client) GetAppReport(name string) (*AppReport, error) {
 	cmd := fmt.Sprintf(appReportCommand, name)
 	out, err := c.exec(cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	info := parseAppReport(out)
+	report := AppsReport{}
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
 
-	return info, nil
+	appReport, ok := report[name]
+	if !ok {
+		return nil, errors.New("failed to get app info report")
+	}
+
+	return appReport, nil
 }
 
-var appReportSectionsRe = regexp.MustCompile(`(=====> [. \w\n:/]+)`)
-
-func (c *Client) GetAllAppInfo() ([]*AppInfo, error) {
+func (c *Client) GetAllAppReport() (AppsReport, error) {
 	cmd := fmt.Sprintf(appReportAllCommand)
 	out, err := c.exec(cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	var infos []*AppInfo
-
-	matches := appReportSectionsRe.FindAllString(out, -1)
-	for _, match := range matches {
-		infos = append(infos, parseAppReport(match))
+	report := AppsReport{}
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
 	}
 
-	return infos, nil
+	return report, nil
 }
 
 func (c *Client) UnlockApp(name string) error {

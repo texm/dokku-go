@@ -2,6 +2,7 @@ package testutils
 
 import (
 	"context"
+	"log"
 	"os"
 	"path"
 	"runtime"
@@ -36,7 +37,6 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 	req := testcontainers.ContainerRequest{
 		Image:        testingImage,
 		Privileged:   false,
-		SkipReaper:   true,
 		ExposedPorts: []string{"22/tcp"},
 		// Mounts:       testcontainers.ContainerMounts{socketMount},
 		WaitingFor: wait.ForListeningPort("22").WithStartupTimeout(startupTimeout),
@@ -45,6 +45,8 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 		ContainerRequest: req,
 		Started:          true,
 	}
+
+	log.Println("requesting dokku container")
 	container, err := testcontainers.GenericContainer(ctx, gReq)
 	if err != nil {
 		return nil, err

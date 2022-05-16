@@ -2,7 +2,6 @@ package dokku
 
 import (
 	"context"
-	"log"
 	"testing"
 
 	"github.com/texm/dokku-go/internal/testutils"
@@ -24,11 +23,11 @@ func (s *DokkuTestSuite) SetupSuite() {
 	ctx := context.Background()
 
 	if err := s.createTestContainer(ctx); err != nil {
-		log.Fatal("Failed to create dokku container: ", err)
+		s.T().Fatal("Failed to create dokku container: ", err)
 	}
 
 	if err := s.createTestClient(ctx); err != nil {
-		log.Fatal("Failed to create default dokku client: ", err)
+		s.T().Fatal("Failed to create default dokku client: ", err)
 	}
 }
 
@@ -73,6 +72,7 @@ func (s *DokkuTestSuite) createTestClient(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
 	if err := client.Dial(); err != nil {
 		return err
 	}

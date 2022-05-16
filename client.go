@@ -115,9 +115,14 @@ func (c *Client) DialWithTimeout(timeout time.Duration) error {
 	return c.Dial()
 }
 
+// TODO: generalise this
 func isInvalidAppError(out string) bool {
 	return strings.HasPrefix(out, "!     App") &&
 		strings.HasSuffix(out, "does not exist")
+}
+
+func isNoDeployedAppsError(out string) bool {
+	return out == noAppsDokkuMessage
 }
 
 func (c *Client) exec(cmd string) (string, error) {
@@ -132,6 +137,10 @@ func (c *Client) exec(cmd string) (string, error) {
 	if err != nil {
 		if isInvalidAppError(cleaned) {
 			return cleaned, InvalidAppError
+		}
+
+		if isNoDeployedAppsError(cleaned) {
+			return cleaned, NoDeployedAppsError
 		}
 
 		var exitCodeErr *ssh.ExitError
