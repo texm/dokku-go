@@ -35,7 +35,30 @@ type ClientConfig struct {
 	HostKeyCallback ssh.HostKeyCallback
 }
 
-type Client struct {
+type Client interface {
+	Dial() error
+	DialWithTimeout(time.Duration) error
+	Close() error
+
+	exec(string) (string, error)
+
+	CloneApp(string, string) error
+	CreateApp(string) error
+	DestroyApp(string) error
+	CheckAppExists(string) (bool, error)
+	ListApps() ([]string, error)
+	LockApp(string) error
+	IsLocked(string) (bool, error)
+	RenameApp(string, string) error
+	GetAppReport(string) (*AppReport, error)
+	GetAllAppReport() (AppsReport, error)
+	UnlockApp(string) error
+
+	GetAllProcessReport() (ProcessesReport, error)
+	GetProcessInfo(string) error
+}
+
+type DokkuClient struct {
 	cfg    *ClientConfig
 	sshCfg *ssh.ClientConfig
 	conn   *ssh.Client
@@ -43,7 +66,7 @@ type Client struct {
 	stderr bytes.Buffer
 }
 
-func NewClient(cfg *ClientConfig) (*Client, error) {
+func NewClient(cfg *ClientConfig) (Client, error) {
 	if cfg.Port == "" {
 		cfg.Port = "22"
 	}
@@ -90,7 +113,7 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 		HostKeyCallback: hostKeyCallback,
 	}
 
-	client := &Client{
+	client := &DokkuClient{
 		cfg:    cfg,
 		sshCfg: sshConfig,
 	}
@@ -98,7 +121,7 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 	return client, nil
 }
 
-func (c *Client) Dial() error {
+func (c *DokkuClient) Dial() error {
 	addr := net.JoinHostPort(c.cfg.Host, c.cfg.Port)
 	sshConn, err := ssh.Dial("tcp", addr, c.sshCfg)
 	if err != nil {
@@ -110,7 +133,7 @@ func (c *Client) Dial() error {
 	return nil
 }
 
-func (c *Client) DialWithTimeout(timeout time.Duration) error {
+func (c *DokkuClient) DialWithTimeout(timeout time.Duration) error {
 	c.sshCfg.Timeout = timeout
 	return c.Dial()
 }
@@ -125,7 +148,7 @@ func isNoDeployedAppsError(out string) bool {
 	return out == noAppsDokkuMessage
 }
 
-func (c *Client) exec(cmd string) (string, error) {
+func (c *DokkuClient) exec(cmd string) (string, error) {
 	session, err := c.conn.NewSession()
 	if err != nil {
 		return "", err
@@ -153,6 +176,6 @@ func (c *Client) exec(cmd string) (string, error) {
 	return cleaned, nil
 }
 
-func (c *Client) Close() error {
+func (c *DokkuClient) Close() error {
 	return c.conn.Close()
 }

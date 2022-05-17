@@ -35,13 +35,13 @@ var (
 	WeirdMessageError = errors.New("Unexpected confirmation message")
 )
 
-func (c *Client) CloneApp(oldName, newName string) error {
+func (c *DokkuClient) CloneApp(oldName, newName string) error {
 	// cmd := fmt.Sprintf(cloneAppCommand, oldName, newName)
 
 	return NotImplementedError
 }
 
-func (c *Client) CreateApp(name string) error {
+func (c *DokkuClient) CreateApp(name string) error {
 	cmd := fmt.Sprintf(appCreateCommand, name)
 	output, err := c.exec(cmd)
 	if output == nameTakenMessage {
@@ -54,7 +54,7 @@ func (c *Client) CreateApp(name string) error {
 	return nil
 }
 
-func (c *Client) DestroyApp(name string) error {
+func (c *DokkuClient) DestroyApp(name string) error {
 	cmd := fmt.Sprintf(appDestroyCommand, name)
 	out, err := c.exec(cmd)
 	if out == fmt.Sprintf(appNotExistsMessageTemplate, name) {
@@ -66,7 +66,7 @@ func (c *Client) DestroyApp(name string) error {
 	return nil
 }
 
-func (c *Client) CheckAppExists(name string) (bool, error) {
+func (c *DokkuClient) CheckAppExists(name string) (bool, error) {
 	cmd := fmt.Sprintf(appExistsCommand, name)
 	_, err := c.exec(cmd)
 	if err == InvalidAppError {
@@ -78,7 +78,7 @@ func (c *Client) CheckAppExists(name string) (bool, error) {
 	return true, nil
 }
 
-func (c *Client) ListApps() ([]string, error) {
+func (c *DokkuClient) ListApps() ([]string, error) {
 	output, err := c.exec(appListCommand)
 	if err != nil {
 		if err == NoDeployedAppsError {
@@ -93,7 +93,7 @@ func (c *Client) ListApps() ([]string, error) {
 	return appList, nil
 }
 
-func (c *Client) LockApp(name string) error {
+func (c *DokkuClient) LockApp(name string) error {
 	cmd := fmt.Sprintf(appLockCommand, name)
 	out, err := c.exec(cmd)
 	if err != nil {
@@ -105,7 +105,7 @@ func (c *Client) LockApp(name string) error {
 	return nil
 }
 
-func (c *Client) IsLocked(name string) (bool, error) {
+func (c *DokkuClient) IsLocked(name string) (bool, error) {
 	cmd := fmt.Sprintf(appIsLockedCommand, name)
 	out, err := c.exec(cmd)
 	if out == deployLockNotExistsMessage {
@@ -116,7 +116,7 @@ func (c *Client) IsLocked(name string) (bool, error) {
 	return out == deployLockExistsMessage, nil
 }
 
-func (c *Client) RenameApp(oldName, newName string) error {
+func (c *DokkuClient) RenameApp(oldName, newName string) error {
 	return NotImplementedError
 }
 
@@ -129,7 +129,7 @@ type AppReport struct {
 }
 type AppsReport map[string]*AppReport
 
-func (c *Client) GetAppReport(name string) (*AppReport, error) {
+func (c *DokkuClient) GetAppReport(name string) (*AppReport, error) {
 	cmd := fmt.Sprintf(appReportCommand, name)
 	out, err := c.exec(cmd)
 	if err != nil {
@@ -149,7 +149,7 @@ func (c *Client) GetAppReport(name string) (*AppReport, error) {
 	return appReport, nil
 }
 
-func (c *Client) GetAllAppReport() (AppsReport, error) {
+func (c *DokkuClient) GetAllAppReport() (AppsReport, error) {
 	cmd := fmt.Sprintf(appReportAllCommand)
 	out, err := c.exec(cmd)
 	if err != nil {
@@ -164,7 +164,7 @@ func (c *Client) GetAllAppReport() (AppsReport, error) {
 	return report, nil
 }
 
-func (c *Client) UnlockApp(name string) error {
+func (c *DokkuClient) UnlockApp(name string) error {
 	cmd := fmt.Sprintf(appUnlockCommand, name)
 	_, err := c.exec(cmd)
 	return err

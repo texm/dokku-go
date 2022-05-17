@@ -16,7 +16,7 @@ func TestRunDokkuTestSuite(t *testing.T) {
 type DokkuTestSuite struct {
 	suite.Suite
 	Dokku  *testutils.DokkuContainer
-	Client *Client
+	Client Client
 }
 
 func (s *DokkuTestSuite) SetupSuite() {
