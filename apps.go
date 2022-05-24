@@ -81,7 +81,7 @@ func (c *DefaultClient) CheckAppExists(name string) (bool, error) {
 func (c *DefaultClient) ListApps() ([]string, error) {
 	output, err := c.exec(appListCommand)
 	if err != nil {
-		if err == NoDeployedAppsError {
+		if errors.Is(err, NoDeployedAppsError) {
 			return []string{}, nil
 		}
 		return nil, err
