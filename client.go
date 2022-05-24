@@ -58,7 +58,7 @@ type Client interface {
 	GetProcessInfo(string) error
 }
 
-type DokkuClient struct {
+type DefaultClient struct {
 	cfg    *ClientConfig
 	sshCfg *ssh.ClientConfig
 	conn   *ssh.Client
@@ -113,7 +113,7 @@ func NewClient(cfg *ClientConfig) (Client, error) {
 		HostKeyCallback: hostKeyCallback,
 	}
 
-	client := &DokkuClient{
+	client := &DefaultClient{
 		cfg:    cfg,
 		sshCfg: sshConfig,
 	}
@@ -121,7 +121,7 @@ func NewClient(cfg *ClientConfig) (Client, error) {
 	return client, nil
 }
 
-func (c *DokkuClient) Dial() error {
+func (c *DefaultClient) Dial() error {
 	addr := net.JoinHostPort(c.cfg.Host, c.cfg.Port)
 	sshConn, err := ssh.Dial("tcp", addr, c.sshCfg)
 	if err != nil {
@@ -133,7 +133,7 @@ func (c *DokkuClient) Dial() error {
 	return nil
 }
 
-func (c *DokkuClient) DialWithTimeout(timeout time.Duration) error {
+func (c *DefaultClient) DialWithTimeout(timeout time.Duration) error {
 	c.sshCfg.Timeout = timeout
 	return c.Dial()
 }
@@ -145,10 +145,10 @@ func isInvalidAppError(out string) bool {
 }
 
 func isNoDeployedAppsError(out string) bool {
-	return out == noAppsDokkuMessage
+	return strings.HasSuffix(out, noAppsDokkuMessage)
 }
 
-func (c *DokkuClient) exec(cmd string) (string, error) {
+func (c *DefaultClient) exec(cmd string) (string, error) {
 	session, err := c.conn.NewSession()
 	if err != nil {
 		return "", err
@@ -176,6 +176,6 @@ func (c *DokkuClient) exec(cmd string) (string, error) {
 	return cleaned, nil
 }
 
-func (c *DokkuClient) Close() error {
+func (c *DefaultClient) Close() error {
 	return c.conn.Close()
 }

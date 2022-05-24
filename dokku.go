@@ -7,9 +7,9 @@ const (
 )
 
 var (
-	InvalidAppError     = errors.New("App does not exist")
-	NoDeployedAppsError = errors.New("No apps have been deployed")
-	NotImplementedError = errors.New("Method not implemented")
+	InvalidAppError     = errors.New("app does not exist")
+	NoDeployedAppsError = errors.New("no apps have been deployed")
+	NotImplementedError = errors.New("method not implemented")
 )
 
 func newDokkuError(msg string) error {

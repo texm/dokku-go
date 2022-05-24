@@ -19,7 +19,7 @@ const (
 	psStopCommand      = "ps:stop [--parallel count] [--all|<app>]"
 )
 
-func (c *DokkuClient) GetProcessInfo(appName string) error {
+func (c *DefaultClient) GetProcessInfo(appName string) error {
 	cmd := fmt.Sprintf(psInspectCommand, appName)
 	output, err := c.exec(cmd)
 	if err != nil {
@@ -45,7 +45,7 @@ type ProcessReport struct {
 
 type ProcessesReport map[string]*ProcessReport
 
-func (c *DokkuClient) GetAllProcessReport() (ProcessesReport, error) {
+func (c *DefaultClient) GetAllProcessReport() (ProcessesReport, error) {
 	output, err := c.exec(psReportCommand)
 	report := ProcessesReport{}
 
