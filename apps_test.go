@@ -17,19 +17,23 @@ func (s *DokkuTestSuite) TestCanManageApp() {
 	r.False(exists, "app was not correctly destroyed")
 }
 
-func (s *DokkuTestSuite) TestCanListApps() {
+func (s *DokkuTestSuite) TestCanCreateApp() {
 	r := s.Require()
 	var err error
 
-	testAppName := "test-list-app"
+	testAppName := "test-manage-app"
 
 	err = s.Client.CreateApp(testAppName)
 	r.Nil(err, "failed to create app")
+}
 
-	apps, err := s.Client.ListApps()
-	r.Nil(err, "failed to list apps")
-	// r.Len(apps, 1)
-	r.Contains(apps, testAppName)
+func (s *DokkuTestSuite) TestNoAppsFunctionality() {
+	r := s.Require()
+	var err error
+
+	_, err = s.Client.GetAllAppReport()
+	r.Error(err, "didnt error with no apps?")
+	r.ErrorIs(err, NoDeployedAppsError)
 }
 
 func (s *DokkuTestSuite) TestCanGetAppInfo() {

@@ -4,9 +4,9 @@ go 1.18
 
 require (
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/testcontainers/testcontainers-go v0.13.0
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
+	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898
 )
 
 require (

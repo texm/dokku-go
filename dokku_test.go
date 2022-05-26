@@ -19,7 +19,7 @@ type DokkuTestSuite struct {
 	Client Client
 }
 
-func (s *DokkuTestSuite) SetupSuite() {
+func (s *DokkuTestSuite) SetupTest() {
 	ctx := context.Background()
 
 	if err := s.createTestContainer(ctx); err != nil {
@@ -31,7 +31,7 @@ func (s *DokkuTestSuite) SetupSuite() {
 	}
 }
 
-func (s *DokkuTestSuite) TearDownSuite() {
+func (s *DokkuTestSuite) TearDownTest() {
 	ctx := context.Background()
 
 	if s.Dokku != nil {
