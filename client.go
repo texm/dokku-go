@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"errors"
-	"log"
 	"net"
 	"os"
 	"path"
@@ -149,7 +148,6 @@ func isNoDeployedAppsError(out string) bool {
 
 // TODO: generalise
 func checkGenericError(output string) error {
-	log.Printf("checking: '" + output + "'")
 	if isInvalidAppError(output) {
 		return InvalidAppError
 	}
