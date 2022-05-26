@@ -3,7 +3,7 @@ package dokku
 import "errors"
 
 const (
-	noAppsDokkuMessage = " !     You haven't deployed any applications yet"
+	noAppsDokkuMessage = "You haven't deployed any applications yet"
 )
 
 var (

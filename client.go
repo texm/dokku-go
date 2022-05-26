@@ -139,12 +139,11 @@ func (c *DefaultClient) DialWithTimeout(timeout time.Duration) error {
 }
 
 func isInvalidAppError(out string) bool {
-	return strings.HasPrefix(out, "!     App") &&
-		strings.HasSuffix(out, "does not exist")
+	return strings.HasSuffix(out, "does not exist")
 }
 
 func isNoDeployedAppsError(out string) bool {
-	return strings.HasSuffix(out, noAppsDokkuMessage)
+	return strings.Contains(out, noAppsDokkuMessage)
 }
 
 // TODO: generalise
