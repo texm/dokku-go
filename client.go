@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"errors"
+	"log"
 	"net"
 	"os"
 	"path"
@@ -147,14 +148,15 @@ func isNoDeployedAppsError(out string) bool {
 }
 
 // TODO: generalise
-func isGenericError(output string) (bool, error) {
+func checkGenericError(output string) error {
+	log.Printf("checking: '" + output + "'")
 	if isInvalidAppError(output) {
-		return true, InvalidAppError
+		return InvalidAppError
 	}
 	if isNoDeployedAppsError(output) {
-		return true, NoDeployedAppsError
+		return NoDeployedAppsError
 	}
-	return false, nil
+	return nil
 }
 
 func (c *DefaultClient) exec(cmd string) (string, error) {
@@ -166,7 +168,7 @@ func (c *DefaultClient) exec(cmd string) (string, error) {
 
 	output, err := session.CombinedOutput(cmd)
 	cleaned := strings.TrimSpace(string(output))
-	if isErr, err := isGenericError(cleaned); isErr {
+	if err := checkGenericError(cleaned); err != nil {
 		return cleaned, err
 	}
 
