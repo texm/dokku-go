@@ -11,7 +11,3 @@ var (
 	NoDeployedAppsError = errors.New("no apps have been deployed")
 	NotImplementedError = errors.New("method not implemented")
 )
-
-func newDokkuError(msg string) error {
-	return errors.New("dokku error: '" + msg + "'")
-}

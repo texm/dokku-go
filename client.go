@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"path"
@@ -56,6 +57,10 @@ type Client interface {
 
 	GetAllProcessReport() (ProcessesReport, error)
 	GetProcessInfo(string) error
+
+	SetEventLoggingEnabled(bool) error
+	GetEventLogs() (string, error)
+	ListLoggedEvents() ([]string, error)
 }
 
 type DefaultClient struct {
@@ -162,18 +167,22 @@ func (c *DefaultClient) exec(cmd string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer session.Close()
 
-	output, err := session.CombinedOutput(cmd)
+	output, cmdErr := session.CombinedOutput(cmd)
 	cleaned := strings.TrimSpace(string(output))
+
+	if sessErr := session.Close(); sessErr != nil {
+		return cleaned, sessErr
+	}
+
 	if err := checkGenericError(cleaned); err != nil {
 		return cleaned, err
 	}
 
-	if err != nil {
+	if cmdErr != nil {
 		var exitCodeErr *ssh.ExitError
-		if errors.As(err, &exitCodeErr) {
-			return cleaned, newDokkuError(cleaned)
+		if errors.As(cmdErr, &exitCodeErr) {
+			return cleaned, fmt.Errorf("dokku error: '%w'", cmdErr)
 		}
 		return cleaned, err
 	}
