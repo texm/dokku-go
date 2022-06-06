@@ -7,7 +7,9 @@ const (
 )
 
 var (
-	InvalidAppError     = errors.New("app does not exist")
-	NoDeployedAppsError = errors.New("no apps have been deployed")
-	NotImplementedError = errors.New("method not implemented")
+	InvalidAppError        = errors.New("app does not exist")
+	NoDeployedAppsError    = errors.New("no apps have been deployed")
+	NotImplementedError    = errors.New("method not implemented")
+	UnexpectedMessageError = errors.New("unexpected confirmation message")
+	NameTakenError         = errors.New("app name already in use")
 )

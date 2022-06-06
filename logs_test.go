@@ -1,7 +1,5 @@
 package dokku
 
-import "fmt"
-
 func (s *DokkuTestSuite) TestGetEventLogs() {
 	r := s.Require()
 	var err error
@@ -19,5 +17,9 @@ func (s *DokkuTestSuite) TestGetEventLogs() {
 
 	logs, err := s.Client.GetEventLogs()
 	r.Nil(err)
-	fmt.Println(logs)
+	r.NotEmpty(logs)
+
+	events, err := s.Client.ListLoggedEvents()
+	r.Nil(err)
+	r.NotEmpty(events)
 }

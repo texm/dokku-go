@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	InvalidPrivateKeyError = errors.New("No valid private key supplied")
+	InvalidPrivateKeyError = errors.New("invalid private key")
 )
 
 type ClientConfig struct {
@@ -32,7 +32,7 @@ type ClientConfig struct {
 	PrivateKey           *rsa.PrivateKey
 	PrivateKeyBytes      []byte
 	PrivateKeyPassphrase []byte
-	// optional
+	// optional, defaults to using $HOME/.ssh/known_hosts
 	HostKeyCallback ssh.HostKeyCallback
 }
 
@@ -76,17 +76,18 @@ func NewClient(cfg *ClientConfig) (Client, error) {
 		cfg.Port = "22"
 	}
 
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-
 	hostKeyCallback := cfg.HostKeyCallback
 	if hostKeyCallback == nil {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+
 		cb, err := knownhosts.New(path.Join(homeDir, knownHostsFile))
 		if err != nil {
 			return nil, err
 		}
+
 		hostKeyCallback = cb
 	}
 
@@ -94,7 +95,6 @@ func NewClient(cfg *ClientConfig) (Client, error) {
 	var signerError error
 	if cfg.PrivateKey != nil {
 		signer, signerError = ssh.NewSignerFromKey(cfg.PrivateKey)
-
 	} else if len(cfg.PrivateKeyBytes) > 0 {
 		if len(cfg.PrivateKeyPassphrase) > 0 {
 			signer, signerError = ssh.ParsePrivateKeyWithPassphrase(cfg.PrivateKeyBytes, cfg.PrivateKeyPassphrase)
@@ -143,20 +143,11 @@ func (c *DefaultClient) DialWithTimeout(timeout time.Duration) error {
 	return c.Dial()
 }
 
-func isInvalidAppError(out string) bool {
-	return strings.HasSuffix(out, "does not exist")
-}
-
-func isNoDeployedAppsError(out string) bool {
-	return strings.Contains(out, noAppsDokkuMessage)
-}
-
-// TODO: generalise
-func checkGenericError(output string) error {
-	if isInvalidAppError(output) {
+func checkGenericErrors(output string) error {
+	if strings.HasSuffix(output, "does not exist") {
 		return InvalidAppError
 	}
-	if isNoDeployedAppsError(output) {
+	if strings.Contains(output, noAppsDokkuMessage) {
 		return NoDeployedAppsError
 	}
 	return nil
@@ -172,10 +163,15 @@ func (c *DefaultClient) exec(cmd string) (string, error) {
 	cleaned := strings.TrimSpace(string(output))
 
 	if sessErr := session.Close(); sessErr != nil {
-		return cleaned, sessErr
+		// The session can be closed asynchronously at any time by the server,
+		// so it's always possible for correctly-written code to get an EOF error
+		// from calling Close() - so we ignore it
+		if sessErr.Error() != "EOF" {
+			return cleaned, fmt.Errorf("error closing ssh session: %w", sessErr)
+		}
 	}
 
-	if err := checkGenericError(cleaned); err != nil {
+	if err := checkGenericErrors(cleaned); err != nil {
 		return cleaned, err
 	}
 
@@ -188,6 +184,19 @@ func (c *DefaultClient) exec(cmd string) (string, error) {
 	}
 
 	return cleaned, nil
+}
+
+func (c *DefaultClient) streamingExec(cmd string, out chan string) error {
+	session, err := c.conn.NewSession()
+	if err != nil {
+		return err
+	}
+
+	if sessErr := session.Close(); sessErr != nil {
+		return sessErr
+	}
+
+	return nil
 }
 
 func (c *DefaultClient) Close() error {

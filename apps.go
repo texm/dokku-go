@@ -30,11 +30,6 @@ const (
 	appUnlockCommand    = "apps:unlock %s"
 )
 
-var (
-	NameTakenError    = errors.New("App name already in use")
-	WeirdMessageError = errors.New("Unexpected confirmation message")
-)
-
 func (c *DefaultClient) CloneApp(oldName, newName string) error {
 	// cmd := fmt.Sprintf(cloneAppCommand, oldName, newName)
 
@@ -100,7 +95,7 @@ func (c *DefaultClient) LockApp(name string) error {
 		return err
 	}
 	if out != lockCreatedMessage {
-		return WeirdMessageError
+		return UnexpectedMessageError
 	}
 	return nil
 }
