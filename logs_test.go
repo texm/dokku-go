@@ -1,5 +1,9 @@
 package dokku
 
+import (
+	"io/ioutil"
+)
+
 func (s *DokkuTestSuite) TestGetEventLogs() {
 	r := s.Require()
 	var err error
@@ -35,4 +39,20 @@ func (s *DokkuTestSuite) TestGetAppLogs() {
 
 	_, err = s.Client.GetAppLogs(testAppName)
 	r.ErrorIs(err, AppNotDeployedError)
+}
+
+func (s *DokkuTestSuite) TestTailAppLogs() {
+	r := s.Require()
+	var err error
+
+	testAppName := "test-logs-app"
+	err = s.Client.CreateApp(testAppName)
+	r.Nil(err, "failed to create app")
+
+	reader, err := s.Client.TailAppLogs(testAppName)
+	r.NoError(err)
+
+	logs, err := ioutil.ReadAll(reader)
+	r.NoError(err)
+	r.Empty(logs)
 }

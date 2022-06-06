@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path"
@@ -63,10 +64,14 @@ type Client interface {
 	GetEventLogs() (string, error)
 	ListLoggedEvents() ([]string, error)
 
+	TailAppLogs(appName string) (io.Reader, error)
 	GetAppLogs(string) (string, error)
+	GetNAppLogs(appName string, numLines int) (string, error)
 	GetAppProcessLogs(appName, process string) (string, error)
 	GetAppFailedDeployLogs(appName string) (string, error)
 	GetAllFailedDeployLogs() (string, error)
+
+	DeployAppFromDockerImage(appName, image string) (string, error)
 }
 
 type DefaultClient struct {
@@ -162,6 +167,17 @@ func checkGenericErrors(output string) error {
 	return nil
 }
 
+func closeSession(session *ssh.Session) error {
+	// The session can be closed asynchronously at any time by the server,
+	// so it's always possible for correctly-written code to get an EOF error
+	// from calling Close() - so we ignore it
+	err := session.Close()
+	if err.Error() != "EOF" {
+		return fmt.Errorf("error closing ssh session: %w", err)
+	}
+	return nil
+}
+
 func (c *DefaultClient) exec(cmd string) (string, error) {
 	session, err := c.conn.NewSession()
 	if err != nil {
@@ -171,13 +187,8 @@ func (c *DefaultClient) exec(cmd string) (string, error) {
 	output, cmdErr := session.CombinedOutput(cmd)
 	cleaned := strings.TrimSpace(string(output))
 
-	if sessErr := session.Close(); sessErr != nil {
-		// The session can be closed asynchronously at any time by the server,
-		// so it's always possible for correctly-written code to get an EOF error
-		// from calling Close() - so we ignore it
-		if sessErr.Error() != "EOF" {
-			return cleaned, fmt.Errorf("error closing ssh session: %w", sessErr)
-		}
+	if sessErr := closeSession(session); sessErr != nil {
+		return cleaned, sessErr
 	}
 
 	if err := checkGenericErrors(cleaned); err != nil {
@@ -195,17 +206,34 @@ func (c *DefaultClient) exec(cmd string) (string, error) {
 	return cleaned, nil
 }
 
-func (c *DefaultClient) streamingExec(cmd string, out chan string) error {
+type commandStream struct {
+	Stdout io.Reader
+	Stderr io.Reader
+}
+
+func (c *DefaultClient) streamingExec(cmd string) (*commandStream, error) {
 	session, err := c.conn.NewSession()
 	if err != nil {
-		return err
+		return nil, err
+	}
+	stream := &commandStream{}
+
+	stream.Stdout, err = session.StdoutPipe()
+	if err != nil {
+		return nil, err
 	}
 
-	if sessErr := session.Close(); sessErr != nil {
-		return sessErr
+	stream.Stderr, err = session.StderrPipe()
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	go func() {
+		_ = session.Run(cmd)
+		_ = closeSession(session)
+	}()
+
+	return stream, nil
 }
 
 func (c *DefaultClient) Close() error {
