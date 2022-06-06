@@ -3,12 +3,10 @@ package reports
 import (
 	"errors"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"reflect"
 	"regexp"
 	"strings"
-	"time"
-
-	"github.com/mitchellh/mapstructure"
 )
 
 const (
@@ -25,6 +23,7 @@ var (
 	rowRe     = regexp.MustCompile(`^\s+([\s\w]*):(.*)$`)
 )
 
+type Report map[string]string
 type ReportMap map[string]map[string]string
 
 func rowPair(row string) (string, string) {
@@ -37,7 +36,30 @@ func rowPair(row string) (string, string) {
 	return key, strings.Trim(val, " \t")
 }
 
-func parseReport(rawReport string) (ReportMap, error) {
+func parseSingleReport(sReport string) (map[string]string, error) {
+	report := Report{}
+	lines := strings.Split(sReport, "\n")
+	for i, line := range lines {
+		if strings.HasPrefix(line, sectionStartDenom) {
+			appNameMatches := appNameRe.FindStringSubmatch(line)
+			if len(appNameMatches) < 2 {
+				return nil, errors.New("invalid report line: '" + line)
+			}
+			if len(lines) > i+1 && !strings.HasPrefix(lines[i+1], infoIndent) {
+				continue
+			}
+		} else if strings.HasPrefix(line, infoIndent) {
+			k, v := rowPair(line)
+			if k != "" {
+				report[k] = v
+			}
+		}
+	}
+
+	return report, nil
+}
+
+func parseReports(rawReport string) (ReportMap, error) {
 	report := ReportMap{}
 
 	var currentAppName string
@@ -74,8 +96,8 @@ func parseReport(rawReport string) (ReportMap, error) {
 	return report, nil
 }
 
-func ParseInto(rawReport string, reportPtr interface{}) error {
-	reportMaps, err := parseReport(rawReport)
+func ParseIntoMap(rawReport string, reportPtr interface{}) error {
+	reportMaps, err := parseReports(rawReport)
 	if err != nil {
 		fmt.Println("failed to parse report: ", err.Error())
 		return err
@@ -121,15 +143,28 @@ func ParseInto(rawReport string, reportPtr interface{}) error {
 	return nil
 }
 
-type AppReport struct {
-	Name                 string
-	CreatedAt            time.Time
-	DeploySource         string
-	DeploySourceMetadata string
-	Directory            string
-	IsLocked             bool
-}
+func ParseInto(singleReport string, reportPtr interface{}) error {
+	report, err := parseSingleReport(singleReport)
+	if err != nil {
+		fmt.Println("failed to parse report: ", err.Error())
+		return err
+	}
 
-func ParseAppReport(appReport string) (*AppReport, error) {
-	return nil, nil
+	decoderCfg := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		Result:           reportPtr,
+		TagName:          dokkuTagName,
+		ErrorUnused:      true,
+		ErrorUnset:       true,
+	}
+	decoder, err := mapstructure.NewDecoder(decoderCfg)
+	if err != nil {
+		return errors.New("failed to create decoder: " + err.Error())
+	}
+
+	if err := decoder.Decode(report); err != nil {
+		return errors.New("failed to decode report map: " + err.Error())
+	}
+
+	return nil
 }

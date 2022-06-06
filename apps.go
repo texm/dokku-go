@@ -122,7 +122,6 @@ type AppReport struct {
 	Directory            string `dokku:"App dir"`
 	IsLocked             bool   `dokku:"App locked"`
 }
-type AppsReport map[string]*AppReport
 
 func (c *DefaultClient) GetAppReport(name string) (*AppReport, error) {
 	cmd := fmt.Sprintf(appReportCommand, name)
@@ -131,18 +130,15 @@ func (c *DefaultClient) GetAppReport(name string) (*AppReport, error) {
 		return nil, err
 	}
 
-	report := AppsReport{}
+	report := AppReport{}
 	if err := reports.ParseInto(out, &report); err != nil {
 		return nil, err
 	}
 
-	appReport, ok := report[name]
-	if !ok {
-		return nil, errors.New("failed to get app info report")
-	}
-
-	return appReport, nil
+	return &report, nil
 }
+
+type AppsReport map[string]*AppReport
 
 func (c *DefaultClient) GetAllAppReport() (AppsReport, error) {
 	cmd := fmt.Sprintf(appReportAllCommand)
@@ -152,7 +148,7 @@ func (c *DefaultClient) GetAllAppReport() (AppsReport, error) {
 	}
 
 	report := AppsReport{}
-	if err := reports.ParseInto(out, &report); err != nil {
+	if err := reports.ParseIntoMap(out, &report); err != nil {
 		return nil, err
 	}
 

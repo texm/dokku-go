@@ -38,29 +38,35 @@ type ClientConfig struct {
 
 type Client interface {
 	Dial() error
-	DialWithTimeout(time.Duration) error
+	DialWithTimeout(timeout time.Duration) error
 	Close() error
 
-	exec(string) (string, error)
+	exec(command string) (string, error)
 
-	CloneApp(string, string) error
-	CreateApp(string) error
-	DestroyApp(string) error
-	CheckAppExists(string) (bool, error)
+	CloneApp(currentAppName string, newAppName string) error
+	CreateApp(appName string) error
+	DestroyApp(appName string) error
+	CheckAppExists(appName string) (bool, error)
 	ListApps() ([]string, error)
-	LockApp(string) error
-	IsLocked(string) (bool, error)
-	RenameApp(string, string) error
-	GetAppReport(string) (*AppReport, error)
+	LockApp(appName string) error
+	IsLocked(appName string) (bool, error)
+	RenameApp(currentAppName string, newAppName string) error
+	GetAppReport(appName string) (*AppReport, error)
 	GetAllAppReport() (AppsReport, error)
-	UnlockApp(string) error
+	UnlockApp(appName string) error
 
+	GetAppProcessReport(appName string) (*ProcessReport, error)
 	GetAllProcessReport() (ProcessesReport, error)
 	GetProcessInfo(string) error
 
-	SetEventLoggingEnabled(bool) error
+	SetEventLoggingEnabled(enabled bool) error
 	GetEventLogs() (string, error)
 	ListLoggedEvents() ([]string, error)
+
+	GetAppLogs(string) (string, error)
+	GetAppProcessLogs(appName, process string) (string, error)
+	GetAppFailedDeployLogs(appName string) (string, error)
+	GetAllFailedDeployLogs() (string, error)
 }
 
 type DefaultClient struct {
@@ -146,6 +152,9 @@ func (c *DefaultClient) DialWithTimeout(timeout time.Duration) error {
 func checkGenericErrors(output string) error {
 	if strings.HasSuffix(output, "does not exist") {
 		return InvalidAppError
+	}
+	if strings.HasSuffix(output, "has not been deployed") {
+		return AppNotDeployedError
 	}
 	if strings.Contains(output, noAppsDokkuMessage) {
 		return NoDeployedAppsError

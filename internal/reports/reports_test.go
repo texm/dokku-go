@@ -40,11 +40,22 @@ type ExampleIndividualReport struct {
 	LongKey  string `dokku:"really long key wow it is"`
 	EmptyVal string `dokku:"empty value"`
 }
+
+func TestParseIndividualReport(t *testing.T) {
+	report := ExampleIndividualReport{}
+	assert.NoError(t, ParseInto(exampleOutput, &report))
+	assert.Equal(t, "value", report.Key)
+	assert.Equal(t, 3, report.IntKey)
+	assert.Equal(t, true, report.BoolKey)
+	assert.Equal(t, "value", report.LongKey)
+	assert.Empty(t, report.EmptyVal)
+}
+
 type ExampleReport map[string]ExampleIndividualReport
 
 func TestParseReport(t *testing.T) {
 	report := ExampleReport{}
-	assert.NoError(t, ParseInto(exampleOutput, &report))
+	assert.NoError(t, ParseIntoMap(exampleOutputWithTwoSections, &report))
 	assert.Contains(t, report, "APP_NAME")
 
 	appReport, _ := report["APP_NAME"]
@@ -53,8 +64,6 @@ func TestParseReport(t *testing.T) {
 	assert.Equal(t, true, appReport.BoolKey)
 	assert.Equal(t, "value", appReport.LongKey)
 	assert.Empty(t, appReport.EmptyVal)
-
-	assert.NoError(t, ParseInto(exampleOutputWithTwoSections, &report))
 
 	assert.Error(t, ParseInto(exampleOutputWithMissingKeys, &report))
 }

@@ -10,7 +10,7 @@ func (s *DokkuTestSuite) TestGetProcessInfo() {
 	r.Nil(err, "failed to create app")
 
 	err = s.Client.GetProcessInfo(testAppName)
-	r.Nil(err, "failed to get info")
+	r.ErrorIs(err, AppNotDeployedError, "did not detect app not being deployed")
 }
 
 func (s *DokkuTestSuite) TestGetProcessReport() {
@@ -21,6 +21,10 @@ func (s *DokkuTestSuite) TestGetProcessReport() {
 
 	err = s.Client.CreateApp(testAppName)
 	r.Nil(err, "failed to create app")
+
+	appReport, err := s.Client.GetAppProcessReport(testAppName)
+	r.Nil(err, "failed to get report")
+	r.True(appReport.Restore)
 
 	report, err := s.Client.GetAllProcessReport()
 	r.Nil(err, "failed to get report")

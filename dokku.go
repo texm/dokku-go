@@ -8,6 +8,7 @@ const (
 
 var (
 	InvalidAppError        = errors.New("app does not exist")
+	AppNotDeployedError    = errors.New("app is not deployed")
 	NoDeployedAppsError    = errors.New("no apps have been deployed")
 	NotImplementedError    = errors.New("method not implemented")
 	UnexpectedMessageError = errors.New("unexpected confirmation message")
