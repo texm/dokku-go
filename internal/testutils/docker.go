@@ -2,8 +2,9 @@ package testutils
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"os"
+	"os/user"
 	"path"
 	"runtime"
 	"time"
@@ -29,39 +30,38 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 		}
 	}
 
-	// this is gross
-	// mounting the host socket is easier than running some kind of VM setup, although it is somewhat insecure as
-	// the test container now needs to run privileged
-	// socketMount := testcontainers.BindMount(dockerSocketFile, defaultDockerSocketFile)
+	// mounting the docker socket into the container is insecure, but nobody else should run this
+	socketMount := testcontainers.BindMount(dockerSocketFile, defaultDockerSocketFile)
 
 	req := testcontainers.ContainerRequest{
 		Image:        testingImage,
-		Privileged:   false,
+		Privileged:   true,
 		ExposedPorts: []string{"22/tcp"},
-		// Mounts:       testcontainers.ContainerMounts{socketMount},
-		WaitingFor: wait.ForListeningPort("22").WithStartupTimeout(startupTimeout),
+		Mounts:       testcontainers.ContainerMounts{socketMount},
+		WaitingFor:   wait.ForListeningPort("22").WithStartupTimeout(startupTimeout),
 	}
 	gReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
 	}
 
-	log.Println("requesting dokku container")
 	container, err := testcontainers.GenericContainer(ctx, gReq)
 	if err != nil {
 		return nil, err
 	}
 
+	if err := ensureMatchingDockerGroupId(ctx, container); err != nil {
+		return nil, maybeTerminateContainerAfterError(ctx, container, err)
+	}
+
 	host, err := container.Host(ctx)
 	if err != nil {
-		container.Terminate(ctx)
-		return nil, err
+		return nil, maybeTerminateContainerAfterError(ctx, container, err)
 	}
 
 	mappedPort, err := container.MappedPort(ctx, "22")
 	if err != nil {
-		container.Terminate(ctx)
-		return nil, err
+		return nil, maybeTerminateContainerAfterError(ctx, container, err)
 	}
 
 	dc := &DokkuContainer{
@@ -80,7 +80,34 @@ func setupColimaEnv() error {
 	}
 
 	dockerSocketFile = path.Join(home, ".colima/docker.sock")
-	os.Setenv("DOCKER_HOST", "unix://"+dockerSocketFile)
-	os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", dockerSocketFile)
+	if err := os.Setenv("DOCKER_HOST", "unix://"+dockerSocketFile); err != nil {
+		return err
+	}
+
+	if err := os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", dockerSocketFile); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func ensureMatchingDockerGroupId(ctx context.Context, container testcontainers.Container) error {
+	dockerGroup, err := user.LookupGroup("docker")
+	if err != nil {
+		return err
+	}
+
+	exitCode, err := container.Exec(ctx, []string{"groupmod", "-g", dockerGroup.Gid, "docker"})
+	if exitCode != 0 {
+		return fmt.Errorf("failed to change gid of containerized docker group, got exit code %d\n", exitCode)
+	}
+
+	return err
+}
+
+func maybeTerminateContainerAfterError(ctx context.Context, container testcontainers.Container, err error) error {
+	if termErr := container.Terminate(ctx); termErr != nil {
+		return fmt.Errorf("failed to terminate container: %s after failing to handle error: %w", termErr.Error(), err)
+	}
+	return err
 }

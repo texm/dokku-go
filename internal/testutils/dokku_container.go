@@ -37,7 +37,7 @@ func (dc *DokkuContainer) Cleanup(ctx context.Context) {
 	}
 }
 
-func (dc *DokkuContainer) GetLogs(ctx context.Context) []string {
+func (dc *DokkuContainer) GetLogs() []string {
 	if dc.logConsumer != nil {
 		return dc.logConsumer.Msgs
 	}
