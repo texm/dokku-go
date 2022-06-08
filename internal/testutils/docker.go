@@ -19,10 +19,6 @@ const (
 	defaultDockerSocketFile = "/var/run/docker.sock"
 )
 
-var (
-	dockerSocketFile = defaultDockerSocketFile
-)
-
 func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 	if runtime.GOOS == "darwin" {
 		if err := setupColimaEnv(); err != nil {
@@ -31,11 +27,11 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 	}
 
 	// mounting the docker socket into the container is insecure, but nobody else should run this
-	socketMount := testcontainers.BindMount(dockerSocketFile, defaultDockerSocketFile)
+	socketMount := testcontainers.BindMount(defaultDockerSocketFile, defaultDockerSocketFile)
 
 	req := testcontainers.ContainerRequest{
 		Image:        testingImage,
-		Privileged:   true,
+		Privileged:   false,
 		ExposedPorts: []string{"22/tcp"},
 		Mounts:       testcontainers.ContainerMounts{socketMount},
 		WaitingFor:   wait.ForListeningPort("22").WithStartupTimeout(startupTimeout),
@@ -79,12 +75,13 @@ func setupColimaEnv() error {
 		return err
 	}
 
-	dockerSocketFile = path.Join(home, ".colima/docker.sock")
-	if err := os.Setenv("DOCKER_HOST", "unix://"+dockerSocketFile); err != nil {
+	localDockerSocketFile := path.Join(home, ".colima/docker.sock")
+	localDockerSocketURI := fmt.Sprintf("unix://%s", localDockerSocketFile)
+
+	if err := os.Setenv("DOCKER_HOST", "unix://"+localDockerSocketURI); err != nil {
 		return err
 	}
-
-	if err := os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", dockerSocketFile); err != nil {
+	if err := os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", localDockerSocketFile); err != nil {
 		return err
 	}
 
@@ -92,12 +89,19 @@ func setupColimaEnv() error {
 }
 
 func ensureMatchingDockerGroupId(ctx context.Context, container testcontainers.Container) error {
-	dockerGroup, err := user.LookupGroup("docker")
-	if err != nil {
-		return err
+	var hostGid string
+	if runtime.GOOS == "darwin" {
+		// need to 'colima ssh' and groupmod ping to 998, groupmod docker 999
+		hostGid = "999"
+	} else {
+		dockerGroup, err := user.LookupGroup("docker")
+		if err != nil {
+			return err
+		}
+		hostGid = dockerGroup.Gid
 	}
 
-	exitCode, err := container.Exec(ctx, []string{"groupmod", "-g", dockerGroup.Gid, "docker"})
+	exitCode, err := container.Exec(ctx, []string{"groupmod", "-g", hostGid, "docker"})
 	if exitCode != 0 {
 		return fmt.Errorf("failed to change gid of containerized docker group, got exit code %d\n", exitCode)
 	}

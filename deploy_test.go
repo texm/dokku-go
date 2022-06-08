@@ -1,21 +1,20 @@
 package dokku
 
 import (
-	"log"
+	"fmt"
 )
 
 func (s *DokkuTestSuite) TestDockerImageDeploy() {
 	r := s.Require()
 	var err error
 
-	testAppName := "test-logs-app"
+	testAppName := "test-deploy-app"
 	err = s.Client.CreateApp(testAppName)
 	r.NoError(err, "failed to create app")
 
-	// checks:skip <app>
+	err = s.Client.SetAppDeployChecksEnabled(testAppName, false)
+	fmt.Printf("checks err:%s\n", err)
 
-	image := "crccheck/hello-world"
-	out, err := s.Client.DeployAppFromDockerImage(testAppName, image)
+	_, err = s.Client.DeployAppFromDockerImage(testAppName, "dokku/node-js-getting-started:latest")
 	r.NoError(err)
-	log.Printf("command output: %s\n", out)
 }

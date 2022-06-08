@@ -71,6 +71,7 @@ type Client interface {
 	GetAppFailedDeployLogs(appName string) (string, error)
 	GetAllFailedDeployLogs() (string, error)
 
+	SetAppDeployChecksEnabled(appName string, enabled bool) error
 	DeployAppFromDockerImage(appName, image string) (string, error)
 }
 
