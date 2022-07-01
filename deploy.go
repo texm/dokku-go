@@ -15,12 +15,12 @@ func (c *DefaultClient) SetAppDeployChecksEnabled(appName string, enabled bool) 
 	if !enabled {
 		cmd = disableChecksCmd
 	}
-	out, err := c.exec(fmt.Sprintf(cmd, appName))
+	out, err := c.Exec(fmt.Sprintf(cmd, appName))
 	fmt.Println(out)
 	return err
 }
 
 func (c *DefaultClient) DeployAppFromDockerImage(appName, image string) (string, error) {
 	cmd := fmt.Sprintf(deployImageCmd, appName, image)
-	return c.exec(cmd)
+	return c.Exec(cmd)
 }

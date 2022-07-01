@@ -42,7 +42,7 @@ type Client interface {
 	DialWithTimeout(timeout time.Duration) error
 	Close() error
 
-	exec(command string) (string, error)
+	Exec(command string) (string, error)
 
 	CloneApp(currentAppName string, newAppName string) error
 	CreateApp(appName string) error
@@ -179,7 +179,7 @@ func closeSession(session *ssh.Session) error {
 	return nil
 }
 
-func (c *DefaultClient) exec(cmd string) (string, error) {
+func (c *DefaultClient) Exec(cmd string) (string, error) {
 	session, err := c.conn.NewSession()
 	if err != nil {
 		return "", err
@@ -207,17 +207,17 @@ func (c *DefaultClient) exec(cmd string) (string, error) {
 	return cleaned, nil
 }
 
-type commandStream struct {
+type CommandStream struct {
 	Stdout io.Reader
 	Stderr io.Reader
 }
 
-func (c *DefaultClient) streamingExec(cmd string) (*commandStream, error) {
+func (c *DefaultClient) StreamingExec(cmd string) (*CommandStream, error) {
 	session, err := c.conn.NewSession()
 	if err != nil {
 		return nil, err
 	}
-	stream := &commandStream{}
+	stream := &CommandStream{}
 
 	stream.Stdout, err = session.StdoutPipe()
 	if err != nil {

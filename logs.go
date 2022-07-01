@@ -28,7 +28,7 @@ const (
 
 func (c *DefaultClient) TailAppLogs(appName string) (io.Reader, error) {
 	cmd := fmt.Sprintf(appTailLogsCmd, appName)
-	stream, err := c.streamingExec(cmd)
+	stream, err := c.StreamingExec(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *DefaultClient) TailAppLogs(appName string) (io.Reader, error) {
 
 func (c *DefaultClient) GetNAppLogs(appName string, numLines int) (string, error) {
 	cmd := fmt.Sprintf(appLogsCmd, appName)
-	return c.exec(cmd)
+	return c.Exec(cmd)
 }
 
 func (c *DefaultClient) GetAppLogs(appName string) (string, error) {
@@ -73,28 +73,28 @@ func (c *DefaultClient) GetAppLogs(appName string) (string, error) {
 
 func (c *DefaultClient) GetAppProcessLogs(appName, process string) (string, error) {
 	cmd := fmt.Sprintf(appLogsProcessCmd, appName, process)
-	return c.exec(cmd)
+	return c.Exec(cmd)
 }
 
 func (c *DefaultClient) GetAppFailedDeployLogs(appName string) (string, error) {
 	cmd := fmt.Sprintf(appFailedDeployLogsCmd, appName)
-	return c.exec(cmd)
+	return c.Exec(cmd)
 }
 
 func (c *DefaultClient) GetAllFailedDeployLogs() (string, error) {
-	return c.exec(allFailedDeployLogsCmd)
+	return c.Exec(allFailedDeployLogsCmd)
 }
 
 func (c *DefaultClient) SetEventLoggingEnabled(enabled bool) error {
 	var err error
 	var output string
 	if !enabled {
-		output, err = c.exec(eventsOffCmd)
+		output, err = c.Exec(eventsOffCmd)
 		if output != disabledEventLoggerMsg {
 			return UnexpectedMessageError
 		}
 	} else {
-		output, err = c.exec(eventsOnCmd)
+		output, err = c.Exec(eventsOnCmd)
 		if output != enabledEventLoggerMsg {
 			return UnexpectedMessageError
 		}
@@ -103,12 +103,12 @@ func (c *DefaultClient) SetEventLoggingEnabled(enabled bool) error {
 }
 
 func (c *DefaultClient) GetEventLogs() (string, error) {
-	return c.exec(eventsCmd)
+	return c.Exec(eventsCmd)
 }
 
 func (c *DefaultClient) ListLoggedEvents() ([]string, error) {
 	var events []string
-	sEvents, err := c.exec(eventsListCmd)
+	sEvents, err := c.Exec(eventsListCmd)
 	if err != nil {
 		return events, err
 	}

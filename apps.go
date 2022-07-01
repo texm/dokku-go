@@ -38,7 +38,7 @@ func (c *DefaultClient) CloneApp(oldName, newName string) error {
 
 func (c *DefaultClient) CreateApp(name string) error {
 	cmd := fmt.Sprintf(appCreateCommand, name)
-	output, err := c.exec(cmd)
+	output, err := c.Exec(cmd)
 	if output == nameTakenMessage {
 		return NameTakenError
 	}
@@ -51,7 +51,7 @@ func (c *DefaultClient) CreateApp(name string) error {
 
 func (c *DefaultClient) DestroyApp(name string) error {
 	cmd := fmt.Sprintf(appDestroyCommand, name)
-	out, err := c.exec(cmd)
+	out, err := c.Exec(cmd)
 	if out == fmt.Sprintf(appNotExistsMessageTemplate, name) {
 		return InvalidAppError
 	} else if err != nil {
@@ -63,7 +63,7 @@ func (c *DefaultClient) DestroyApp(name string) error {
 
 func (c *DefaultClient) CheckAppExists(name string) (bool, error) {
 	cmd := fmt.Sprintf(appExistsCommand, name)
-	_, err := c.exec(cmd)
+	_, err := c.Exec(cmd)
 	if err == InvalidAppError {
 		return false, nil
 	} else if err != nil {
@@ -74,7 +74,7 @@ func (c *DefaultClient) CheckAppExists(name string) (bool, error) {
 }
 
 func (c *DefaultClient) ListApps() ([]string, error) {
-	output, err := c.exec(appListCommand)
+	output, err := c.Exec(appListCommand)
 	if err != nil {
 		if errors.Is(err, NoDeployedAppsError) {
 			return []string{}, nil
@@ -90,7 +90,7 @@ func (c *DefaultClient) ListApps() ([]string, error) {
 
 func (c *DefaultClient) LockApp(name string) error {
 	cmd := fmt.Sprintf(appLockCommand, name)
-	out, err := c.exec(cmd)
+	out, err := c.Exec(cmd)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (c *DefaultClient) LockApp(name string) error {
 
 func (c *DefaultClient) IsLocked(name string) (bool, error) {
 	cmd := fmt.Sprintf(appIsLockedCommand, name)
-	out, err := c.exec(cmd)
+	out, err := c.Exec(cmd)
 	if out == deployLockNotExistsMessage {
 		return false, nil
 	} else if err != nil {
@@ -125,7 +125,7 @@ type AppReport struct {
 
 func (c *DefaultClient) GetAppReport(name string) (*AppReport, error) {
 	cmd := fmt.Sprintf(appReportCommand, name)
-	out, err := c.exec(cmd)
+	out, err := c.Exec(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ type AppsReport map[string]*AppReport
 
 func (c *DefaultClient) GetAllAppReport() (AppsReport, error) {
 	cmd := fmt.Sprintf(appReportAllCommand)
-	out, err := c.exec(cmd)
+	out, err := c.Exec(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -157,6 +157,6 @@ func (c *DefaultClient) GetAllAppReport() (AppsReport, error) {
 
 func (c *DefaultClient) UnlockApp(name string) error {
 	cmd := fmt.Sprintf(appUnlockCommand, name)
-	_, err := c.exec(cmd)
+	_, err := c.Exec(cmd)
 	return err
 }

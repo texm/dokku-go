@@ -22,7 +22,7 @@ const (
 
 func (c *DefaultClient) GetProcessInfo(appName string) error {
 	cmd := fmt.Sprintf(psInspectCommand, appName)
-	output, err := c.exec(cmd)
+	output, err := c.Exec(cmd)
 	if err != nil {
 		if strings.HasPrefix(output, "\"docker container inspect\" requires at least 1 argument.") {
 			return AppNotDeployedError
@@ -47,7 +47,7 @@ type ProcessReport struct {
 
 func (c *DefaultClient) GetAppProcessReport(appName string) (*ProcessReport, error) {
 	cmd := fmt.Sprintf(psReportAppCommand, appName)
-	output, err := c.exec(cmd)
+	output, err := c.Exec(cmd)
 
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (c *DefaultClient) GetAppProcessReport(appName string) (*ProcessReport, err
 type ProcessesReport map[string]*ProcessReport
 
 func (c *DefaultClient) GetAllProcessReport() (ProcessesReport, error) {
-	output, err := c.exec(psReportCommand)
+	output, err := c.Exec(psReportCommand)
 	report := ProcessesReport{}
 
 	if err == NoDeployedAppsError {
