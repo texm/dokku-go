@@ -19,12 +19,21 @@ func (s *DokkuTestSuite) TestCanManageApp() {
 
 func (s *DokkuTestSuite) TestCanCreateApp() {
 	r := s.Require()
-	var err error
 
 	testAppName := "test-manage-app"
+	err := s.Client.CreateApp(testAppName)
+	r.Nil(err, "failed to create app")
+}
+
+func (s *DokkuTestSuite) TestDuplicateAppName() {
+	r := s.Require()
+
+	testAppName := "test-duplicate-app"
+	err := s.Client.CreateApp(testAppName)
+	r.NoError(err, "failed to create app")
 
 	err = s.Client.CreateApp(testAppName)
-	r.Nil(err, "failed to create app")
+	r.ErrorIs(err, NameTakenError)
 }
 
 func (s *DokkuTestSuite) TestNoAppsFunctionality() {

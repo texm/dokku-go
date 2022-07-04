@@ -78,7 +78,7 @@ func setupColimaEnv() error {
 	localDockerSocketFile := path.Join(home, ".colima/docker.sock")
 	localDockerSocketURI := fmt.Sprintf("unix://%s", localDockerSocketFile)
 
-	if err := os.Setenv("DOCKER_HOST", "unix://"+localDockerSocketURI); err != nil {
+	if err := os.Setenv("DOCKER_HOST", localDockerSocketURI); err != nil {
 		return err
 	}
 	if err := os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", localDockerSocketFile); err != nil {

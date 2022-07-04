@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	nameTakenMessage            = " !     Name is already taken"
+	nameTakenMessage            = "!     Name is already taken"
 	lockCreatedMessage          = "-----> Deploy lock created"
 	deployLockExistsMessage     = "Deploy lock exists"
 	deployLockNotExistsMessage  = "!     Deploy lock does not exist"
@@ -39,6 +39,7 @@ func (c *DefaultClient) CloneApp(oldName, newName string) error {
 func (c *DefaultClient) CreateApp(name string) error {
 	cmd := fmt.Sprintf(appCreateCommand, name)
 	output, err := c.Exec(cmd)
+	fmt.Printf("out: '%s'\n", output)
 	if output == nameTakenMessage {
 		return NameTakenError
 	}
