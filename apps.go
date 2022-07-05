@@ -39,7 +39,6 @@ func (c *DefaultClient) CloneApp(oldName, newName string) error {
 func (c *DefaultClient) CreateApp(name string) error {
 	cmd := fmt.Sprintf(appCreateCommand, name)
 	output, err := c.Exec(cmd)
-	fmt.Printf("out: '%s'\n", output)
 	if output == nameTakenMessage {
 		return NameTakenError
 	}
