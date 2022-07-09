@@ -11,21 +11,21 @@ func (s *DokkuTestSuite) TestGetEventLogs() {
 	testAppName := "test-process-app"
 
 	err = s.Client.SetEventLoggingEnabled(false)
-	r.Nil(err)
+	r.NoError(err)
 
 	err = s.Client.SetEventLoggingEnabled(true)
-	r.Nil(err)
+	r.NoError(err)
 
 	err = s.Client.CreateApp(testAppName)
-	r.Nil(err, "failed to create app")
+	r.NoError(err, "failed to create app")
 
 	_, err = s.Client.GetEventLogs()
-	r.Nil(err)
+	r.NoError(err)
 	// TODO: dokku logs doesn't seem to work here?
 	// r.NotEmpty(logs)
 
 	events, err := s.Client.ListLoggedEvents()
-	r.Nil(err)
+	r.NoError(err)
 	r.NotEmpty(events)
 }
 
@@ -35,7 +35,7 @@ func (s *DokkuTestSuite) TestGetAppLogs() {
 
 	testAppName := "test-logs-app"
 	err = s.Client.CreateApp(testAppName)
-	r.Nil(err, "failed to create app")
+	r.NoError(err, "failed to create app")
 
 	_, err = s.Client.GetAppLogs(testAppName)
 	r.ErrorIs(err, AppNotDeployedError)
@@ -47,7 +47,7 @@ func (s *DokkuTestSuite) TestTailAppLogs() {
 
 	testAppName := "test-logs-app"
 	err = s.Client.CreateApp(testAppName)
-	r.Nil(err, "failed to create app")
+	r.NoError(err, "failed to create app")
 
 	reader, err := s.Client.TailAppLogs(testAppName)
 	r.NoError(err)

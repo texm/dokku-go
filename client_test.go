@@ -11,9 +11,9 @@ func (s *DokkuTestSuite) TestCanCreateClient() {
 	ctx := context.Background()
 
 	keyPair, err := testutils.GenerateRSAKeyPair()
-	r.Nil(err, "failed to create keypair")
+	r.NoError(err, "failed to create keypair")
 
-	s.Dokku.RegisterPublicKey(ctx, keyPair.PublicKey)
+	r.NoError(s.Dokku.RegisterPublicKey(ctx, keyPair.PublicKey))
 
 	cfg := &ClientConfig{
 		Host:            s.Dokku.Host,
@@ -22,6 +22,6 @@ func (s *DokkuTestSuite) TestCanCreateClient() {
 		HostKeyCallback: s.Dokku.HostKeyFunc(),
 	}
 	client, err := NewClient(cfg)
-	r.Nil(err, "error while creating client")
+	r.NoError(err, "error while creating client")
 	r.NotNil(client, "returned client is nil")
 }

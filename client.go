@@ -58,7 +58,16 @@ type Client interface {
 
 	GetAppProcessReport(appName string) (*ProcessReport, error)
 	GetAllProcessReport() (ProcessesReport, error)
-	GetProcessInfo(string) error
+	GetProcessInfo(appName string) error
+
+	GetAppResourceReport(appName string) (*ProcessReport, error)
+	/*GetAllResourceReport() (ProcessesReport, error)
+	SetAppProcessResourceLimit(string, string, string) error
+	ClearAppProcessResourceLimit(string, string) error
+	SetAppProcessReservedResource(string, string, string) error
+	ClearAppProcessReservedResource(string, string) error*/
+
+	GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error
 
 	SetEventLoggingEnabled(enabled bool) error
 	GetEventLogs() (string, error)

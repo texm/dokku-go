@@ -7,13 +7,13 @@ func (s *DokkuTestSuite) TestCanManageApp() {
 	testAppName := "test-manage-app"
 
 	err = s.Client.CreateApp(testAppName)
-	r.Nil(err, "failed to create app")
+	r.NoError(err, "failed to create app")
 
 	err = s.Client.DestroyApp(testAppName)
-	r.Nil(err, "failed to destroy app")
+	r.NoError(err, "failed to destroy app")
 
 	exists, err := s.Client.CheckAppExists(testAppName)
-	r.Nil(err, "failed to check if app exists")
+	r.NoError(err, "failed to check if app exists")
 	r.False(exists, "app was not correctly destroyed")
 }
 
@@ -22,7 +22,7 @@ func (s *DokkuTestSuite) TestCanCreateApp() {
 
 	testAppName := "test-manage-app"
 	err := s.Client.CreateApp(testAppName)
-	r.Nil(err, "failed to create app")
+	r.NoError(err, "failed to create app")
 }
 
 func (s *DokkuTestSuite) TestDuplicateAppName() {
@@ -53,14 +53,14 @@ func (s *DokkuTestSuite) TestCanGetAppInfo() {
 	testAppName2 := "test-app-info2"
 
 	exists, err := s.Client.CheckAppExists(testAppName)
-	r.Nil(err, "failed to check if app exists")
+	r.NoError(err, "failed to check if app exists")
 	r.False(exists, "incorrect result from exists check")
 
 	err = s.Client.CreateApp(testAppName)
-	r.Nil(err, "failed to create app 1")
+	r.NoError(err, "failed to create app 1")
 
 	err = s.Client.CreateApp(testAppName2)
-	r.Nil(err, "failed to create app 2")
+	r.NoError(err, "failed to create app 2")
 
 	_, err = s.Client.GetAppReport(testAppName)
 	r.NoError(err, "Failed to get app info")
