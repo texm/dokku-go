@@ -38,11 +38,15 @@ type ClientConfig struct {
 }
 
 type Client interface {
+	// client connection methods
+
 	Dial() error
 	DialWithTimeout(timeout time.Duration) error
 	Close() error
 
 	Exec(command string) (string, error)
+
+	// apps
 
 	CloneApp(currentAppName string, newAppName string) error
 	CreateApp(appName string) error
@@ -56,11 +60,23 @@ type Client interface {
 	GetAllAppReport() (AppsReport, error)
 	UnlockApp(appName string) error
 
+	// ps
+
+	GetProcessInfo(appName string) error
 	GetAppProcessReport(appName string) (*ProcessReport, error)
 	GetAllProcessReport() (ProcessesReport, error)
 	GetAppProcessScale(appName string) (map[string]int, error)
 	SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error
-	GetProcessInfo(appName string) error
+	StartApp(appName string, p *ParallelismOptions) error
+	StartAllApps(p *ParallelismOptions) error
+	StopApp(appName string, p *ParallelismOptions) error
+	StopAllApps(p *ParallelismOptions) error
+	RebuildApp(appName string, p *ParallelismOptions) error
+	RebuildAllApps(p *ParallelismOptions) error
+	RestartApp(appName string, p *ParallelismOptions) error
+	RestartAppProcess(appName string, process string, p *ParallelismOptions) error
+	RestartAllApps(p *ParallelismOptions) error
+	SetAppProcessProperty(appName string, key string, value string) error
 
 	GetAppResourceReport(appName string) (*ResourceReport, error)
 	GetAllAppResourceReport() (ResourcesReport, error)
