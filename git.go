@@ -6,6 +6,27 @@ import (
 	"time"
 )
 
+type gitManager interface {
+	GitInitializeApp(appName string) error
+	GitGetPublicKey() (string, error)
+	GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error
+	GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) error
+	GitCreateFromImage(appName string, image string, opt *GitImageOptions) error
+	GitSetAuth(host string, username string, password string) error
+	GitRemoveAuth(host string) error
+	GitSetAppProperty(appName string, property string, val string) error
+	GitRemoveAppProperty(appName string, property string) error
+	GitAllowHost(host string) error
+	GitUnlockApp(appName string, force bool) error
+	GitGetAppReport(appName string) (*GitAppReport, error)
+	GitGetReport() (GitReport, error)
+}
+
+/*
+repo:gc <app>                                                                                Runs 'git gc --aggressive' against the application's repo
+repo:purge-cache <app>                                                                       Deletes the contents of the build cache stored in the repository
+*/
+
 const (
 	gitAllowHostCmd       = "git:allow-host %s"
 	gitAuthCmd            = "git:auth %s %s"

@@ -7,6 +7,29 @@ import (
 	"strings"
 )
 
+type processManager interface {
+	GetProcessInfo(appName string) error
+	GetAppProcessReport(appName string) (*ProcessReport, error)
+	GetAllProcessReport() (ProcessesReport, error)
+	GetAppProcessScale(appName string) (map[string]int, error)
+	SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error
+	StartApp(appName string, p *ParallelismOptions) error
+	StartAllApps(p *ParallelismOptions) error
+	StopApp(appName string, p *ParallelismOptions) error
+	StopAllApps(p *ParallelismOptions) error
+	RebuildApp(appName string, p *ParallelismOptions) error
+	RebuildAllApps(p *ParallelismOptions) error
+	RestartApp(appName string, p *ParallelismOptions) error
+	RestartAppProcess(appName string, process string, p *ParallelismOptions) error
+	RestartAllApps(p *ParallelismOptions) error
+	SetAppProcessProperty(appName string, key string, value string) error
+	SetGlobalProcessProperty(key string, value string) error
+	SetAppProcfilePath(appName string, procPath string) error
+	SetGlobalProcfilePath(procPath string) error
+	SetAppRestartPolicy(appName string, policy RestartPolicy) error
+	SetGlobalRestartPolicy(policy RestartPolicy) error
+}
+
 const (
 	psInspectCommand           = "ps:inspect %s"
 	psRebuildCommand           = "ps:rebuild --parallel %d %s"

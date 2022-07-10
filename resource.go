@@ -7,6 +7,23 @@ import (
 	"strings"
 )
 
+type resourceManager interface {
+	GetAppResourceReport(appName string) (*ResourceReport, error)
+	GetAllAppResourceReport() (ResourcesReport, error)
+	SetAppDefaultResourceLimit(appName string, resource ResourceSpec, limit int) error
+	ClearAppDefaultResourceLimit(appName string, resource ResourceSpec) error
+	ClearAppDefaultResourceLimits(appName string) error
+	SetAppProcessResourceLimit(appName string, process string, resource ResourceSpec, limit int) error
+	ClearAppProcessResourceLimit(appName string, process string, resource ResourceSpec) error
+	ClearAppProcessResourceLimits(appName string, process string) error
+	SetAppResourceReservation(appName string, resource ResourceSpec, reserve int) error
+	ClearAppResourceReservation(appName string, resource ResourceSpec) error
+	ClearAppResourceReservations(appName string) error
+	SetAppProcessResourceReservation(appName string, process string, resource ResourceSpec, reserve int) error
+	ClearAppProcessResourceReservation(appName string, process string, resource ResourceSpec) error
+	ClearAppProcessResourceReservations(appName string, process string) error
+}
+
 const (
 	resourceReportCmd              = "resource:report"
 	resourceReportAppCmd           = "resource:report %s"

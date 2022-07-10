@@ -1,5 +1,17 @@
 package dokku
 
+type networkManager interface {
+	CreateNetwork(name string) error
+	DestroyNetwork(name string) error
+	CheckNetworkExists(name string) (bool, error)
+	GetNetworkInfo(name string) (interface{}, error)
+	ListNetworks() ([]string, error)
+	RebuildNetwork(name string) error
+	RebuildAllNetworks() error
+	GetNetworkReport(name string) (interface{}, error)
+	SetNetworkProperty(name string, property string, value string) error
+}
+
 const (
 	networkCreateCmd      = "network:create %s"
 	networkDestroyCmd     = "network:destroy %s"

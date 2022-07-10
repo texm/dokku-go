@@ -8,6 +8,19 @@ import (
 	"strings"
 )
 
+type logsManager interface {
+	SetEventLoggingEnabled(enabled bool) error
+	GetEventLogs() (string, error)
+	ListLoggedEvents() ([]string, error)
+
+	TailAppLogs(appName string) (io.Reader, error)
+	GetAppLogs(string) (string, error)
+	GetNAppLogs(appName string, numLines int) (string, error)
+	GetAppProcessLogs(appName, process string) (string, error)
+	GetAppFailedDeployLogs(appName string) (string, error)
+	GetAllFailedDeployLogs() (string, error)
+}
+
 const (
 	disabledEventLoggerMsg = "Disabling dokku events logger"
 	enabledEventLoggerMsg  = "Enabling dokku events logger"

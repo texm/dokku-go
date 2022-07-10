@@ -6,6 +6,17 @@ import (
 	"strings"
 )
 
+type checksManager interface {
+	GetDeployChecksReport() (ChecksReport, error)
+	GetAppDeployChecksReport(appName string) (*AppChecksReport, error)
+	EnableAppDeployChecks(appName string) error
+	EnableAppProcessesDeployChecks(appName string, processes []string) error
+	DisableAppDeployChecks(appName string) error
+	DisableAppProcessesDeployChecks(appName string, processes []string) error
+	SetAppDeployChecksSkipped(appName string) error
+	SetAppProcessesDeployChecksSkipped(appName string, processes []string) error
+}
+
 const (
 	checksEnableCmd         = "checks:enable %s"
 	checksEnableProcessCmd  = "checks:enable %s %s"

@@ -8,6 +8,20 @@ import (
 	"github.com/texm/dokku-go/internal/reports"
 )
 
+type appManager interface {
+	CloneApp(currentAppName string, newAppName string, options *AppManagementOptions) error
+	CreateApp(appName string) error
+	DestroyApp(appName string) error
+	CheckAppExists(appName string) (bool, error)
+	ListApps() ([]string, error)
+	LockApp(appName string) error
+	IsLocked(appName string) (bool, error)
+	RenameApp(currentAppName string, newAppName string, options *AppManagementOptions) error
+	GetAppReport(appName string) (*AppReport, error)
+	GetAllAppReport() (AppsReport, error)
+	UnlockApp(appName string) error
+}
+
 const (
 	appCloneCommand     = "apps:clone %s %s"
 	appCreateCommand    = "apps:create %s"
