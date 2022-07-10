@@ -246,12 +246,16 @@ func (c *DefaultClient) SetGlobalProcfilePath(procPath string) error {
 	return c.SetGlobalProcessProperty("procfile-path", procPath)
 }
 
-type RestartPolicy struct {
+type RestartPolicy interface {
+	GetPolicy() string
+}
+
+type restartPolicy struct {
 	policy string
 	option string
 }
 
-func (p *RestartPolicy) String() string {
+func (p restartPolicy) GetPolicy() string {
 	if p.option != "" {
 		return fmt.Sprintf("%s:%s", p.policy, p.option)
 	}
@@ -259,19 +263,23 @@ func (p *RestartPolicy) String() string {
 }
 
 var (
-	RestartPolicyAlways        = RestartPolicy{policy: "always"}
-	RestartPolicyNever         = RestartPolicy{policy: "no"}
-	RestartPolicyUnlessStopped = RestartPolicy{policy: "unless-stopped"}
-	RestartPolicyOnFailure     = RestartPolicy{policy: "on-failure"}
+	RestartPolicyAlways        = restartPolicy{policy: "always"}
+	RestartPolicyNever         = restartPolicy{policy: "no"}
+	RestartPolicyUnlessStopped = restartPolicy{policy: "unless-stopped"}
+	RestartPolicyOnFailure     = restartPolicy{policy: "on-failure"}
 )
 
 func RetryableRestartPolicy(maxRetries int) RestartPolicy {
-	return RestartPolicy{
+	return restartPolicy{
 		policy: "on-failure",
 		option: fmt.Sprintf("%d", maxRetries),
 	}
 }
 
-func (c *DefaultClient) SetAppRestartPolicy(appName string, policy RestartPolicy) error {
-	return c.SetAppProcessProperty(appName, "restart-policy", policy.String())
+func (c *DefaultClient) SetAppRestartPolicy(appName string, p RestartPolicy) error {
+	return c.SetAppProcessProperty(appName, "restart-policy", p.GetPolicy())
+}
+
+func (c *DefaultClient) SetGlobalRestartPolicy(p RestartPolicy) error {
+	return c.SetGlobalProcessProperty("restart-policy", p.GetPolicy())
 }

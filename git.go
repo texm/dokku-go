@@ -1,24 +1,57 @@
 package dokku
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/texm/dokku-go/internal/reports"
+	"time"
+)
 
 const (
-	gitAllowHostCmd       = "git:allow-host <host>"
-	gitAuthCmd            = "git:auth <host> [<username> <password>]"
-	gitFromArchiveCmd     = "git:from-archive <app> <archive-url> [<git-username> <git-email>]"
-	gitFromImageCmd       = "git:from-image <app> <docker-image> [<git-username> <git-email>]"
-	gitInitializeCmd      = "git:initialize <app>"
+	gitAllowHostCmd       = "git:allow-host %s"
+	gitAuthCmd            = "git:auth %s %s"
+	gitFromArchiveCmd     = "git:from-archive --archive-type %s %s %s %s"
+	gitFromImageCmd       = "git:from-image %s %s %s %s"
+	gitInitializeCmd      = "git:initialize %s"
 	gitPublicKeyCmd       = "git:public-key"
-	gitReportCmd          = "git:report [<app>] [<flag>]"
-	gitSetCmd             = "git:set <app> <property> (<value>)"
+	gitReportCmd          = "git:report %s"
+	gitSetCmd             = "git:set %s %s %s"
 	gitSyncCmd            = "git:sync %s %s"
 	gitSyncWithOptionsCmd = "git:sync %s %s %s %s"
-	gitUnlockCmd          = "git:unlock <app> [--force]"
+	gitUnlockCmd          = "git:unlock %s %s"
 )
+
+type GitArchiveOptions struct {
+	ArchiveType   string
+	AuthorDetails *GitAuthorDetails
+}
+
+type GitImageOptions struct {
+	BuildDir      string
+	AuthorDetails *GitAuthorDetails
+}
+
+type GitAuthorDetails struct {
+	Username string
+	Email    string
+}
+
+func (ad *GitAuthorDetails) String() string {
+	return fmt.Sprintf("\"%s\" \"%s\"", ad.Username, ad.Email)
+}
 
 type GitSyncOptions struct {
 	Build  bool
 	GitRef string
+}
+
+func (c *DefaultClient) GitInitializeApp(appName string) error {
+	cmd := fmt.Sprintf(gitInitializeCmd, appName)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GitGetPublicKey() (string, error) {
+	return c.Exec(gitPublicKeyCmd)
 }
 
 func (c *DefaultClient) GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error {
@@ -32,4 +65,110 @@ func (c *DefaultClient) GitSyncAppRepo(appName string, repo string, opt *GitSync
 	}
 	_, err := c.Exec(cmd)
 	return err
+}
+
+func (c *DefaultClient) GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) error {
+	var authorDetails string
+	archiveType := "tar"
+	if opt != nil {
+		if opt.AuthorDetails != nil {
+			authorDetails = opt.AuthorDetails.String()
+		}
+		if opt.ArchiveType != "" {
+			archiveType = opt.ArchiveType
+		}
+	}
+	cmd := fmt.Sprintf(gitFromArchiveCmd, archiveType, appName, url, authorDetails)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GitCreateFromImage(appName string, image string, opt *GitImageOptions) error {
+	var authorDetails string
+	buildDir := ""
+	if opt != nil {
+		if opt.AuthorDetails != nil {
+			authorDetails = opt.AuthorDetails.String()
+		}
+		if opt.BuildDir != "" {
+			buildDir = "--build-dir " + opt.BuildDir
+		}
+	}
+	cmd := fmt.Sprintf(gitFromImageCmd, appName, image, buildDir, authorDetails)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GitSetAuth(host string, username string, password string) error {
+	authDetails := fmt.Sprintf("%s %s", username, password)
+	cmd := fmt.Sprintf(gitAuthCmd, host, authDetails)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GitRemoveAuth(host string) error {
+	cmd := fmt.Sprintf(gitAuthCmd, host, "")
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GitSetAppProperty(appName string, property string, val string) error {
+	cmd := fmt.Sprintf(gitSetCmd, appName, property, val)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GitRemoveAppProperty(appName string, property string) error {
+	return c.GitSetAppProperty(appName, property, "")
+}
+
+func (c *DefaultClient) GitAllowHost(host string) error {
+	cmd := fmt.Sprintf(gitAllowHostCmd, host)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GitUnlockApp(appName string, force bool) error {
+	var forceStr string
+	if force {
+		forceStr = "--force"
+	}
+	cmd := fmt.Sprintf(gitUnlockCmd, appName, forceStr)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+type GitAppReport struct {
+	DeployBranch       string    `json:"deploy_branch" dokku:"Git deploy branch"`
+	GlobalDeployBranch string    `json:"global_deploy_branch" dokku:"Git global deploy branch"`
+	KeepGitDir         bool      `json:"keep_git_dir" dokku:"Git keep git dir"`
+	RevisionEnvVar     string    `json:"rev_env_var" dokku:"Git rev env var"`
+	SHA                string    `json:"sha" dokku:"Git sha"`
+	LastUpdatedAt      time.Time `json:"last_updated_at" dokku:"Git last updated at"`
+}
+
+func (c *DefaultClient) GitGetAppReport(appName string) (*GitAppReport, error) {
+	cmd := fmt.Sprintf(gitReportCmd, appName)
+	output, err := c.Exec(cmd)
+
+	var gitReport GitAppReport
+	if err := reports.ParseInto(output, &gitReport); err != nil {
+		return nil, fmt.Errorf("failed to parse report: %w", err)
+	}
+
+	return &gitReport, err
+}
+
+type GitReport map[string]*GitAppReport
+
+func (c *DefaultClient) GitGetReport() (GitReport, error) {
+	cmd := fmt.Sprintf(gitReportCmd, "")
+	output, err := c.Exec(cmd)
+
+	var gitReport GitReport
+	if err := reports.ParseIntoMap(output, &gitReport); err != nil {
+		return nil, fmt.Errorf("failed to parse report: %w", err)
+	}
+
+	return gitReport, err
 }
