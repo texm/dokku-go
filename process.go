@@ -8,18 +8,17 @@ import (
 )
 
 const (
-	psInspectCommand            = "ps:inspect %s"
-	psRebuildCommand            = "ps:rebuild --parallel %d %s"
-	psReportCommand             = "ps:report"
-	psReportAppCommand          = "ps:report %s"
-	psReportAppWithFlagsCommand = "ps:report %s %s"
-	psRestartCommand            = "ps:restart --parallel %d %s"
-	psRestartAppProcessCommand  = "ps:restart --parallel %d %s %s"
-	psRestoreCommand            = "ps:restore %s"
-	psScaleCommand              = "ps:scale %s %s"
-	psSetCommand                = "ps:set %s %s %s"
-	psStartCommand              = "ps:start --parallel %d %s"
-	psStopCommand               = "ps:stop --parallel %d %s"
+	psInspectCommand           = "ps:inspect %s"
+	psRebuildCommand           = "ps:rebuild --parallel %d %s"
+	psReportCommand            = "ps:report"
+	psReportAppCommand         = "ps:report %s"
+	psRestartCommand           = "ps:restart --parallel %d %s"
+	psRestartAppProcessCommand = "ps:restart --parallel %d %s %s"
+	psRestoreCommand           = "ps:restore %s"
+	psScaleCommand             = "ps:scale %s %s"
+	psSetCommand               = "ps:set %s %s %s"
+	psStartCommand             = "ps:start --parallel %d %s"
+	psStopCommand              = "ps:stop --parallel %d %s"
 )
 
 type ParallelismOptions struct {

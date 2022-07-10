@@ -9,14 +9,6 @@ import (
 )
 
 const (
-	nameTakenMessage            = "!     Name is already taken"
-	lockCreatedMessage          = "-----> Deploy lock created"
-	deployLockExistsMessage     = "Deploy lock exists"
-	deployLockNotExistsMessage  = "!     Deploy lock does not exist"
-	appNotExistsMessageTemplate = "!     App %s does not exist"
-)
-
-const (
 	appCloneCommand     = "apps:clone %s %s"
 	appCreateCommand    = "apps:create %s"
 	appDestroyCommand   = "apps:destroy --force %s"
@@ -30,34 +22,41 @@ const (
 	appUnlockCommand    = "apps:unlock %s"
 )
 
-func (c *DefaultClient) CloneApp(oldName, newName string) error {
-	// cmd := fmt.Sprintf(cloneAppCommand, oldName, newName)
+type AppManagementOptions struct {
+	SkipDeploy     bool
+	IgnoreExisting bool
+}
 
-	return NotImplementedError
+func (o *AppManagementOptions) asFlags() string {
+	if o == nil {
+		return ""
+	}
+	flags := ""
+	if o.SkipDeploy {
+		flags += "--skip-deploy"
+	}
+	if o.IgnoreExisting {
+		flags += "--ignore-existing"
+	}
+	return flags
+}
+
+func (c *DefaultClient) CloneApp(oldName string, newName string, opts *AppManagementOptions) error {
+	cmd := fmt.Sprintf(appCloneCommand, oldName, newName) + opts.asFlags()
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) CreateApp(name string) error {
 	cmd := fmt.Sprintf(appCreateCommand, name)
-	output, err := c.Exec(cmd)
-	if output == nameTakenMessage {
-		return NameTakenError
-	}
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) DestroyApp(name string) error {
 	cmd := fmt.Sprintf(appDestroyCommand, name)
-	out, err := c.Exec(cmd)
-	if out == fmt.Sprintf(appNotExistsMessageTemplate, name) {
-		return InvalidAppError
-	} else if err != nil {
-		return err
-	}
-	return nil
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) CheckAppExists(name string) (bool, error) {
@@ -110,8 +109,10 @@ func (c *DefaultClient) IsLocked(name string) (bool, error) {
 	return out == deployLockExistsMessage, nil
 }
 
-func (c *DefaultClient) RenameApp(oldName, newName string) error {
-	return NotImplementedError
+func (c *DefaultClient) RenameApp(oldName string, newName string, opts *AppManagementOptions) error {
+	cmd := fmt.Sprintf(appRenameCommand, oldName, newName) + opts.asFlags()
+	_, err := c.Exec(cmd)
+	return err
 }
 
 type AppReport struct {

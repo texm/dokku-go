@@ -7,7 +7,12 @@ import (
 )
 
 const (
-	noAppsDokkuMessage = "You haven't deployed any applications yet"
+	noAppsDokkuMessage          = "You haven't deployed any applications yet"
+	nameTakenMessage            = "!     Name is already taken"
+	lockCreatedMessage          = "-----> Deploy lock created"
+	deployLockExistsMessage     = "Deploy lock exists"
+	deployLockNotExistsMessage  = "!     Deploy lock does not exist"
+	appNotExistsMessageTemplate = "!     App %s does not exist"
 )
 
 var (
@@ -20,30 +25,36 @@ var (
 )
 
 type Client interface {
-	// client connection methods
-
 	Dial() error
 	DialWithTimeout(timeout time.Duration) error
 	Close() error
 
 	Exec(command string) (string, error)
 
-	// apps
+	appManager
+	processManager
+	resourceManager
+	gitManager
+	logsManager
+	checksManager
+	networksManager
+}
 
-	CloneApp(currentAppName string, newAppName string) error
+type appManager interface {
+	CloneApp(currentAppName string, newAppName string, options *AppManagementOptions) error
 	CreateApp(appName string) error
 	DestroyApp(appName string) error
 	CheckAppExists(appName string) (bool, error)
 	ListApps() ([]string, error)
 	LockApp(appName string) error
 	IsLocked(appName string) (bool, error)
-	RenameApp(currentAppName string, newAppName string) error
+	RenameApp(currentAppName string, newAppName string, options *AppManagementOptions) error
 	GetAppReport(appName string) (*AppReport, error)
 	GetAllAppReport() (AppsReport, error)
 	UnlockApp(appName string) error
+}
 
-	// ps
-
+type processManager interface {
 	GetProcessInfo(appName string) error
 	GetAppProcessReport(appName string) (*ProcessReport, error)
 	GetAllProcessReport() (ProcessesReport, error)
@@ -64,9 +75,9 @@ type Client interface {
 	SetGlobalProcfilePath(procPath string) error
 	SetAppRestartPolicy(appName string, policy RestartPolicy) error
 	SetGlobalRestartPolicy(policy RestartPolicy) error
+}
 
-	// resource
-
+type resourceManager interface {
 	GetAppResourceReport(appName string) (*ResourceReport, error)
 	GetAllAppResourceReport() (ResourcesReport, error)
 	SetAppDefaultResourceLimit(appName string, resource ResourceSpec, limit int) error
@@ -81,9 +92,9 @@ type Client interface {
 	SetAppProcessResourceReservation(appName string, process string, resource ResourceSpec, reserve int) error
 	ClearAppProcessResourceReservation(appName string, process string, resource ResourceSpec) error
 	ClearAppProcessResourceReservations(appName string, process string) error
+}
 
-	// git
-
+type gitManager interface {
 	GitInitializeApp(appName string) error
 	GitGetPublicKey() (string, error)
 	GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error
@@ -97,9 +108,9 @@ type Client interface {
 	GitUnlockApp(appName string, force bool) error
 	GitGetAppReport(appName string) (*GitAppReport, error)
 	GitGetReport() (GitReport, error)
+}
 
-	// logs & events
-
+type logsManager interface {
 	SetEventLoggingEnabled(enabled bool) error
 	GetEventLogs() (string, error)
 	ListLoggedEvents() ([]string, error)
@@ -110,9 +121,27 @@ type Client interface {
 	GetAppProcessLogs(appName, process string) (string, error)
 	GetAppFailedDeployLogs(appName string) (string, error)
 	GetAllFailedDeployLogs() (string, error)
+}
 
-	// deploy
+type checksManager interface {
+	GetDeployChecksReport() (ChecksReport, error)
+	GetAppDeployChecksReport(appName string) (*AppChecksReport, error)
+	EnableAppDeployChecks(appName string) error
+	EnableAppProcessesDeployChecks(appName string, processes []string) error
+	DisableAppDeployChecks(appName string) error
+	DisableAppProcessesDeployChecks(appName string, processes []string) error
+	SetAppDeployChecksSkipped(appName string) error
+	SetAppProcessesDeployChecksSkipped(appName string, processes []string) error
+}
 
-	SetAppDeployChecksEnabled(appName string, enabled bool) error
-	DeployAppFromDockerImage(appName, image string) (string, error)
+type networksManager interface {
+	CreateNetwork(name string) error
+	DestroyNetwork(name string) error
+	CheckNetworkExists(name string) (bool, error)
+	GetNetworkInfo(name string) (interface{}, error)
+	ListNetworks() ([]string, error)
+	RebuildNetwork(name string) error
+	RebuildAllNetworks() error
+	GetNetworkReport(name string) (interface{}, error)
+	SetNetworkProperty(name string, property string, value string) error
 }

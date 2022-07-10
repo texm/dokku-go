@@ -127,6 +127,9 @@ func checkGenericErrors(output string) error {
 	if strings.Contains(output, noAppsDokkuMessage) {
 		return NoDeployedAppsError
 	}
+	if strings.Contains(output, nameTakenMessage) {
+		return NameTakenError
+	}
 	return nil
 }
 
