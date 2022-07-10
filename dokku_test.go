@@ -2,6 +2,7 @@ package dokku
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/texm/dokku-go/internal/testutils"
@@ -34,6 +35,16 @@ func (s *DokkuTestSuite) SetupTest() {
 func (s *DokkuTestSuite) TearDownTest() {
 	ctx := context.Background()
 
+	apps, err := s.Client.ListApps()
+	if err != nil {
+		fmt.Println("failed to list apps")
+	}
+	for _, app := range apps {
+		if err := s.Client.DestroyApp(app); err != nil {
+			fmt.Printf("failed to destroy app %s: %s\n", app, err.Error())
+		}
+	}
+
 	if s.Dokku != nil {
 		s.Dokku.Cleanup(ctx)
 	}
@@ -60,7 +71,9 @@ func (s *DokkuTestSuite) createTestClient(ctx context.Context) error {
 		return err
 	}
 
-	s.Dokku.RegisterPublicKey(ctx, keyPair.PublicKey)
+	if err := s.Dokku.RegisterPublicKey(ctx, keyPair.PublicKey); err != nil {
+		return err
+	}
 
 	cfg := &ClientConfig{
 		Host:            s.Dokku.Host,

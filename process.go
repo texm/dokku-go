@@ -3,6 +3,7 @@ package dokku
 import (
 	"fmt"
 	"github.com/texm/dokku-go/internal/reports"
+	"strconv"
 	"strings"
 )
 
@@ -14,7 +15,7 @@ const (
 	psReportAppWithFlagsCommand = "ps:report %s %s"
 	psRestartCommand            = "ps:restart [--parallel count] [--all|<app>] [<process-name>]"
 	psRestoreCommand            = "ps:restore [<app>]"
-	psScaleCommand              = "ps:scale [--skip-deploy] <app> <proc>=<count> [<proc>=<count>...]"
+	psScaleCommand              = "ps:scale %s %s"
 	psSetCommand                = "ps:set <app> <key> <value>"
 	psStartCommand              = "ps:start [--parallel count] [--all|<app>]"
 	psStopCommand               = "ps:stop [--parallel count] [--all|<app>]"
@@ -78,4 +79,47 @@ func (c *DefaultClient) GetAllProcessReport() (ProcessesReport, error) {
 	}
 
 	return report, nil
+}
+
+func (c *DefaultClient) GetAppProcessScale(appName string) (map[string]int, error) {
+	cmd := fmt.Sprintf(psScaleCommand, appName, "")
+	output, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	scaleReport := map[string]int{}
+
+	lines := strings.Split(output, "\n")
+	if len(lines) < 3 {
+		return nil, fmt.Errorf("invalid process scale returned")
+	}
+
+	for i := 3; i < len(lines); i++ {
+		parts := strings.Split(lines[i], ":")
+		processName := parts[0]
+		scale := strings.Trim(parts[1], " :")
+		scaleInt, err := strconv.Atoi(scale)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert scale (%s): %w", scale, err)
+		}
+		scaleReport[processName] = scaleInt
+	}
+
+	return scaleReport, nil
+}
+
+func (c *DefaultClient) SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error {
+	scaleAssignment := fmt.Sprintf("%s=%d", processName, scale)
+	cmd := fmt.Sprintf(psScaleCommand, appName, scaleAssignment)
+	if skipDeploy {
+		cmd += " --skip-deploy"
+	}
+	fmt.Println(cmd)
+	output, err := c.Exec(cmd)
+	if err != nil {
+		return err
+	}
+	fmt.Println(output)
+	return nil
 }

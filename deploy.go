@@ -15,8 +15,7 @@ func (c *DefaultClient) SetAppDeployChecksEnabled(appName string, enabled bool) 
 	if !enabled {
 		cmd = disableChecksCmd
 	}
-	out, err := c.Exec(fmt.Sprintf(cmd, appName))
-	fmt.Println(out)
+	_, err := c.Exec(fmt.Sprintf(cmd, appName))
 	return err
 }
 

@@ -57,7 +57,6 @@ func (c *DefaultClient) DestroyApp(name string) error {
 	} else if err != nil {
 		return err
 	}
-
 	return nil
 }
 

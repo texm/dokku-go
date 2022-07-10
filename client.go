@@ -58,14 +58,30 @@ type Client interface {
 
 	GetAppProcessReport(appName string) (*ProcessReport, error)
 	GetAllProcessReport() (ProcessesReport, error)
+	GetAppProcessScale(appName string) (map[string]int, error)
+	SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error
 	GetProcessInfo(appName string) error
 
-	GetAppResourceReport(appName string) (*ProcessReport, error)
-	/*GetAllResourceReport() (ProcessesReport, error)
-	SetAppProcessResourceLimit(string, string, string) error
-	ClearAppProcessResourceLimit(string, string) error
-	SetAppProcessReservedResource(string, string, string) error
-	ClearAppProcessReservedResource(string, string) error*/
+	GetAppResourceReport(appName string) (*ResourceReport, error)
+	GetAllAppResourceReport() (ResourcesReport, error)
+
+	SetAppDefaultResourceLimit(appName string, resource ResourceSpec, limit int) error
+	ClearAppDefaultResourceLimit(appName string, resource ResourceSpec) error
+	ClearAppDefaultResourceLimits(appName string) error
+
+	SetAppProcessResourceLimit(appName string, process string, resource ResourceSpec, limit int) error
+	ClearAppProcessResourceLimit(appName string, process string, resource ResourceSpec) error
+	ClearAppProcessResourceLimits(appName string, process string) error
+
+	SetAppResourceReservation(appName string, resource ResourceSpec, reserve int) error
+	ClearAppResourceReservation(appName string, resource ResourceSpec) error
+	ClearAppResourceReservations(appName string) error
+
+	SetAppProcessResourceReservation(appName string, process string, resource ResourceSpec, reserve int) error
+	ClearAppProcessResourceReservation(appName string, process string, resource ResourceSpec) error
+	ClearAppProcessResourceReservations(appName string, process string) error
+
+	// GetAllResourceReport() (ProcessesReport, error)
 
 	GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error
 

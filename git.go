@@ -30,8 +30,6 @@ func (c *DefaultClient) GitSyncAppRepo(appName string, repo string, opt *GitSync
 		}
 		cmd = fmt.Sprintf(gitSyncWithOptionsCmd, buildFlag, appName, repo, opt.GitRef)
 	}
-	fmt.Println(cmd)
-	output, err := c.Exec(cmd)
-	fmt.Println(output)
+	_, err := c.Exec(cmd)
 	return err
 }

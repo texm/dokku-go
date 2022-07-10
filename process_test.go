@@ -30,3 +30,31 @@ func (s *DokkuTestSuite) TestGetProcessReport() {
 	r.NoError(err, "failed to get report")
 	r.Contains(report, testAppName)
 }
+
+func (s *DokkuTestSuite) TestGetProcessScale() {
+	r := s.Require()
+	var err error
+
+	testAppName := "test-process-app"
+
+	err = s.Client.CreateApp(testAppName)
+	r.NoError(err, "failed to create app")
+
+	scaleReport, err := s.Client.GetAppProcessScale(testAppName)
+	r.NoError(err, "failed to get report")
+	r.Contains(scaleReport, "web")
+	r.Equal(scaleReport["web"], 1)
+}
+
+func (s *DokkuTestSuite) TestSetProcessScale() {
+	r := s.Require()
+	var err error
+
+	testAppName := "test-process-app"
+
+	err = s.Client.CreateApp(testAppName)
+	r.NoError(err, "failed to create app")
+
+	err = s.Client.SetAppProcessScale(testAppName, "web", 2, true)
+	r.NoError(err, "failed to set app scale")
+}

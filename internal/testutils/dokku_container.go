@@ -76,10 +76,9 @@ func (dc *DokkuContainer) RegisterPublicKey(ctx context.Context, key []byte) err
 	chownCmd := []string{"/usr/bin/dokku", "ssh-keys:add", "test", testKeyPath}
 	retCode, err := dc.Exec(ctx, chownCmd)
 	if err != nil {
-		return errors.New("Failed to execute - err: " + err.Error())
+		return fmt.Errorf("failed to add ssh key: %w", err)
 	} else if retCode != 0 {
-		msg := fmt.Sprintf("Failed to execute - code %d", retCode)
-		return errors.New(msg)
+		return fmt.Errorf("failed to add ssh key: got exit code %d", retCode)
 	}
 
 	return nil

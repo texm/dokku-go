@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	ErrInvalidReport = errors.New("Invalid report")
+	ErrInvalidReport = errors.New("invalid report")
 
 	appNameRe = regexp.MustCompile(`^=====> (\S*)\s`)
 	rowRe     = regexp.MustCompile(`^\s+([\s\w]*):(.*)$`)
@@ -36,7 +36,7 @@ func rowPair(row string) (string, string) {
 	return key, strings.Trim(val, " \t")
 }
 
-func parseSingleReport(sReport string) (map[string]string, error) {
+func ParseSingle(sReport string) (map[string]string, error) {
 	report := Report{}
 	lines := strings.Split(sReport, "\n")
 	for i, line := range lines {
@@ -59,7 +59,7 @@ func parseSingleReport(sReport string) (map[string]string, error) {
 	return report, nil
 }
 
-func parseReports(rawReport string) (ReportMap, error) {
+func ParseMultiple(rawReport string) (ReportMap, error) {
 	report := ReportMap{}
 
 	var currentAppName string
@@ -97,7 +97,7 @@ func parseReports(rawReport string) (ReportMap, error) {
 }
 
 func ParseIntoMap(rawReport string, reportPtr interface{}) error {
-	reportMaps, err := parseReports(rawReport)
+	reportMaps, err := ParseMultiple(rawReport)
 	if err != nil {
 		fmt.Println("failed to parse report: ", err.Error())
 		return err
@@ -144,7 +144,7 @@ func ParseIntoMap(rawReport string, reportPtr interface{}) error {
 }
 
 func ParseInto(singleReport string, reportPtr interface{}) error {
-	report, err := parseSingleReport(singleReport)
+	report, err := ParseSingle(singleReport)
 	if err != nil {
 		fmt.Println("failed to parse report: ", err.Error())
 		return err

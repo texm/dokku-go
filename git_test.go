@@ -9,7 +9,13 @@ func (s *DokkuTestSuite) TestSyncGitRepo() {
 	err = s.Client.CreateApp(testAppName)
 	r.NoError(err, "failed to create app")
 
-	testRepo := "https://github.com/simonvanderveldt/go-hello-world-http.git"
-	err = s.Client.GitSyncAppRepo(testAppName, testRepo, nil)
+	r.NoError(s.Client.SetAppDeployChecksEnabled(testAppName, false))
+
+	testRepo := "https://github.com/texm/go-hello-world-http.git"
+	options := &GitSyncOptions{
+		Build:  true,
+		GitRef: "main",
+	}
+	err = s.Client.GitSyncAppRepo(testAppName, testRepo, options)
 	r.NoError(err)
 }
