@@ -9,8 +9,8 @@ import (
 
 type processManager interface {
 	GetProcessInfo(appName string) error
-	GetAppProcessReport(appName string) (*ProcessReport, error)
-	GetAllProcessReport() (ProcessesReport, error)
+	GetAppProcessReport(appName string) (*AppProcessReport, error)
+	GetAllProcessReport() (ProcessReport, error)
 	GetAppProcessScale(appName string) (map[string]int, error)
 	SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error
 	StartApp(appName string, p *ParallelismOptions) error
@@ -29,6 +29,20 @@ type processManager interface {
 	SetAppRestartPolicy(appName string, policy RestartPolicy) error
 	SetGlobalRestartPolicy(policy RestartPolicy) error
 }
+
+type AppProcessReport struct {
+	Deployed             bool   `json:"deployed" dokku:"Deployed"`
+	Processes            int    `json:"processes" dokku:"Processes"`
+	CanScale             bool   `json:"can_scale" dokku:"Ps can scale"`
+	ComputedProcfilePath string `json:"computed_procfile_path" dokku:"Ps computed procfile path"`
+	GlobalProcfilePath   string `json:"global_procfile_path" dokku:"Ps global procfile path"`
+	ProcfilePath         string `json:"procfile_path" dokku:"Ps procfile path"`
+	RestartPolicy        string `json:"restart_policy" dokku:"Ps restart policy"`
+	Restore              bool   `json:"restore" dokku:"Restore"`
+	Running              bool   `json:"running" dokku:"Running"`
+}
+
+type ProcessReport map[string]*AppProcessReport
 
 const (
 	psInspectCommand           = "ps:inspect %s"
@@ -71,19 +85,7 @@ func (c *DefaultClient) GetProcessInfo(appName string) error {
 	return NotImplementedError
 }
 
-type ProcessReport struct {
-	Deployed             bool   `json:"deployed" dokku:"Deployed"`
-	Processes            int    `json:"processes" dokku:"Processes"`
-	CanScale             bool   `json:"can_scale" dokku:"Ps can scale"`
-	ComputedProcfilePath string `json:"computed_procfile_path" dokku:"Ps computed procfile path"`
-	GlobalProcfilePath   string `json:"global_procfile_path" dokku:"Ps global procfile path"`
-	ProcfilePath         string `json:"procfile_path" dokku:"Ps procfile path"`
-	RestartPolicy        string `json:"restart_policy" dokku:"Ps restart policy"`
-	Restore              bool   `json:"restore" dokku:"Restore"`
-	Running              bool   `json:"running" dokku:"Running"`
-}
-
-func (c *DefaultClient) GetAppProcessReport(appName string) (*ProcessReport, error) {
+func (c *DefaultClient) GetAppProcessReport(appName string) (*AppProcessReport, error) {
 	cmd := fmt.Sprintf(psReportAppCommand, appName)
 	output, err := c.Exec(cmd)
 
@@ -91,7 +93,7 @@ func (c *DefaultClient) GetAppProcessReport(appName string) (*ProcessReport, err
 		return nil, err
 	}
 
-	report := ProcessReport{}
+	report := AppProcessReport{}
 	if err := reports.ParseInto(output, &report); err != nil {
 		return nil, err
 	}
@@ -99,11 +101,9 @@ func (c *DefaultClient) GetAppProcessReport(appName string) (*ProcessReport, err
 	return &report, nil
 }
 
-type ProcessesReport map[string]*ProcessReport
-
-func (c *DefaultClient) GetAllProcessReport() (ProcessesReport, error) {
+func (c *DefaultClient) GetAllProcessReport() (ProcessReport, error) {
 	output, err := c.Exec(psReportCommand)
-	report := ProcessesReport{}
+	report := ProcessReport{}
 
 	if err == NoDeployedAppsError {
 		return report, nil

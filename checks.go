@@ -17,6 +17,15 @@ type checksManager interface {
 	SetAppProcessesDeployChecksSkipped(appName string, processes []string) error
 }
 
+type AppChecksReport struct {
+	AllDisabled       bool     `json:"all_disabled"`
+	AllSkipped        bool     `json:"all_skipped"`
+	DisabledProcesses []string `json:"disabled_processes"`
+	SkippedProcesses  []string `json:"skipped_processes"`
+}
+
+type ChecksReport map[string]*AppChecksReport
+
 const (
 	checksEnableCmd         = "checks:enable %s"
 	checksEnableProcessCmd  = "checks:enable %s %s"
@@ -68,13 +77,6 @@ type appChecksRawReport struct {
 	Skipped  string `dokku:"Checks skipped list"`
 }
 
-type AppChecksReport struct {
-	AllDisabled       bool     `json:"all_disabled"`
-	AllSkipped        bool     `json:"all_skipped"`
-	DisabledProcesses []string `json:"disabled_processes"`
-	SkippedProcesses  []string `json:"skipped_processes"`
-}
-
 func parseRawReport(r appChecksRawReport) *AppChecksReport {
 	report := &AppChecksReport{
 		AllDisabled:       r.Disabled == "_all_",
@@ -106,8 +108,6 @@ func (c *DefaultClient) GetAppDeployChecksReport(appName string) (*AppChecksRepo
 
 	return parseRawReport(rawReport), nil
 }
-
-type ChecksReport map[string]*AppChecksReport
 
 func (c *DefaultClient) GetDeployChecksReport() (ChecksReport, error) {
 	cmd := fmt.Sprintf(checksReportCmd, "")

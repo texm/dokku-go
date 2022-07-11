@@ -22,6 +22,21 @@ type appManager interface {
 	UnlockApp(appName string) error
 }
 
+type AppReport struct {
+	CreatedAtTimestamp   int64  `dokku:"App created at"`
+	DeploySource         string `dokku:"App deploy source"`
+	DeploySourceMetadata string `dokku:"App deploy source metadata"`
+	Directory            string `dokku:"App dir"`
+	IsLocked             bool   `dokku:"App locked"`
+}
+
+type AppManagementOptions struct {
+	SkipDeploy     bool
+	IgnoreExisting bool
+}
+
+type AppsReport map[string]*AppReport
+
 const (
 	appCloneCommand     = "apps:clone %s %s"
 	appCreateCommand    = "apps:create %s"
@@ -35,11 +50,6 @@ const (
 	appReportAllCommand = "apps:report"
 	appUnlockCommand    = "apps:unlock %s"
 )
-
-type AppManagementOptions struct {
-	SkipDeploy     bool
-	IgnoreExisting bool
-}
 
 func (o *AppManagementOptions) asFlags() string {
 	if o == nil {
@@ -120,21 +130,13 @@ func (c *DefaultClient) IsLocked(name string) (bool, error) {
 	} else if err != nil {
 		return false, err
 	}
-	return out == deployLockExistsMessage, nil
+	return out == "Deploy lock exists", nil
 }
 
 func (c *DefaultClient) RenameApp(oldName string, newName string, opts *AppManagementOptions) error {
 	cmd := fmt.Sprintf(appRenameCommand, oldName, newName) + opts.asFlags()
 	_, err := c.Exec(cmd)
 	return err
-}
-
-type AppReport struct {
-	CreatedAtTimestamp   int64  `dokku:"App created at"`
-	DeploySource         string `dokku:"App deploy source"`
-	DeploySourceMetadata string `dokku:"App deploy source metadata"`
-	Directory            string `dokku:"App dir"`
-	IsLocked             bool   `dokku:"App locked"`
 }
 
 func (c *DefaultClient) GetAppReport(name string) (*AppReport, error) {
@@ -151,8 +153,6 @@ func (c *DefaultClient) GetAppReport(name string) (*AppReport, error) {
 
 	return &report, nil
 }
-
-type AppsReport map[string]*AppReport
 
 func (c *DefaultClient) GetAllAppReport() (AppsReport, error) {
 	cmd := fmt.Sprintf(appReportAllCommand)

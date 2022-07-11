@@ -25,6 +25,17 @@ type gitManager interface {
 	GitPurgeRepoCache(appName string) error
 }
 
+type GitAppReport struct {
+	DeployBranch       string    `json:"deploy_branch" dokku:"Git deploy branch"`
+	GlobalDeployBranch string    `json:"global_deploy_branch" dokku:"Git global deploy branch"`
+	KeepGitDir         bool      `json:"keep_git_dir" dokku:"Git keep git dir"`
+	RevisionEnvVar     string    `json:"rev_env_var" dokku:"Git rev env var"`
+	SHA                string    `json:"sha" dokku:"Git sha"`
+	LastUpdatedAt      time.Time `json:"last_updated_at" dokku:"Git last updated at"`
+}
+
+type GitReport map[string]*GitAppReport
+
 const (
 	gitAllowHostCmd       = "git:allow-host %s"
 	gitAuthCmd            = "git:auth %s %s"
@@ -160,15 +171,6 @@ func (c *DefaultClient) GitUnlockApp(appName string, force bool) error {
 	return err
 }
 
-type GitAppReport struct {
-	DeployBranch       string    `json:"deploy_branch" dokku:"Git deploy branch"`
-	GlobalDeployBranch string    `json:"global_deploy_branch" dokku:"Git global deploy branch"`
-	KeepGitDir         bool      `json:"keep_git_dir" dokku:"Git keep git dir"`
-	RevisionEnvVar     string    `json:"rev_env_var" dokku:"Git rev env var"`
-	SHA                string    `json:"sha" dokku:"Git sha"`
-	LastUpdatedAt      time.Time `json:"last_updated_at" dokku:"Git last updated at"`
-}
-
 func (c *DefaultClient) GitGetAppReport(appName string) (*GitAppReport, error) {
 	cmd := fmt.Sprintf(gitReportCmd, appName)
 	output, err := c.Exec(cmd)
@@ -180,8 +182,6 @@ func (c *DefaultClient) GitGetAppReport(appName string) (*GitAppReport, error) {
 
 	return &gitReport, err
 }
-
-type GitReport map[string]*GitAppReport
 
 func (c *DefaultClient) GitGetReport() (GitReport, error) {
 	cmd := fmt.Sprintf(gitReportCmd, "")

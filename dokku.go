@@ -5,12 +5,10 @@ import (
 )
 
 const (
-	noAppsDokkuMessage          = "You haven't deployed any applications yet"
-	nameTakenMessage            = "!     Name is already taken"
-	lockCreatedMessage          = "-----> Deploy lock created"
-	deployLockExistsMessage     = "Deploy lock exists"
-	deployLockNotExistsMessage  = "!     Deploy lock does not exist"
-	appNotExistsMessageTemplate = "!     App %s does not exist"
+	noAppsDokkuMessage         = "You haven't deployed any applications yet"
+	nameTakenMessage           = "!     Name is already taken"
+	lockCreatedMessage         = "-----> Deploy lock created"
+	deployLockNotExistsMessage = "!     Deploy lock does not exist"
 )
 
 var (

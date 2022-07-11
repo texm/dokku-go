@@ -8,8 +8,8 @@ import (
 )
 
 type resourceManager interface {
-	GetAppResourceReport(appName string) (*ResourceReport, error)
-	GetAllAppResourceReport() (ResourcesReport, error)
+	GetAppResourceReport(appName string) (*AppResourceReport, error)
+	GetResourceReport() (ResourceReport, error)
 	SetAppDefaultResourceLimit(appName string, resource ResourceSpec, limit int) error
 	ClearAppDefaultResourceLimit(appName string, resource ResourceSpec) error
 	ClearAppDefaultResourceLimits(appName string) error
@@ -62,10 +62,12 @@ type ResourceSettings struct {
 	Reservations ResourceUnits
 }
 
-type ResourceReport struct {
+type AppResourceReport struct {
 	Defaults  ResourceSettings
 	Processes map[string]ResourceSettings
 }
+
+type ResourceReport map[string]*AppResourceReport
 
 var (
 	ResourceCPU                 = ResourceSpec{"cpu", ""}
@@ -202,8 +204,8 @@ func updateResourceUnitSettings(units *ResourceUnits, resourceType string, rawVa
 	return nil
 }
 
-func parseAppResourceReport(reportMap map[string]string) (*ResourceReport, error) {
-	report := &ResourceReport{
+func parseAppResourceReport(reportMap map[string]string) (*AppResourceReport, error) {
+	report := &AppResourceReport{
 		Defaults: ResourceSettings{
 			Limits:       ResourceUnits{},
 			Reservations: ResourceUnits{},
@@ -257,7 +259,7 @@ func parseAppResourceReport(reportMap map[string]string) (*ResourceReport, error
 	return report, nil
 }
 
-func (c *DefaultClient) GetAppResourceReport(appName string) (*ResourceReport, error) {
+func (c *DefaultClient) GetAppResourceReport(appName string) (*AppResourceReport, error) {
 	cmd := fmt.Sprintf(resourceReportAppCmd, appName)
 	output, err := c.Exec(cmd)
 
@@ -273,9 +275,7 @@ func (c *DefaultClient) GetAppResourceReport(appName string) (*ResourceReport, e
 	return parseAppResourceReport(reportMap)
 }
 
-type ResourcesReport map[string]*ResourceReport
-
-func (c *DefaultClient) GetAllAppResourceReport() (ResourcesReport, error) {
+func (c *DefaultClient) GetResourceReport() (ResourceReport, error) {
 	output, err := c.Exec(resourceReportCmd)
 
 	if err != nil {
@@ -287,7 +287,7 @@ func (c *DefaultClient) GetAllAppResourceReport() (ResourcesReport, error) {
 		return nil, err
 	}
 
-	appsReport := ResourcesReport{}
+	appsReport := ResourceReport{}
 	for name, report := range reportMap {
 		appReport, err := parseAppResourceReport(report)
 		if err != nil {

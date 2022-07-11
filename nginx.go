@@ -16,7 +16,7 @@ type nginxManager interface {
 }
 
 type AppNginxReport struct{}
-type NginxReport map[string]AppNginxReport
+type NginxReport map[string]*AppNginxReport
 
 const (
 	nginxAccessLogsCmd          = "nginx:access-logs %s"
