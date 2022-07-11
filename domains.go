@@ -42,7 +42,7 @@ const (
 	domainsDisableAppCmd   = "domains:disable %s"
 	domainsEnableAppCmd    = "domains:enable %s"
 	domainsRemoveAppCmd    = "domains:remove %s %s"
-	domainsRemoveGlobalCmd = "domains:remove-global %s %s"
+	domainsRemoveGlobalCmd = "domains:remove-global %s"
 	domainsReportCmd       = "domains:report %s"
 	domainsSetAppCmd       = "domains:set %s %s"
 	domainsSetGlobalCmd    = "domains:set-global %s"
@@ -57,7 +57,7 @@ type rawDomainsReport struct {
 
 func parseRawAppDomainsReport(rawReport rawDomainsReport) (*AppDomainsReport, error) {
 	appDomains := strings.Split(rawReport.AppDomains, ",")
-	globalDomains := strings.Split(rawReport.AppDomains, ",")
+	globalDomains := strings.Split(rawReport.GlobalDomains, ",")
 
 	return &AppDomainsReport{
 		AppEnabled:    rawReport.AppEnabled,
