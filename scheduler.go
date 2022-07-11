@@ -16,10 +16,35 @@ type DockerLocalReport map[string]*AppDockerLocalSchedulerReport
 type AppSchedulerReport struct{}
 type SchedulerReport map[string]*AppSchedulerReport
 
-/*
-scheduler-docker-local:report [<app>] [<flag>]                                               Displays a scheduler-docker-local report for one or more apps
-scheduler-docker-local:set <app> <property> (<value>)                                        Set or clear a scheduler-docker-local property for an app
+const (
+	schedulerDockerLocalReportCmd      = "scheduler-docker-local:report %s"
+	schedulerDockerLocalSetPropertyCmd = "scheduler-docker-local:set %s %s %s"
 
-scheduler:report [<app>] [<flag>]                                                            Displays a scheduler report for one or more apps
-scheduler:set <app> <property> (<value>)                                                     Set or clear a scheduler property for an app
-*/
+	schedulerReportCmd      = "scheduler:report %s"
+	schedulerSetPropertyCmd = "scheduler:set %s %s %s"
+)
+
+func (c *DefaultClient) GetAppSchedulerDockerLocalReport(appName string) (AppDockerLocalSchedulerReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetSchedulerDockerLocalReport() (DockerLocalReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppSchedulerReport(appName string) (AppSchedulerReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetSchedulerReport() (SchedulerReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppSchedulerProperty(appName string, property string, value string) error {
+	//TODO implement me
+	panic("implement me")
+}

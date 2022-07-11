@@ -18,11 +18,52 @@ type nginxManager interface {
 type AppNginxReport struct{}
 type NginxReport map[string]AppNginxReport
 
-/*
-nginx:access-logs <app> [-t]                                                                 Show the nginx access logs for an application (-t follows)
-nginx:error-logs <app> [-t]                                                                  Show the nginx error logs for an application (-t follows)
-nginx:report [<app>] [<flag>]                                                                Displays an nginx report for one or more apps
-nginx:set <app> <property> (<value>)                                                         Set or clear an nginx property for an app
-nginx:show-config <app>                                                                      Display app nginx config
-nginx:validate-config [<app>] [--clean]                                                      Validates and optionally cleans up invalid nginx configurations
-*/
+const (
+	nginxAccessLogsCmd          = "nginx:access-logs %s"
+	nginxErrorLogsCmd           = "nginx:error-logs %s"
+	nginxReportCmd              = "nginx:report %s"
+	nginxSetPropertyCmd         = "nginx:set %s %s %s"
+	nginxShowConfigCmd          = "nginx:show-config %s"
+	nginxValidateConfigCmd      = "nginx:validate-config %s"
+	nginxValidateCleanConfigCmd = "nginx:validate-config %s --clean"
+)
+
+func (c *DefaultClient) GetAppNginxConfig(appName string) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppNginxAccessLogs(appName string) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppNginxErrorLogs(appName string) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppNginxReport(appName string) (*AppNginxReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetGlobalNginxReport() (NginxReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ValidateAllNginxConfig(clean bool) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ValidateAppNginxConfig(appName string, clean bool) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppNginxProperty(appName string, property string, value string) error {
+	//TODO implement me
+	panic("implement me")
+}

@@ -16,6 +16,15 @@ import (
 	"golang.org/x/crypto/ssh/knownhosts"
 )
 
+type dokkuSSHClient interface {
+	Dial() error
+	DialWithTimeout(timeout time.Duration) error
+
+	Close() error
+
+	Exec(command string) (string, error)
+}
+
 const (
 	dokkuUser      = "dokku"
 	defaultTimeout = time.Second * 5

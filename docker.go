@@ -29,19 +29,99 @@ type DockerOptionsReport map[string]*AppDockerOptionsReport
 type AppDockerRegistryReport struct{}
 type DockerRegistryReport map[string]AppDockerRegistryReport
 
-/*
-cleanup [<app>]                                                                              Cleans up exited/dead Docker containers and removes dangling images
+const (
+	cleanupCmd = "cleanup [<app>]"
 
-docker-options:add <app> <phase(s)> OPTION                                                   Add Docker option to app for phase (comma separated phase list)
-docker-options:clear <app> [phase(s)]                                                        Clear a docker options from application with an optional phase (comma separated phase list)
-docker-options:remove <app> <phase(s)> OPTION                                                Remove Docker option from app for phase (comma separated phase list)
-docker-options:report [<app>] [<flag>]                                                       Displays a docker options report for one or more apps
+	dockerOptionsAddCmd    = "docker-options:add <app> <phase(s)> OPTION"
+	dockerOptionsClearCmd  = "docker-options:clear <app> [phase(s)]"
+	dockerOptionsRemoveCmd = "docker-options:remove <app> <phase(s)> OPTION"
+	dockerOptionsReportCmd = "docker-options:report [<app>] [<flag>]"
 
-registry:login [--password-stdin] <server> <username> [<password>]                           Login to a docker registry
-registry:report [<app>] [<flag>]                                                             Displays a registry report for one or more apps
-registry:set <app> <property> (<value>)                                                      Set or clear a registry property for an app
+	dockerRegistryLoginCmd       = "registry:login [--password-stdin] <server> <username> [<password>]"
+	dockerRegistryReportCmd      = "registry:report [<app>] [<flag>]"
+	dockerRegistrySetPropertyCmd = "registry:set <app> <property> (<value>)"
 
-run [-e|--env KEY=VALUE] [--no-tty] <app> <cmd>                                              Run a command in a new container using the current app image
-run:detached [-e|-env KEY=VALUE] [--no-tty] <app> <cmd>                                      Run a command in a new detached container using the current app image
-run:list <app>                                                                               List all run containers for an app
-*/
+	dockerRunCmd         = "run [-e|--env KEY=VALUE] [--no-tty] <app> <cmd>"
+	dockerRunDetachedCmd = "run:detached [-e|-env KEY=VALUE] [--no-tty] <app> <cmd>"
+	dockerRunListCmd     = "run:list <app>"
+)
+
+func (c *DefaultClient) DockerCleanup(appName string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) DockerCleanupAll() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppDockerOptionsReport(appName string) (*AppDockerOptionsReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetGlobalDockerOptionsReport() (DockerOptionsReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) AddAppPhaseDockerOption(appName string, phase string, option string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) AddAppPhasesDockerOption(appName string, phases []string, option string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ClearAppPhaseDockerOptions(appName string, phase string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) RemoveAppPhaseDockerOption(appName string, phase string, option string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) RemoveAppPhasesDockerOption(appName string, phases []string, option string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) LoginDockerRegistry(server string, username string, password string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppDockerRegistryReport(appName string) (*AppDockerRegistryReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetDockerRegistryReport() (DockerRegistryReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppDockerRegistryProperty(appName string, property string, value string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ClearAppDockerRegistryProperty(appName string, property string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) RunAppCommand(appName string, cmd string, env map[string]string) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ListAppRunContainers(appName string) ([]string, error) {
+	//TODO implement me
+	panic("implement me")
+}

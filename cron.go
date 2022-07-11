@@ -15,3 +15,18 @@ const (
 	cronReportCmd    = "cron:report"
 	cronAppReportCmd = "cron:report %s"
 )
+
+func (c *DefaultClient) ListAppCronTasks(appName string) ([]CronTask, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppCronReport(appName string) (*AppCronReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAllAppCronReport() (CronReport, error) {
+	//TODO implement me
+	panic("implement me")
+}

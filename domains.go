@@ -34,3 +34,63 @@ const (
 	domainsSetAppCmd       = "domains:set <app> <domain> [<domain> ...]"
 	domainsSetGlobalCmd    = "domains:set-global <domain> [<domain> ...]"
 )
+
+func (c *DefaultClient) GetAppDomainsReport(appName string) (AppDomainsReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetGlobalDomainsReport(appName string) (AppDomainsReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) EnableAppDomains(appName string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) DisableAppDomains(appName string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) AddAppDomain(appName string, domain string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) RemoveAppDomain(appName string, domain string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppDomains(appName string, domains []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ClearAppDomains(appName string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) AddGlobalDomain(domain string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) RemoveGlobalDomain(domain string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetGlobalDomains(domains []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ClearGlobalDomains() error {
+	//TODO implement me
+	panic("implement me")
+}

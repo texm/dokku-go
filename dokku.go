@@ -2,7 +2,6 @@ package dokku
 
 import (
 	"errors"
-	"time"
 )
 
 const (
@@ -24,11 +23,7 @@ var (
 )
 
 type Client interface {
-	Dial() error
-	DialWithTimeout(timeout time.Duration) error
-	Close() error
-
-	Exec(command string) (string, error)
+	dokkuSSHClient
 
 	appManager
 	processManager
@@ -37,19 +32,16 @@ type Client interface {
 	logsManager
 	checksManager
 	networkManager
-
-	//builderManager
-	//configManager
-	//cronManager
-	//dockerManager
-	//domainsManager
-	//letsEncryptManager
-	//nginxManager
-	//pluginManager
-	//proxyManager
-	//schedulerManager
-	//sshKeysManager
-	//storageManager
-
-	//GetDokkuVersion() (string, error)
+	builderManager
+	configManager
+	cronManager
+	dockerManager
+	domainsManager
+	letsEncryptManager
+	nginxManager
+	pluginManager
+	proxyManager
+	schedulerManager
+	sshKeysManager
+	storageManager
 }

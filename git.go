@@ -20,12 +20,10 @@ type gitManager interface {
 	GitUnlockApp(appName string, force bool) error
 	GitGetAppReport(appName string) (*GitAppReport, error)
 	GitGetReport() (GitReport, error)
-}
 
-/*
-repo:gc <app>                                                                                Runs 'git gc --aggressive' against the application's repo
-repo:purge-cache <app>                                                                       Deletes the contents of the build cache stored in the repository
-*/
+	GitRunRepoGC(appName string) error
+	GitPurgeRepoCache(appName string) error
+}
 
 const (
 	gitAllowHostCmd       = "git:allow-host %s"
@@ -39,6 +37,9 @@ const (
 	gitSyncCmd            = "git:sync %s %s"
 	gitSyncWithOptionsCmd = "git:sync %s %s %s %s"
 	gitUnlockCmd          = "git:unlock %s %s"
+
+	gitRepoGcCmd         = "repo:gc %s"
+	gitRepoPurgeCacheCmd = "repo:purge-cache %s"
 )
 
 type GitArchiveOptions struct {
@@ -192,4 +193,16 @@ func (c *DefaultClient) GitGetReport() (GitReport, error) {
 	}
 
 	return gitReport, err
+}
+
+func (c *DefaultClient) GitRunRepoGC(appName string) error {
+	cmd := fmt.Sprintf(gitRepoGcCmd, appName)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GitPurgeRepoCache(appName string) error {
+	cmd := fmt.Sprintf(gitRepoPurgeCacheCmd, appName)
+	_, err := c.Exec(cmd)
+	return err
 }

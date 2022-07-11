@@ -15,3 +15,28 @@ const (
 	sshKeysRemoveFingerprintCmd = "ssh-keys:remove --fingerprint %s"
 	sshKeysRemoveNameCmd        = "ssh-keys:remove %s"
 )
+
+func (c *DefaultClient) AddSSHKey(name string, key []byte) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ListSSHKeys() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ListSSHKeysForName(name string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) RemoveSSHKeyByName(name string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) RemoveSSHKeyByFingerprint(fingerprint string) error {
+	//TODO implement me
+	panic("implement me")
+}

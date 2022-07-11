@@ -26,21 +26,91 @@ type AppBuilderPackReport struct{}
 type AppBuilderReport struct{}
 type AppBuildpacksReport struct{}
 
-/*
-builder-dockerfile:report [<app>] [<flag>]                                                   Displays a builder-dockerfile report for one or more apps
-builder-dockerfile:set <app> <property> (<value>)                                            Set or clear a builder-dockerfile property for an app
+const (
+	builderDockerfileReportCmd      = "builder-dockerfile:report [<app>] [<flag>]"
+	builderDockerfileSetPropertyCmd = "builder-dockerfile:set <app> <property> (<value>)"
 
-builder-pack:report [<app>] [<flag>]                                                         Displays a builder-pack report for one or more apps
-builder-pack:set <app> <property> (<value>)                                                  Set or clear a builder-pack property for an app
+	builderPackReportCmd      = "builder-pack:report [<app>] [<flag>]"
+	builderPackSetPropertyCmd = "builder-pack:set <app> <property> (<value>)"
 
-builder:report [<app>] [<flag>]                                                              Displays a builder report for one or more apps
-builder:set <app> <property> (<value>)                                                       Set or clear a builder property for an app
+	builderReportCmd      = "builder:report [<app>] [<flag>]"
+	builderSetPropertyCmd = "builder:set <app> <property> (<value>)"
 
-buildpacks:add [--index 1] <app> <buildpack>                                                 Add new app buildpack while inserting into list of buildpacks if necessary
-buildpacks:clear <app>                                                                       Clear all buildpacks set on the app
-buildpacks:list <app>                                                                        List all buildpacks for an app
-buildpacks:remove <app> <buildpack>                                                          Remove a buildpack set on the app
-buildpacks:report [<app>] [<flag>]                                                           Displays a buildpack report for one or more apps
-buildpacks:set [--index 1] <app> <buildpack>                                                 Set new app buildpack at a given position defaulting to the first buildpack if no index is specified
-buildpacks:set-property [--global|<app>] <key> <value>                                       Set or clear a buildpacks property for an app
-*/
+	buildpacksAddCmd         = "buildpacks:add [--index 1] <app> <buildpack>"
+	buildpacksClearCmd       = "buildpacks:clear <app>"
+	buildpacksListCmd        = "buildpacks:list <app>"
+	buildpacksRemoveCmd      = "buildpacks:remove <app> <buildpack>"
+	buildpacksReportCmd      = "buildpacks:report [<app>] [<flag>]"
+	buildpacksSetCmd         = "buildpacks:set [--index 1] <app> <buildpack>"
+	buildpacksSetPropertyCmd = "buildpacks:set-property [--global|<app>] <key> <value>"
+)
+
+func (c *DefaultClient) GetAppBuilderDockerfileReport(appName string) (*AppBuilderDockerfileReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppBuilderDockerfileProperty(appName string, property string, value string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppBuilderPackReport(appName string) (*AppBuilderPackReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppBuilderPackProperty(appName string, property string, value string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppBuilderReport(appName string) (*AppBuilderReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppBuilderProperty(appName string, property string, value string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) AddAppBuildpack(appName string, buildpack string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ClearAppBuildpacks(appName string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ListAppBuildpacks(appName string) ([]string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) RemoveAppBuildpack(appName string, buildpack string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppBuildpacksReport(appName string) (*AppBuildpacksReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppBuildpack(appName string, buildpack string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetAppBuildpacksProperty(appName string, property string, value string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) SetGlobalBuildpacksProperty(appName string, property string, value string) error {
+	//TODO implement me
+	panic("implement me")
+}

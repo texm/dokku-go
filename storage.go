@@ -26,3 +26,33 @@ const (
 	storageReportCmd               = "storage:report"
 	storageUnmountCmd              = "storage:unmount %s %s"
 )
+
+func (c *DefaultClient) EnsureStorageDirectory(directory string, chown *StorageChownOptions) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) ListAppStorage(appName string) ([]StorageBindMount, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) MountAppStorage(appName string, mount StorageBindMount) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) UnmountAppStorage(appName string, mount StorageBindMount) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetAppStorageReport(appName string) (*AppStorageReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *DefaultClient) GetStorageReport() (StorageReport, error) {
+	//TODO implement me
+	panic("implement me")
+}
