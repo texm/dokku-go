@@ -26,21 +26,21 @@ type Client interface {
 	dokkuSSHClient
 
 	appManager
-	processManager
-	resourceManager
-	gitManager
-	logsManager
-	checksManager
-	networkManager
 	builderManager
+	checksManager
 	configManager
 	cronManager
 	dockerManager
 	domainsManager
+	gitManager
 	letsEncryptManager
+	logsManager
+	networkManager
 	nginxManager
 	pluginManager
+	processManager
 	proxyManager
+	resourceManager
 	schedulerManager
 	sshKeysManager
 	storageManager
