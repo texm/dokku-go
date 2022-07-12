@@ -1,19 +1,31 @@
 package dokku
 
+import (
+	"fmt"
+	"github.com/texm/dokku-go/internal/reports"
+)
+
 type schedulerManager interface {
-	GetAppSchedulerDockerLocalReport(appName string) (AppDockerLocalSchedulerReport, error)
-	GetSchedulerDockerLocalReport() (DockerLocalReport, error)
+	GetAppSchedulerDockerLocalReport(appName string) (*AppSchedulerDockerLocalReport, error)
+	GetSchedulerDockerLocalReport() (SchedulerDockerLocalReport, error)
+	SetSchedulerDockerLocalProperty(appName string, property string, value string) error
 
-	GetAppSchedulerReport(appName string) (AppSchedulerReport, error)
+	GetAppSchedulerReport(appName string) (*AppSchedulerReport, error)
 	GetSchedulerReport() (SchedulerReport, error)
-
 	SetAppSchedulerProperty(appName string, property string, value string) error
 }
 
-type AppDockerLocalSchedulerReport struct{}
-type DockerLocalReport map[string]*AppDockerLocalSchedulerReport
+type AppSchedulerDockerLocalReport struct {
+	DisableChown          bool `dokku:"Scheduler docker local disable chown"`
+	ParallelScheduleCount int  `dokku:"Scheduler docker local parallel schedule count"`
+}
+type SchedulerDockerLocalReport map[string]*AppSchedulerDockerLocalReport
 
-type AppSchedulerReport struct{}
+type AppSchedulerReport struct {
+	ComputedSelectedScheduler string `dokku:"Scheduler computed selected"`
+	GlobalSelectedScheduler   string `dokku:"Scheduler global selected"`
+	SelectedScheduler         string `dokku:"Scheduler selected"`
+}
 type SchedulerReport map[string]*AppSchedulerReport
 
 const (
@@ -24,27 +36,74 @@ const (
 	schedulerSetPropertyCmd = "scheduler:set %s %s %s"
 )
 
-func (c *DefaultClient) GetAppSchedulerDockerLocalReport(appName string) (AppDockerLocalSchedulerReport, error) {
-	//TODO implement me
-	panic("implement me")
+func (c *DefaultClient) GetAppSchedulerDockerLocalReport(appName string) (*AppSchedulerDockerLocalReport, error) {
+	cmd := fmt.Sprintf(schedulerDockerLocalReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report *AppSchedulerDockerLocalReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
 }
 
-func (c *DefaultClient) GetSchedulerDockerLocalReport() (DockerLocalReport, error) {
-	//TODO implement me
-	panic("implement me")
+func (c *DefaultClient) GetSchedulerDockerLocalReport() (SchedulerDockerLocalReport, error) {
+	cmd := fmt.Sprintf(schedulerDockerLocalReportCmd, "")
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report SchedulerDockerLocalReport
+	if err := reports.ParseIntoMap(out, &report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
 }
 
-func (c *DefaultClient) GetAppSchedulerReport(appName string) (AppSchedulerReport, error) {
-	//TODO implement me
-	panic("implement me")
+func (c *DefaultClient) SetSchedulerDockerLocalProperty(appName string, property string, value string) error {
+	cmd := fmt.Sprintf(schedulerDockerLocalSetPropertyCmd, appName, property, value)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) GetAppSchedulerReport(appName string) (*AppSchedulerReport, error) {
+	cmd := fmt.Sprintf(schedulerReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report *AppSchedulerReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
 }
 
 func (c *DefaultClient) GetSchedulerReport() (SchedulerReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(schedulerReportCmd, "")
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report SchedulerReport
+	if err := reports.ParseIntoMap(out, &report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
 }
 
 func (c *DefaultClient) SetAppSchedulerProperty(appName string, property string, value string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(schedulerSetPropertyCmd, appName, property, value)
+	_, err := c.Exec(cmd)
+	return err
 }
