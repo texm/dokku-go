@@ -1,5 +1,11 @@
 package dokku
 
+import (
+	"fmt"
+	"github.com/texm/dokku-go/internal/reports"
+	"strings"
+)
+
 type builderManager interface {
 	GetAppBuilderDockerfileReport(appName string) (*AppBuilderDockerfileReport, error)
 	SetAppBuilderDockerfileProperty(appName string, property string, value string) error
@@ -18,99 +24,186 @@ type builderManager interface {
 	SetAppBuildpack(appName string, buildpack string) error
 	SetAppBuildpacksProperty(appName string, property string, value string) error
 
-	SetGlobalBuildpacksProperty(appName string, property string, value string) error
+	SetGlobalBuildpacksProperty(property string, value string) error
 }
 
-type AppBuilderDockerfileReport struct{}
-type AppBuilderPackReport struct{}
-type AppBuilderReport struct{}
-type AppBuildpacksReport struct{}
+type AppBuilderDockerfileReport struct {
+	DockerfilePath         string `dokku:"Builder dockerfile dockerfile path"`
+	ComputedDockerfilePath string `dokku:"Builder dockerfile computed dockerfile path"`
+	GlobalDockerfilePath   string `dokku:"Builder dockerfile global dockerfile path"`
+}
+type AppBuilderPackReport struct {
+	ProjectTOMLPath         string `dokku:"Builder pack projecttoml path"`
+	ComputedProjectTOMLPath string `dokku:"Builder pack computed projecttoml path"`
+	GlobalProjectTOMLPath   string `dokku:"Builder pack global projecttoml path"`
+}
+type AppBuilderReport struct {
+	BuildDir         string `dokku:"Builder build dir"`
+	ComputedBuildDir string `dokku:"Builder computed build dir"`
+	GlobalBuildDir   string `dokku:"Builder global build dir"`
+
+	SelectedBuilder         string `dokku:"Builder selected"`
+	ComputedSelectedBuilder string `dokku:"Builder computed selected"`
+	GlobalSelectedBuilder   string `dokku:"Builder global selected"`
+}
+type AppBuildpacksReport struct {
+	Stack         string `dokku:"Buildpacks stack"`
+	ComputedStack string `dokku:"Buildpacks computed stack"`
+	GlobalStack   string `dokku:"Buildpacks global stack"`
+
+	List string `dokku:"Buildpacks list"`
+}
 
 const (
-	builderDockerfileReportCmd      = "builder-dockerfile:report [<app>] [<flag>]"
-	builderDockerfileSetPropertyCmd = "builder-dockerfile:set <app> <property> (<value>)"
+	builderDockerfileReportCmd      = "builder-dockerfile:report %s"
+	builderDockerfileSetPropertyCmd = "builder-dockerfile:set %s %s %s"
 
-	builderPackReportCmd      = "builder-pack:report [<app>] [<flag>]"
-	builderPackSetPropertyCmd = "builder-pack:set <app> <property> (<value>)"
+	builderPackReportCmd      = "builder-pack:report %s"
+	builderPackSetPropertyCmd = "builder-pack:set %s %s %s"
 
-	builderReportCmd      = "builder:report [<app>] [<flag>]"
-	builderSetPropertyCmd = "builder:set <app> <property> (<value>)"
+	builderReportCmd      = "builder:report %s"
+	builderSetPropertyCmd = "builder:set %s %s %s"
 
-	buildpacksAddCmd         = "buildpacks:add [--index 1] <app> <buildpack>"
-	buildpacksClearCmd       = "buildpacks:clear <app>"
-	buildpacksListCmd        = "buildpacks:list <app>"
-	buildpacksRemoveCmd      = "buildpacks:remove <app> <buildpack>"
-	buildpacksReportCmd      = "buildpacks:report [<app>] [<flag>]"
-	buildpacksSetCmd         = "buildpacks:set [--index 1] <app> <buildpack>"
-	buildpacksSetPropertyCmd = "buildpacks:set-property [--global|<app>] <key> <value>"
+	buildpacksAddCmd         = "buildpacks:add --index %d %s %s"
+	buildpacksClearCmd       = "buildpacks:clear %s"
+	buildpacksListCmd        = "buildpacks:list %s"
+	buildpacksRemoveCmd      = "buildpacks:remove %s %s"
+	buildpacksReportCmd      = "buildpacks:report %s"
+	buildpacksSetCmd         = "buildpacks:set --index %d %s %s"
+	buildpacksSetPropertyCmd = "buildpacks:set-property %s %s %s"
 )
 
 func (c *DefaultClient) GetAppBuilderDockerfileReport(appName string) (*AppBuilderDockerfileReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(builderDockerfileReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report AppBuilderDockerfileReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return &report, err
 }
 
 func (c *DefaultClient) SetAppBuilderDockerfileProperty(appName string, property string, value string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(builderDockerfileSetPropertyCmd, appName, property, value)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) GetAppBuilderPackReport(appName string) (*AppBuilderPackReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(builderPackReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report AppBuilderPackReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return &report, err
 }
 
 func (c *DefaultClient) SetAppBuilderPackProperty(appName string, property string, value string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(builderPackSetPropertyCmd, appName, property, value)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) GetAppBuilderReport(appName string) (*AppBuilderReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(builderReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report AppBuilderReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return &report, err
 }
 
 func (c *DefaultClient) SetAppBuilderProperty(appName string, property string, value string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(builderSetPropertyCmd, appName, property, value)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) AddAppBuildpackAtIndex(appName string, buildpack string, index int) error {
+	cmd := fmt.Sprintf(buildpacksAddCmd, index, appName, buildpack)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) AddAppBuildpack(appName string, buildpack string) error {
-	//TODO implement me
-	panic("implement me")
+	return c.AddAppBuildpackAtIndex(appName, buildpack, 1)
 }
 
 func (c *DefaultClient) ClearAppBuildpacks(appName string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(buildpacksClearCmd, appName)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) ListAppBuildpacks(appName string) ([]string, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(buildpacksListCmd, appName)
+	out, err := c.Exec(cmd)
+
+	var packs []string
+	for i, line := range strings.Split(out, "\n") {
+		if i == 0 {
+			continue
+		}
+		packs = append(packs, line)
+	}
+
+	return packs, err
 }
 
 func (c *DefaultClient) RemoveAppBuildpack(appName string, buildpack string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(buildpacksRemoveCmd, appName, buildpack)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) GetAppBuildpacksReport(appName string) (*AppBuildpacksReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(buildpacksReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report AppBuildpacksReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return &report, err
+}
+
+func (c *DefaultClient) SetAppBuildpackIndex(appName string, buildpack string, index int) error {
+	cmd := fmt.Sprintf(buildpacksSetCmd, index, appName, buildpack)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) SetAppBuildpack(appName string, buildpack string) error {
-	//TODO implement me
-	panic("implement me")
+	return c.SetAppBuildpackIndex(appName, buildpack, 1)
 }
 
 func (c *DefaultClient) SetAppBuildpacksProperty(appName string, property string, value string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(buildpacksSetPropertyCmd, appName, property, value)
+	_, err := c.Exec(cmd)
+	return err
 }
 
-func (c *DefaultClient) SetGlobalBuildpacksProperty(appName string, property string, value string) error {
-	//TODO implement me
-	panic("implement me")
+func (c *DefaultClient) SetGlobalBuildpacksProperty(property string, value string) error {
+	return c.SetAppBuildpacksProperty("--global", property, value)
 }
