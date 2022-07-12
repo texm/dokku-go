@@ -2,6 +2,7 @@ package dokku
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/texm/dokku-go/internal/testutils"
@@ -26,7 +27,7 @@ func (s *DokkuTestSuite) SetupTest() {
 		s.T().Fatal("Failed to create dokku container: ", err)
 	}
 
-	if err := s.createTestClient(ctx); err != nil {
+	if err := s.createTestClient(ctx, false); err != nil {
 		s.T().Fatal("Failed to create default dokku client: ", err)
 	}
 }
@@ -64,13 +65,18 @@ func (s *DokkuTestSuite) createTestContainer(ctx context.Context) error {
 	return nil
 }
 
-func (s *DokkuTestSuite) createTestClient(ctx context.Context) error {
+func (s *DokkuTestSuite) createTestClient(ctx context.Context, admin bool) error {
 	keyPair, err := testutils.GenerateRSAKeyPair()
 	if err != nil {
 		return err
 	}
 
-	if err := s.Dokku.RegisterPublicKey(ctx, keyPair.PublicKey); err != nil {
+	keyName := "test"
+	if admin {
+		keyName = "admin"
+	}
+
+	if err := s.Dokku.RegisterPublicKey(ctx, keyPair.PublicKey, keyName); err != nil {
 		return err
 	}
 
@@ -91,4 +97,22 @@ func (s *DokkuTestSuite) createTestClient(ctx context.Context) error {
 
 	s.Client = client
 	return nil
+}
+
+func (s *DokkuTestSuite) GrantAdminPriveleges() error {
+	if err := s.Client.Close(); err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+
+	chownCmd := []string{"/usr/bin/dokku", "ssh-keys:remove", "test"}
+	retCode, err := s.Dokku.Exec(ctx, chownCmd)
+	if err != nil {
+		return fmt.Errorf("failed to remove ssh key: %w", err)
+	} else if retCode != 0 {
+		return fmt.Errorf("failed to remove ssh key: got exit code %d", retCode)
+	}
+
+	return s.createTestClient(ctx, true)
 }

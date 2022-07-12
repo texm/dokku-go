@@ -1,5 +1,7 @@
 package dokku
 
+import "fmt"
+
 type cronManager interface {
 	ListAppCronTasks(appName string) ([]CronTask, error)
 	GetAppCronReport(appName string) (*AppCronReport, error)
@@ -17,8 +19,16 @@ const (
 )
 
 func (c *DefaultClient) ListAppCronTasks(appName string) ([]CronTask, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(cronAppListCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var crons []CronTask
+	fmt.Println(out)
+
+	return crons, nil
 }
 
 func (c *DefaultClient) GetAppCronReport(appName string) (*AppCronReport, error) {

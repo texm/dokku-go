@@ -181,6 +181,40 @@ func (c *DefaultClient) Exec(cmd string) (string, error) {
 	return cleaned, nil
 }
 
+func (c *DefaultClient) ExecWithStdin(cmd string, b []byte) (string, error) {
+	session, err := c.conn.NewSession()
+	if err != nil {
+		return "", err
+	}
+
+	stdin, err := session.StdinPipe()
+	if err != nil {
+		return "", err
+	}
+	go io.Copy(stdin, bytes.NewReader(b))
+
+	output, cmdErr := session.CombinedOutput(cmd)
+	cleaned := strings.TrimSpace(string(output))
+
+	if sessErr := closeSession(session); sessErr != nil {
+		return cleaned, sessErr
+	}
+
+	if err := checkGenericErrors(cleaned); err != nil {
+		return cleaned, err
+	}
+
+	if cmdErr != nil {
+		var exitCodeErr *ssh.ExitError
+		if errors.As(cmdErr, &exitCodeErr) {
+			return cleaned, fmt.Errorf("dokku error: '%w'", cmdErr)
+		}
+		return cleaned, err
+	}
+
+	return cleaned, nil
+}
+
 type CommandStream struct {
 	Stdout io.Reader
 	Stderr io.Reader

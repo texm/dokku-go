@@ -20,6 +20,18 @@ type networkManager interface {
 	RemoveAppNetworkProperty(appName string, property string) error
 	SetGlobalNetworkProperty(property string, value string) error
 	RemoveGlobalNetworkProperty(property string) error
+
+	// SetProperty Aliases
+	// SetAppNetworkAttachPostCreate(appName string, network string)
+	// SetAppNetworkAttachPostDeploy(appName string, network string)
+	// SetAppNetworkInitial(appName string, network string)
+	// SetGlobalNetworkAttachPostCreate(network string)
+	// SetGlobalNetworkAttachPostDeploy(network string)
+	// SetGlobalNetworkInitialNetwork(network string)
+	// SetAppNetworkTLD(appName string, tld string)
+	// SetGlobalNetworkTLD(tld string)
+	// SetAppNetworkBindAllInterfaces(appName string, shouldBind bool)
+	// SetGlobalNetworkBindAllInterfaces(shouldBind bool)
 }
 
 type AppNetworkReport struct {

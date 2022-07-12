@@ -67,13 +67,13 @@ func (dc *DokkuContainer) HostKeyFunc() func(string, net.Addr, ssh.PublicKey) er
 	}
 }
 
-func (dc *DokkuContainer) RegisterPublicKey(ctx context.Context, key []byte) error {
+func (dc *DokkuContainer) RegisterPublicKey(ctx context.Context, key []byte, name string) error {
 	err := dc.CopyToContainer(ctx, key, testKeyPath, testKeyFileMode)
 	if err != nil {
 		return err
 	}
 
-	chownCmd := []string{"/usr/bin/dokku", "ssh-keys:add", "test", testKeyPath}
+	chownCmd := []string{"/usr/bin/dokku", "ssh-keys:add", name, testKeyPath}
 	retCode, err := dc.Exec(ctx, chownCmd)
 	if err != nil {
 		return fmt.Errorf("failed to add ssh key: %w", err)
