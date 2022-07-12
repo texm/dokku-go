@@ -1,6 +1,11 @@
 package dokku
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/texm/dokku-go/internal/reports"
+	"regexp"
+	"strings"
+)
 
 type cronManager interface {
 	ListAppCronTasks(appName string) ([]CronTask, error)
@@ -8,9 +13,15 @@ type cronManager interface {
 	GetAllAppCronReport() (CronReport, error)
 }
 
-type CronTask struct{}
-type AppCronReport struct{}
-type CronReport map[string]AppCronReport
+type CronTask struct {
+	ID       string
+	Schedule string
+	Command  string
+}
+type AppCronReport struct {
+	TaskCount int `dokku:"Cron task count"`
+}
+type CronReport map[string]*AppCronReport
 
 const (
 	cronAppListCmd   = "cron:list %s"
@@ -25,18 +36,51 @@ func (c *DefaultClient) ListAppCronTasks(appName string) ([]CronTask, error) {
 		return nil, err
 	}
 
+	var multipleWhitespaceRe = regexp.MustCompile("\\s\\s+")
 	var crons []CronTask
-	fmt.Println(out)
+	for i, line := range strings.Split(out, "\n") {
+		if i == 0 {
+			continue
+		}
+		cols := multipleWhitespaceRe.Split(line, 3)
+		if len(cols) < 3 {
+			return nil, fmt.Errorf("failed to parse cron line: '%s'", line)
+		}
+		crons = append(crons, CronTask{
+			ID:       cols[0],
+			Schedule: cols[1],
+			Command:  cols[2],
+		})
+	}
 
 	return crons, nil
 }
 
 func (c *DefaultClient) GetAppCronReport(appName string) (*AppCronReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(cronAppReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report AppCronReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return &report, nil
 }
 
 func (c *DefaultClient) GetAllAppCronReport() (CronReport, error) {
-	//TODO implement me
-	panic("implement me")
+	out, err := c.Exec(cronReportCmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report CronReport
+	if err := reports.ParseIntoMap(out, &report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
 }
