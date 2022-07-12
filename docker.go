@@ -1,5 +1,11 @@
 package dokku
 
+import (
+	"fmt"
+	"github.com/texm/dokku-go/internal/reports"
+	"strings"
+)
+
 type dockerManager interface {
 	DockerCleanup(appName string) error
 	DockerCleanupAll() error
@@ -8,10 +14,8 @@ type dockerManager interface {
 	GetGlobalDockerOptionsReport() (DockerOptionsReport, error)
 
 	AddAppPhaseDockerOption(appName string, phase string, option string) error
-	AddAppPhasesDockerOption(appName string, phases []string, option string) error
 	ClearAppPhaseDockerOptions(appName string, phase string) error
 	RemoveAppPhaseDockerOption(appName string, phase string, option string) error
-	RemoveAppPhasesDockerOption(appName string, phases []string, option string) error
 
 	LoginDockerRegistry(server string, username string, password string) error
 	GetAppDockerRegistryReport(appName string) (*AppDockerRegistryReport, error)
@@ -19,109 +23,186 @@ type dockerManager interface {
 	SetAppDockerRegistryProperty(appName string, property string, value string) error
 	ClearAppDockerRegistryProperty(appName string, property string) error
 
-	RunAppCommand(appName string, cmd string, env map[string]string) (string, error)
+	RunAppCommand(appName string, cmd string, options *DockerRunOptions) (string, error)
 	ListAppRunContainers(appName string) ([]string, error)
 }
 
-type AppDockerOptionsReport struct{}
+type AppDockerOptionsReport struct {
+	BuildOptions  string `dokku:"Docker options build"`
+	DeployOptions string `dokku:"Docker options deploy"`
+	RunOptions    string `dokku:"Docker options run"`
+}
 type DockerOptionsReport map[string]*AppDockerOptionsReport
 
-type AppDockerRegistryReport struct{}
+type AppDockerRegistryReport struct {
+	ImageRepo         string `dokku:"Registry image repo"`
+	ComputedImageRepo string `dokku:"Registry computed image repo"`
+
+	PushOnRelease         string `dokku:"Registry push on release"`
+	GlobalPushOnRelease   bool   `dokku:"Registry global push on release"`
+	ComputedPushOnRelease bool   `dokku:"Registry computed push on release"`
+
+	Server         string `dokku:"Registry server"`
+	GlobalServer   string `dokku:"Registry global server"`
+	ComputedServer string `dokku:"Registry computed server"`
+
+	TagVersion string `dokku:"Registry tag version"`
+}
 type DockerRegistryReport map[string]AppDockerRegistryReport
 
+type DockerRunOptions struct {
+	Detached    bool
+	Environment map[string]string
+}
+
 const (
-	cleanupCmd = "cleanup [<app>]"
+	cleanupCmd = "cleanup %s"
 
-	dockerOptionsAddCmd    = "docker-options:add <app> <phase(s)> OPTION"
-	dockerOptionsClearCmd  = "docker-options:clear <app> [phase(s)]"
-	dockerOptionsRemoveCmd = "docker-options:remove <app> <phase(s)> OPTION"
-	dockerOptionsReportCmd = "docker-options:report [<app>] [<flag>]"
+	dockerOptionsAddCmd    = "docker-options:add %s %s %s"
+	dockerOptionsClearCmd  = "docker-options:clear %s %s"
+	dockerOptionsRemoveCmd = "docker-options:remove %s %s %s"
+	dockerOptionsReportCmd = "docker-options:report %s"
 
-	dockerRegistryLoginCmd       = "registry:login [--password-stdin] <server> <username> [<password>]"
-	dockerRegistryReportCmd      = "registry:report [<app>] [<flag>]"
-	dockerRegistrySetPropertyCmd = "registry:set <app> <property> (<value>)"
+	dockerRegistryLoginCmd       = "registry:login %s %s %s"
+	dockerRegistryReportCmd      = "registry:report %s"
+	dockerRegistrySetPropertyCmd = "registry:set %s %s %s"
 
-	dockerRunCmd         = "run [-e|--env KEY=VALUE] [--no-tty] <app> <cmd>"
-	dockerRunDetachedCmd = "run:detached [-e|-env KEY=VALUE] [--no-tty] <app> <cmd>"
-	dockerRunListCmd     = "run:list <app>"
+	dockerRunCmd         = "run %s --no-tty %s %s"
+	dockerRunDetachedCmd = "run:detached %s --no-tty %s %s"
+	dockerRunListCmd     = "run:list %s"
 )
 
 func (c *DefaultClient) DockerCleanup(appName string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(cleanupCmd, appName)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) DockerCleanupAll() error {
-	//TODO implement me
-	panic("implement me")
+	return c.DockerCleanup("")
 }
 
 func (c *DefaultClient) GetAppDockerOptionsReport(appName string) (*AppDockerOptionsReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerOptionsReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report AppDockerOptionsReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return &report, nil
 }
 
 func (c *DefaultClient) GetGlobalDockerOptionsReport() (DockerOptionsReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerOptionsReportCmd, "")
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report DockerOptionsReport
+	if err := reports.ParseIntoMap(out, &report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
 }
 
 func (c *DefaultClient) AddAppPhaseDockerOption(appName string, phase string, option string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (c *DefaultClient) AddAppPhasesDockerOption(appName string, phases []string, option string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerOptionsAddCmd, appName, phase, option)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) ClearAppPhaseDockerOptions(appName string, phase string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerOptionsClearCmd, appName, phase)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) RemoveAppPhaseDockerOption(appName string, phase string, option string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (c *DefaultClient) RemoveAppPhasesDockerOption(appName string, phases []string, option string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerOptionsRemoveCmd, appName, phase, option)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) LoginDockerRegistry(server string, username string, password string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerRegistryLoginCmd, server, username, password)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) GetAppDockerRegistryReport(appName string) (*AppDockerRegistryReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerRegistryReportCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report *AppDockerRegistryReport
+	if err := reports.ParseInto(out, &report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
 }
 
 func (c *DefaultClient) GetDockerRegistryReport() (DockerRegistryReport, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerRegistryReportCmd, "")
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var report DockerRegistryReport
+	if err := reports.ParseIntoMap(out, &report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
 }
 
 func (c *DefaultClient) SetAppDockerRegistryProperty(appName string, property string, value string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerRegistrySetPropertyCmd, appName, property, value)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) ClearAppDockerRegistryProperty(appName string, property string) error {
-	//TODO implement me
-	panic("implement me")
+	return c.SetAppDockerRegistryProperty(appName, property, "")
 }
 
-func (c *DefaultClient) RunAppCommand(appName string, cmd string, env map[string]string) (string, error) {
-	//TODO implement me
-	panic("implement me")
+func (c *DefaultClient) RunAppCommand(appName string, runCmd string, options *DockerRunOptions) (string, error) {
+	tpl := dockerRunCmd
+	envArg := ""
+	if options != nil {
+		if options.Detached {
+			tpl = dockerRunDetachedCmd
+		}
+		if options.Environment != nil {
+			var env []string
+			for key, val := range options.Environment {
+				env = append(env, fmt.Sprintf("--env '%s=%s'", key, val))
+			}
+			envArg = strings.Join(env, " ")
+		}
+	}
+	cmd := fmt.Sprintf(tpl, envArg, appName, runCmd)
+	return c.Exec(cmd)
 }
 
 func (c *DefaultClient) ListAppRunContainers(appName string) ([]string, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(dockerRunListCmd, appName)
+	_, err := c.Exec(cmd)
+
+	var containers []string
+	// =====> node-js-app run containers
+	// NAMES                   COMMAND            CREATED
+	// node-js-app.run.28689   "/exec sleep 15"   2 seconds ago
+
+	return containers, err
 }
