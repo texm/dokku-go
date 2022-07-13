@@ -22,12 +22,15 @@ type processManager interface {
 	RestartApp(appName string, p *ParallelismOptions) error
 	RestartAppProcess(appName string, process string, p *ParallelismOptions) error
 	RestartAllApps(p *ParallelismOptions) error
-	SetAppProcessProperty(appName string, key string, value string) error
-	SetGlobalProcessProperty(key string, value string) error
 	SetAppProcfilePath(appName string, procPath string) error
 	SetGlobalProcfilePath(procPath string) error
 	SetAppRestartPolicy(appName string, policy RestartPolicy) error
 	SetGlobalRestartPolicy(policy RestartPolicy) error
+
+	/*
+		SetAppProcessProperty(appName string, key string, value string) error
+		SetGlobalProcessProperty(key string, value string) error
+	*/
 }
 
 type AppProcessReport struct {
@@ -44,19 +47,35 @@ type AppProcessReport struct {
 
 type ProcessReport map[string]*AppProcessReport
 
-const (
-	psInspectCommand           = "ps:inspect %s"
-	psRebuildCommand           = "ps:rebuild --parallel %d %s"
-	psReportCommand            = "ps:report"
-	psReportAppCommand         = "ps:report %s"
-	psRestartCommand           = "ps:restart --parallel %d %s"
-	psRestartAppProcessCommand = "ps:restart --parallel %d %s %s"
-	psRestoreCommand           = "ps:restore %s"
-	psScaleCommand             = "ps:scale %s %s"
-	psSetCommand               = "ps:set %s %s %s"
-	psStartCommand             = "ps:start --parallel %d %s"
-	psStopCommand              = "ps:stop --parallel %d %s"
+type RestartPolicy interface {
+	GetPolicy() string
+}
+
+type restartPolicy struct {
+	policy string
+	option string
+}
+
+func (p restartPolicy) GetPolicy() string {
+	if p.option != "" {
+		return fmt.Sprintf("%s:%s", p.policy, p.option)
+	}
+	return p.policy
+}
+
+var (
+	RestartPolicyAlways        = restartPolicy{policy: "always"}
+	RestartPolicyNever         = restartPolicy{policy: "no"}
+	RestartPolicyUnlessStopped = restartPolicy{policy: "unless-stopped"}
+	RestartPolicyOnFailure     = restartPolicy{policy: "on-failure"}
 )
+
+func RetryableRestartPolicy(maxRetries int) RestartPolicy {
+	return restartPolicy{
+		policy: "on-failure",
+		option: fmt.Sprintf("%d", maxRetries),
+	}
+}
 
 type ParallelismOptions struct {
 	Count            int
@@ -71,6 +90,20 @@ func getParallelism(p *ParallelismOptions) int {
 	}
 	return p.Count
 }
+
+const (
+	psInspectCommand           = "ps:inspect %s"
+	psRebuildCommand           = "ps:rebuild --parallel %d %s"
+	psReportCommand            = "ps:report"
+	psReportAppCommand         = "ps:report %s"
+	psRestartCommand           = "ps:restart --parallel %d %s"
+	psRestartAppProcessCommand = "ps:restart --parallel %d %s %s"
+	psRestoreCommand           = "ps:restore %s"
+	psScaleCommand             = "ps:scale %s %s"
+	psSetCommand               = "ps:set %s %s %s"
+	psStartCommand             = "ps:start --parallel %d %s"
+	psStopCommand              = "ps:stop --parallel %d %s"
+)
 
 func (c *DefaultClient) GetProcessInfo(appName string) error {
 	cmd := fmt.Sprintf(psInspectCommand, appName)
@@ -242,7 +275,7 @@ func (c *DefaultClient) RestartAllApps(p *ParallelismOptions) error {
 	return nil
 }
 
-func (c *DefaultClient) SetAppProcessProperty(appName string, key string, value string) error {
+func (c *DefaultClient) setAppProcessProperty(appName string, key string, value string) error {
 	cmd := fmt.Sprintf(psSetCommand, appName, key, value)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -251,7 +284,7 @@ func (c *DefaultClient) SetAppProcessProperty(appName string, key string, value 
 	return nil
 }
 
-func (c *DefaultClient) SetGlobalProcessProperty(key string, value string) error {
+func (c *DefaultClient) setGlobalProcessProperty(key string, value string) error {
 	cmd := fmt.Sprintf(psSetCommand, "--global", key, value)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -261,47 +294,17 @@ func (c *DefaultClient) SetGlobalProcessProperty(key string, value string) error
 }
 
 func (c *DefaultClient) SetAppProcfilePath(appName string, procPath string) error {
-	return c.SetAppProcessProperty(appName, "procfile-path", procPath)
+	return c.setAppProcessProperty(appName, "procfile-path", procPath)
 }
 
 func (c *DefaultClient) SetGlobalProcfilePath(procPath string) error {
-	return c.SetGlobalProcessProperty("procfile-path", procPath)
-}
-
-type RestartPolicy interface {
-	GetPolicy() string
-}
-
-type restartPolicy struct {
-	policy string
-	option string
-}
-
-func (p restartPolicy) GetPolicy() string {
-	if p.option != "" {
-		return fmt.Sprintf("%s:%s", p.policy, p.option)
-	}
-	return p.policy
-}
-
-var (
-	RestartPolicyAlways        = restartPolicy{policy: "always"}
-	RestartPolicyNever         = restartPolicy{policy: "no"}
-	RestartPolicyUnlessStopped = restartPolicy{policy: "unless-stopped"}
-	RestartPolicyOnFailure     = restartPolicy{policy: "on-failure"}
-)
-
-func RetryableRestartPolicy(maxRetries int) RestartPolicy {
-	return restartPolicy{
-		policy: "on-failure",
-		option: fmt.Sprintf("%d", maxRetries),
-	}
+	return c.setGlobalProcessProperty("procfile-path", procPath)
 }
 
 func (c *DefaultClient) SetAppRestartPolicy(appName string, p RestartPolicy) error {
-	return c.SetAppProcessProperty(appName, "restart-policy", p.GetPolicy())
+	return c.setAppProcessProperty(appName, "restart-policy", p.GetPolicy())
 }
 
 func (c *DefaultClient) SetGlobalRestartPolicy(p RestartPolicy) error {
-	return c.SetGlobalProcessProperty("restart-policy", p.GetPolicy())
+	return c.setGlobalProcessProperty("restart-policy", p.GetPolicy())
 }

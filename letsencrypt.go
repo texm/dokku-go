@@ -79,13 +79,18 @@ func (c *DefaultClient) GetAppLetsEncryptEnabled(appName string) (bool, error) {
 }
 
 func (c *DefaultClient) SetAppLetsEncryptEnabled(appName string, enabled bool) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(letsEncryptDisableAppCmd, appName)
+	if enabled {
+		cmd = fmt.Sprintf(letsEncryptEnableAppCmd, appName)
+	}
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) RevokeAppLetsEncryptCertificate(appName string) error {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(letsEncryptRevokeAppCmd, appName)
+	_, err := c.Exec(cmd)
+	return err
 }
 
 func (c *DefaultClient) GetLetsEncryptAppList() ([]LetsEncryptAppInfo, error) {

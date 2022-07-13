@@ -173,7 +173,7 @@ func (c *DefaultClient) Exec(cmd string) (string, error) {
 	if cmdErr != nil {
 		var exitCodeErr *ssh.ExitError
 		if errors.As(cmdErr, &exitCodeErr) {
-			return cleaned, fmt.Errorf("dokku error: '%w'", cmdErr)
+			return cleaned, fmt.Errorf("dokku error: '%w' (output: '%s')", cmdErr, cleaned)
 		}
 		return cleaned, err
 	}

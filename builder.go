@@ -8,13 +8,13 @@ import (
 
 type builderManager interface {
 	GetAppBuilderDockerfileReport(appName string) (*AppBuilderDockerfileReport, error)
-	SetAppBuilderDockerfileProperty(appName string, property string, value string) error
+	SetAppBuilderDockerfileProperty(appName string, property DockerfileProperty, value string) error
 
 	GetAppBuilderPackReport(appName string) (*AppBuilderPackReport, error)
-	SetAppBuilderPackProperty(appName string, property string, value string) error
+	SetAppBuilderPackProperty(appName string, property BuildpackProperty, value string) error
 
 	GetAppBuilderReport(appName string) (*AppBuilderReport, error)
-	SetAppBuilderProperty(appName string, property string, value string) error
+	SetAppBuilderProperty(appName string, property BuilderProperty, value string) error
 
 	AddAppBuildpack(appName string, buildpack string) error
 	ClearAppBuildpacks(appName string) error
@@ -22,9 +22,8 @@ type builderManager interface {
 	RemoveAppBuildpack(appName string, buildpack string) error
 	GetAppBuildpacksReport(appName string) (*AppBuildpacksReport, error)
 	SetAppBuildpack(appName string, buildpack string) error
-	SetAppBuildpacksProperty(appName string, property string, value string) error
-
-	SetGlobalBuildpacksProperty(property string, value string) error
+	SetAppBuildpacksProperty(appName string, property BuildpackProperty, value string) error
+	SetGlobalBuildpacksProperty(property BuildpackProperty, value string) error
 }
 
 type AppBuilderDockerfileReport struct {
@@ -53,6 +52,20 @@ type AppBuildpacksReport struct {
 
 	List string `dokku:"Buildpacks list"`
 }
+
+type BuilderProperty string
+type BuildpackProperty string
+type DockerfileProperty string
+
+const (
+	BuilderPropertySelected = BuilderProperty("selected")
+	BuilderPropertyBuildDir = BuilderProperty("build-dir")
+
+	BuildpackPropertyProjectTomlPath = BuildpackProperty("projecttoml-path")
+	BuildpackPropertyStackBuilder    = BuildpackProperty("stack")
+
+	DockerfilePropertyPath = DockerfileProperty("dockerfile-path")
+)
 
 const (
 	builderDockerfileReportCmd      = "builder-dockerfile:report %s"
@@ -88,7 +101,7 @@ func (c *DefaultClient) GetAppBuilderDockerfileReport(appName string) (*AppBuild
 	return &report, err
 }
 
-func (c *DefaultClient) SetAppBuilderDockerfileProperty(appName string, property string, value string) error {
+func (c *DefaultClient) SetAppBuilderDockerfileProperty(appName string, property DockerfileProperty, value string) error {
 	cmd := fmt.Sprintf(builderDockerfileSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
@@ -109,7 +122,7 @@ func (c *DefaultClient) GetAppBuilderPackReport(appName string) (*AppBuilderPack
 	return &report, err
 }
 
-func (c *DefaultClient) SetAppBuilderPackProperty(appName string, property string, value string) error {
+func (c *DefaultClient) SetAppBuilderPackProperty(appName string, property BuildpackProperty, value string) error {
 	cmd := fmt.Sprintf(builderPackSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
@@ -130,7 +143,7 @@ func (c *DefaultClient) GetAppBuilderReport(appName string) (*AppBuilderReport, 
 	return &report, err
 }
 
-func (c *DefaultClient) SetAppBuilderProperty(appName string, property string, value string) error {
+func (c *DefaultClient) SetAppBuilderProperty(appName string, property BuilderProperty, value string) error {
 	cmd := fmt.Sprintf(builderSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
@@ -198,12 +211,12 @@ func (c *DefaultClient) SetAppBuildpack(appName string, buildpack string) error 
 	return c.SetAppBuildpackIndex(appName, buildpack, 1)
 }
 
-func (c *DefaultClient) SetAppBuildpacksProperty(appName string, property string, value string) error {
+func (c *DefaultClient) SetAppBuildpacksProperty(appName string, property BuildpackProperty, value string) error {
 	cmd := fmt.Sprintf(buildpacksSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetGlobalBuildpacksProperty(property string, value string) error {
+func (c *DefaultClient) SetGlobalBuildpacksProperty(property BuildpackProperty, value string) error {
 	return c.SetAppBuildpacksProperty("--global", property, value)
 }

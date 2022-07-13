@@ -20,8 +20,8 @@ type dockerManager interface {
 	LoginDockerRegistry(server string, username string, password string) error
 	GetAppDockerRegistryReport(appName string) (*AppDockerRegistryReport, error)
 	GetDockerRegistryReport() (DockerRegistryReport, error)
-	SetAppDockerRegistryProperty(appName string, property string, value string) error
-	ClearAppDockerRegistryProperty(appName string, property string) error
+	SetAppDockerRegistryProperty(appName string, property DockerRegistryProperty, value string) error
+	ClearAppDockerRegistryProperty(appName string, property DockerRegistryProperty) error
 
 	RunAppCommand(appName string, cmd string, options *DockerRunOptions) (string, error)
 	ListAppRunContainers(appName string) ([]string, error)
@@ -54,6 +54,14 @@ type DockerRunOptions struct {
 	Detached    bool
 	Environment map[string]string
 }
+
+type DockerRegistryProperty string
+
+const (
+	DockerRegistryPropertyServer        = DockerRegistryProperty("server")
+	DockerRegistryPropertyImageRepo     = DockerRegistryProperty("image-repo")
+	DockerRegistryPropertyPushOnRelease = DockerRegistryProperty("push-on-release")
+)
 
 const (
 	cleanupCmd = "cleanup %s"
@@ -166,13 +174,13 @@ func (c *DefaultClient) GetDockerRegistryReport() (DockerRegistryReport, error) 
 	return report, nil
 }
 
-func (c *DefaultClient) SetAppDockerRegistryProperty(appName string, property string, value string) error {
+func (c *DefaultClient) SetAppDockerRegistryProperty(appName string, property DockerRegistryProperty, value string) error {
 	cmd := fmt.Sprintf(dockerRegistrySetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppDockerRegistryProperty(appName string, property string) error {
+func (c *DefaultClient) ClearAppDockerRegistryProperty(appName string, property DockerRegistryProperty) error {
 	return c.SetAppDockerRegistryProperty(appName, property, "")
 }
 
@@ -195,6 +203,7 @@ func (c *DefaultClient) RunAppCommand(appName string, runCmd string, options *Do
 	return c.Exec(cmd)
 }
 
+// TODO: implement
 func (c *DefaultClient) ListAppRunContainers(appName string) ([]string, error) {
 	cmd := fmt.Sprintf(dockerRunListCmd, appName)
 	_, err := c.Exec(cmd)

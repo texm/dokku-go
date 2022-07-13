@@ -8,11 +8,11 @@ import (
 type schedulerManager interface {
 	GetAppSchedulerDockerLocalReport(appName string) (*AppSchedulerDockerLocalReport, error)
 	GetSchedulerDockerLocalReport() (SchedulerDockerLocalReport, error)
-	SetSchedulerDockerLocalProperty(appName string, property string, value string) error
+	SetSchedulerDockerLocalProperty(appName string, property DockerLocalSchedulerProperty, value string) error
 
 	GetAppSchedulerReport(appName string) (*AppSchedulerReport, error)
 	GetSchedulerReport() (SchedulerReport, error)
-	SetAppSchedulerProperty(appName string, property string, value string) error
+	SetAppSchedulerProperty(appName string, property SchedulerProperty, value string) error
 }
 
 type AppSchedulerDockerLocalReport struct {
@@ -27,6 +27,16 @@ type AppSchedulerReport struct {
 	SelectedScheduler         string `dokku:"Scheduler selected"`
 }
 type SchedulerReport map[string]*AppSchedulerReport
+
+type SchedulerProperty string
+type DockerLocalSchedulerProperty string
+
+const (
+	SchedulerPropertySelected = SchedulerProperty("selected")
+
+	DockerLocalSchedulerPropertyDisableChown          = DockerLocalSchedulerProperty("disable-chown")
+	DockerLocalSchedulerPropertyParallelScheduleCount = DockerLocalSchedulerProperty("parallel-schedule-count")
+)
 
 const (
 	schedulerDockerLocalReportCmd      = "scheduler-docker-local:report %s"
@@ -66,7 +76,7 @@ func (c *DefaultClient) GetSchedulerDockerLocalReport() (SchedulerDockerLocalRep
 	return report, nil
 }
 
-func (c *DefaultClient) SetSchedulerDockerLocalProperty(appName string, property string, value string) error {
+func (c *DefaultClient) SetSchedulerDockerLocalProperty(appName string, property DockerLocalSchedulerProperty, value string) error {
 	cmd := fmt.Sprintf(schedulerDockerLocalSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
@@ -102,7 +112,7 @@ func (c *DefaultClient) GetSchedulerReport() (SchedulerReport, error) {
 	return report, nil
 }
 
-func (c *DefaultClient) SetAppSchedulerProperty(appName string, property string, value string) error {
+func (c *DefaultClient) SetAppSchedulerProperty(appName string, property SchedulerProperty, value string) error {
 	cmd := fmt.Sprintf(schedulerSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err

@@ -69,7 +69,10 @@ func (c *DefaultClient) ListPlugins() ([]PluginInfo, error) {
 
 /*
 func (c *DefaultClient) CheckPluginInstalled(plugin string) (bool, error) {
-
+	cmd := fmt.Sprintf(pluginEnableCmd, plugin)
+	out, err := c.Exec(cmd)
+	fmt.Println(out)
+	return false, err
 }
 
 func (c *DefaultClient) EnablePlugin(plugin string) error {

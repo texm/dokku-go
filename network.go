@@ -16,10 +16,10 @@ type networkManager interface {
 	RebuildAllNetworks() error
 	GetAppNetworkReport(appName string) (*AppNetworkReport, error)
 	GetNetworkReport() (NetworkReport, error)
-	SetAppNetworkProperty(appName string, property string, value string) error
-	RemoveAppNetworkProperty(appName string, property string) error
-	SetGlobalNetworkProperty(property string, value string) error
-	RemoveGlobalNetworkProperty(property string) error
+	SetAppNetworkProperty(appName string, property NetworkProperty, value string) error
+	RemoveAppNetworkProperty(appName string, property NetworkProperty) error
+	SetGlobalNetworkProperty(property NetworkProperty, value string) error
+	RemoveGlobalNetworkProperty(property NetworkProperty) error
 
 	// SetProperty Aliases
 	// SetAppNetworkAttachPostCreate(appName string, network string)
@@ -35,25 +35,42 @@ type networkManager interface {
 }
 
 type AppNetworkReport struct {
-	AttachPostCreate          string `dokku:"Network attach post create"`
-	AttachPostDeploy          string `dokku:"Network attach post deploy"`
-	BindAllInterfaces         bool   `dokku:"Network bind all interfaces"`
-	ComputedAttachPostCreate  string `dokku:"Network computed attach post create"`
-	ComputedAttachPostDeploy  string `dokku:"Network computed attach post deploy"`
-	ComputedBindAllInterfaces bool   `dokku:"Network computed bind all interfaces"`
-	ComputedInitialNetwork    string `dokku:"Network computed initial network"`
-	ComputedTLD               string `dokku:"Network computed tld"`
-	GlobalAttachPostCreate    string `dokku:"Network global attach post create"`
-	GlobalAttachPostDeploy    string `dokku:"Network global attach post deploy"`
-	GlobalBindAllInterfaces   bool   `dokku:"Network global bind all interfaces"`
-	GlobalInitialNetwork      bool   `dokku:"Network global initial network"`
-	GlobalTLD                 string `dokku:"Network global tld"`
-	InitialNetwork            string `dokku:"Network initial network"`
-	TLD                       string `dokku:"Network tld"`
-	WebListeners              string `dokku:"Network web listeners"`
+	AttachPostCreate         string `dokku:"Network attach post create"`
+	GlobalAttachPostCreate   string `dokku:"Network global attach post create"`
+	ComputedAttachPostCreate string `dokku:"Network computed attach post create"`
+
+	AttachPostDeploy         string `dokku:"Network attach post deploy"`
+	GlobalAttachPostDeploy   string `dokku:"Network global attach post deploy"`
+	ComputedAttachPostDeploy string `dokku:"Network computed attach post deploy"`
+
+	BindAllInterfaces         bool `dokku:"Network bind all interfaces"`
+	GlobalBindAllInterfaces   bool `dokku:"Network global bind all interfaces"`
+	ComputedBindAllInterfaces bool `dokku:"Network computed bind all interfaces"`
+
+	InitialNetwork         string `dokku:"Network initial network"`
+	GlobalInitialNetwork   bool   `dokku:"Network global initial network"`
+	ComputedInitialNetwork string `dokku:"Network computed initial network"`
+
+	TLD         string `dokku:"Network tld"`
+	GlobalTLD   string `dokku:"Network global tld"`
+	ComputedTLD string `dokku:"Network computed tld"`
+
+	WebListeners string `dokku:"Network web listeners"`
 }
 
 type NetworkReport map[string]*AppNetworkReport
+
+type NetworkProperty string
+
+const (
+	NetworkPropertyStaticWebListener = NetworkProperty("static-web-listener")
+	NetworkPropertyTLD               = NetworkProperty("tld")
+	NetworkPropertyBindAllInterfaces = NetworkProperty("bind-all-interfaces")
+
+	NetworkPropertyInitialNetwork   = NetworkProperty("initial-network")
+	NetworkPropertyAttachPostCreate = NetworkProperty("attach-post-create")
+	NetworkPropertyAttachPostDeploy = NetworkProperty("attach-post-deploy")
+)
 
 const (
 	networkCreateCmd      = "network:create %s"
@@ -144,25 +161,25 @@ func (c *DefaultClient) GetNetworkReport() (NetworkReport, error) {
 	return reportMap, nil
 }
 
-func (c *DefaultClient) SetAppNetworkProperty(appName string, property string, value string) error {
+func (c *DefaultClient) SetAppNetworkProperty(appName string, property NetworkProperty, value string) error {
 	cmd := fmt.Sprintf(networkSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveAppNetworkProperty(appName string, property string) error {
+func (c *DefaultClient) RemoveAppNetworkProperty(appName string, property NetworkProperty) error {
 	cmd := fmt.Sprintf(networkSetPropertyCmd, appName, property, "")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetGlobalNetworkProperty(property string, value string) error {
+func (c *DefaultClient) SetGlobalNetworkProperty(property NetworkProperty, value string) error {
 	cmd := fmt.Sprintf(networkSetPropertyCmd, "--global", property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveGlobalNetworkProperty(property string) error {
+func (c *DefaultClient) RemoveGlobalNetworkProperty(property NetworkProperty) error {
 	cmd := fmt.Sprintf(networkSetPropertyCmd, "--global", property, "")
 	_, err := c.Exec(cmd)
 	return err

@@ -14,8 +14,8 @@ type gitManager interface {
 	GitCreateFromImage(appName string, image string, opt *GitImageOptions) error
 	GitSetAuth(host string, username string, password string) error
 	GitRemoveAuth(host string) error
-	GitSetAppProperty(appName string, property string, val string) error
-	GitRemoveAppProperty(appName string, property string) error
+	GitSetAppProperty(appName string, property GitProperty, val string) error
+	GitRemoveAppProperty(appName string, property GitProperty) error
 	GitAllowHost(host string) error
 	GitUnlockApp(appName string, force bool) error
 	GitGetAppReport(appName string) (*GitAppReport, error)
@@ -35,6 +35,14 @@ type GitAppReport struct {
 }
 
 type GitReport map[string]*GitAppReport
+
+type GitProperty string
+
+const (
+	GitPropertyDeployBranch = GitProperty("deploy-branch")
+	GitPropertyRevEnvVar    = GitProperty("rev-env-var")
+	GitPropertyKeepGitDir   = GitProperty("keep-git-dir")
+)
 
 const (
 	gitAllowHostCmd       = "git:allow-host %s"
@@ -145,13 +153,13 @@ func (c *DefaultClient) GitRemoveAuth(host string) error {
 	return err
 }
 
-func (c *DefaultClient) GitSetAppProperty(appName string, property string, val string) error {
+func (c *DefaultClient) GitSetAppProperty(appName string, property GitProperty, val string) error {
 	cmd := fmt.Sprintf(gitSetCmd, appName, property, val)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GitRemoveAppProperty(appName string, property string) error {
+func (c *DefaultClient) GitRemoveAppProperty(appName string, property GitProperty) error {
 	return c.GitSetAppProperty(appName, property, "")
 }
 
