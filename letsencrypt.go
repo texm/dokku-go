@@ -1,6 +1,9 @@
 package dokku
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type letsEncryptManager interface {
 	LetsEncryptAutoRenewApp(appName string) error
@@ -12,9 +15,9 @@ type letsEncryptManager interface {
 	AddLetsEncryptCronJob() error
 	RemoveLetsEncryptCronJob() error
 
-	GetAppLetsEncryptActive(appName string) (bool, error)
 	GetAppLetsEncryptEnabled(appName string) (bool, error)
-	SetAppLetsEncryptEnabled(appName string, enabled bool) error
+	EnableAppLetsEncrypt(appName string) error
+	DisableAppLetsEncrypt(appName string) error
 
 	RevokeAppLetsEncryptCertificate(appName string) error
 
@@ -27,13 +30,20 @@ const (
 	letsEncryptActiveCmd     = "letsencrypt:active %s"
 	letsEncryptAutoRenewCmd  = "letsencrypt:auto-renew %s"
 	letsEncryptCleanupCmd    = "letsencrypt:cleanup %s"
-	letsEncryptAddCronCmd    = "letsencrypt:cron-job --add"
-	letsEncryptRemoveCronCmd = "letsencrypt:cron-job --remove"
+	letsEncryptCronCmd       = "letsencrypt:cron-job %s"
 	letsEncryptDisableAppCmd = "letsencrypt:disable %s"
 	letsEncryptEnableAppCmd  = "letsencrypt:enable %s"
 	letsEncryptListCmd       = "letsencrypt:list"
 	letsEncryptRevokeAppCmd  = "letsencrypt:revoke %s"
 )
+
+func exitCodeReturn(err error) (bool, error) {
+	exitErr, ok := err.(*ExitCodeError)
+	if ok && exitErr.sshErr.ExitStatus() == 1 {
+		return false, nil
+	}
+	return false, err
+}
 
 func (c *DefaultClient) LetsEncryptAutoRenewApp(appName string) error {
 	cmd := fmt.Sprintf(letsEncryptAutoRenewCmd, appName)
@@ -54,35 +64,42 @@ func (c *DefaultClient) LetsEncryptCleanup(appName string) error {
 }
 
 func (c *DefaultClient) GetLetsEncryptCronJobEnabled() (bool, error) {
-	//TODO implement me
-	panic("implement me")
+	// https://github.com/dokku/dokku-letsencrypt/issues/221
+	cmd := fmt.Sprintf(letsEncryptCronCmd, "")
+	out, err := c.Exec(cmd)
+	fmt.Println(out)
+	return false, err
 }
 
 func (c *DefaultClient) AddLetsEncryptCronJob() error {
-	_, err := c.Exec(letsEncryptAddCronCmd)
+	cmd := fmt.Sprintf(letsEncryptCronCmd, "--add")
+	_, err := c.Exec(cmd)
 	return err
 }
 
 func (c *DefaultClient) RemoveLetsEncryptCronJob() error {
-	_, err := c.Exec(letsEncryptRemoveCronCmd)
+	cmd := fmt.Sprintf(letsEncryptCronCmd, "--remove")
+	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppLetsEncryptActive(appName string) (bool, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (c *DefaultClient) GetAppLetsEncryptEnabled(appName string) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+	cmd := fmt.Sprintf(letsEncryptActiveCmd, appName)
+	out, err := c.Exec(cmd)
+	if err != nil && out == "" {
+		return exitCodeReturn(err)
+	}
+	return true, nil
 }
 
-func (c *DefaultClient) SetAppLetsEncryptEnabled(appName string, enabled bool) error {
+func (c *DefaultClient) EnableAppLetsEncrypt(appName string) error {
+	cmd := fmt.Sprintf(letsEncryptEnableAppCmd, appName)
+	_, err := c.Exec(cmd)
+	return err
+}
+
+func (c *DefaultClient) DisableAppLetsEncrypt(appName string) error {
 	cmd := fmt.Sprintf(letsEncryptDisableAppCmd, appName)
-	if enabled {
-		cmd = fmt.Sprintf(letsEncryptEnableAppCmd, appName)
-	}
 	_, err := c.Exec(cmd)
 	return err
 }
@@ -94,6 +111,23 @@ func (c *DefaultClient) RevokeAppLetsEncryptCertificate(appName string) error {
 }
 
 func (c *DefaultClient) GetLetsEncryptAppList() ([]LetsEncryptAppInfo, error) {
-	//TODO implement me
-	panic("implement me")
+	out, err := c.Exec(letsEncryptListCmd)
+	if err != nil {
+		return nil, err
+	}
+	// var multipleWhitespaceRe = regexp.MustCompile("\\s+")
+	var infoList []LetsEncryptAppInfo
+	for i, line := range strings.Split(out, "\n") {
+		if i == 0 {
+			continue
+		}
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		//rows := multipleWhitespaceRe.Split(line, 4)
+		//infoList = append()
+	}
+	return infoList, nil
 }

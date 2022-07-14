@@ -27,6 +27,7 @@ type testLogConsumer struct {
 }
 
 func (g *testLogConsumer) Accept(l testcontainers.Log) {
+	fmt.Printf("%s: %s\n", l.LogType, string(l.Content))
 	g.Msgs = append(g.Msgs, string(l.Content))
 }
 

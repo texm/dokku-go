@@ -23,11 +23,11 @@ type DokkuTestSuite struct {
 func (s *DokkuTestSuite) SetupTest() {
 	ctx := context.Background()
 
-	if err := s.createTestContainer(ctx); err != nil {
+	if err := s.CreateTestContainer(ctx); err != nil {
 		s.T().Fatal("Failed to create dokku container: ", err)
 	}
 
-	if err := s.createTestClient(ctx, false); err != nil {
+	if err := s.CreateTestClient(ctx, false); err != nil {
 		s.T().Fatal("Failed to create default dokku client: ", err)
 	}
 }
@@ -54,18 +54,20 @@ func (s *DokkuTestSuite) TearDownTest() {
 	}
 }
 
-func (s *DokkuTestSuite) createTestContainer(ctx context.Context) error {
+func (s *DokkuTestSuite) CreateTestContainer(ctx context.Context) error {
 	dc, err := testutils.CreateDokkuContainer(ctx)
 	if err != nil {
 		return err
 	}
-	dc.AttachLogConsumer(ctx)
+	if err := dc.AttachLogConsumer(ctx); err != nil {
+		return err
+	}
 
 	s.Dokku = dc
 	return nil
 }
 
-func (s *DokkuTestSuite) createTestClient(ctx context.Context, admin bool) error {
+func (s *DokkuTestSuite) CreateTestClient(ctx context.Context, admin bool) error {
 	keyPair, err := testutils.GenerateRSAKeyPair()
 	if err != nil {
 		return err
@@ -114,5 +116,5 @@ func (s *DokkuTestSuite) GrantAdminPriveleges() error {
 		return fmt.Errorf("failed to remove ssh key: got exit code %d", retCode)
 	}
 
-	return s.createTestClient(ctx, true)
+	return s.CreateTestClient(ctx, true)
 }

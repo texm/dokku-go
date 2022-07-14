@@ -43,12 +43,11 @@ const (
 	pluginUpdateCmd              = "plugin:update %s %s"
 )
 
-var multipleWhitespaceRe = regexp.MustCompile("\\s+")
-
 func (c *DefaultClient) ListPlugins() ([]PluginInfo, error) {
 	out, err := c.Exec(pluginListCmd)
 	lines := strings.Split(out, "\n")
 	plugins := make([]PluginInfo, len(lines))
+	var multipleWhitespaceRe = regexp.MustCompile("\\s+")
 	for i, line := range lines {
 		line = strings.TrimSpace(line)
 		cols := multipleWhitespaceRe.Split(line, 4)
