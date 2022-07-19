@@ -38,33 +38,33 @@ const (
 )
 
 type ResourceSpec struct {
-	Name   string
-	Suffix string
+	Name   string `json:"name"`
+	Suffix string `json:"suffix"`
 }
 
 type Resource struct {
-	Type   ResourceSpec
-	Amount int
+	Type   ResourceSpec `json:"type"`
+	Amount int          `json:"amount"`
 }
 
 type ResourceUnits struct {
-	CPU            *Resource
-	Memory         *Resource
-	MemorySwap     *Resource
-	Network        *Resource
-	NetworkIngress *Resource
-	NetworkEgress  *Resource
-	NvidiaGPU      *Resource
+	CPU            *Resource `json:"cpu"`
+	Memory         *Resource `json:"memory"`
+	MemorySwap     *Resource `json:"memory_swap"`
+	Network        *Resource `json:"network"`
+	NetworkIngress *Resource `json:"network_ingress"`
+	NetworkEgress  *Resource `json:"network_egress"`
+	NvidiaGPU      *Resource `json:"nvidia_gpu"`
 }
 
 type ResourceSettings struct {
-	Limits       ResourceUnits
-	Reservations ResourceUnits
+	Limits       ResourceUnits `json:"limits"`
+	Reservations ResourceUnits `json:"reservations"`
 }
 
 type AppResourceReport struct {
-	Defaults  ResourceSettings
-	Processes map[string]ResourceSettings
+	Defaults  ResourceSettings            `json:"defaults"`
+	Processes map[string]ResourceSettings `json:"processes"`
 }
 
 type ResourceReport map[string]*AppResourceReport
