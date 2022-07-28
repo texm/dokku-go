@@ -25,6 +25,11 @@ type domainsManager interface {
 	ClearGlobalDomains() error
 }
 
+type GlobalDomainsReport struct {
+	Enabled bool
+	Domains []string
+}
+
 type AppDomainsReport struct {
 	AppEnabled    bool
 	AppDomains    []string
@@ -48,14 +53,19 @@ const (
 	domainsSetGlobalCmd    = "domains:set-global %s"
 )
 
-type rawDomainsReport struct {
+type rawAppDomainsReport struct {
 	AppEnabled    bool   `dokku:"Domains app enabled"`
 	AppDomains    string `dokku:"Domains app vhosts"`
 	GlobalEnabled bool   `dokku:"Domains global enabled"`
 	GlobalDomains string `dokku:"Domains global vhosts"`
 }
 
-func parseRawAppDomainsReport(rawReport rawDomainsReport) (*AppDomainsReport, error) {
+type rawGlobalDomainsReport struct {
+	GlobalEnabled bool   `dokku:"Domains global enabled"`
+	GlobalDomains string `dokku:"Domains global vhosts"`
+}
+
+func parseRawAppDomainsReport(rawReport rawAppDomainsReport) (*AppDomainsReport, error) {
 	appDomains := strings.Split(rawReport.AppDomains, ",")
 	globalDomains := strings.Split(rawReport.GlobalDomains, ",")
 
@@ -74,7 +84,7 @@ func (c *DefaultClient) GetAppDomainsReport(appName string) (*AppDomainsReport, 
 		return nil, err
 	}
 
-	var rawReport rawDomainsReport
+	var rawReport rawAppDomainsReport
 	if err := reports.ParseInto(out, &rawReport); err != nil {
 		return nil, err
 	}
@@ -82,8 +92,24 @@ func (c *DefaultClient) GetAppDomainsReport(appName string) (*AppDomainsReport, 
 	return parseRawAppDomainsReport(rawReport)
 }
 
-func (c *DefaultClient) GetGlobalDomainsReport() (*AppDomainsReport, error) {
-	return c.GetAppDomainsReport("--global")
+func (c *DefaultClient) GetGlobalDomainsReport() (*GlobalDomainsReport, error) {
+	cmd := fmt.Sprintf(domainsReportCmd, "--global")
+	out, err := c.Exec(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	var rawReport rawGlobalDomainsReport
+	if err := reports.ParseInto(out, &rawReport); err != nil {
+		return nil, err
+	}
+
+	domains := strings.Split(rawReport.GlobalDomains, ",")
+
+	return &GlobalDomainsReport{
+		Domains: domains,
+		Enabled: rawReport.GlobalEnabled,
+	}, nil
 }
 
 func (c *DefaultClient) GetDomainsReport() (DomainsReport, error) {
@@ -93,7 +119,7 @@ func (c *DefaultClient) GetDomainsReport() (DomainsReport, error) {
 		return nil, err
 	}
 
-	rawReportMap := map[string]rawDomainsReport{}
+	rawReportMap := map[string]rawAppDomainsReport{}
 	if err := reports.ParseIntoMap(out, &rawReportMap); err != nil {
 		return nil, err
 	}
