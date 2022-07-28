@@ -8,7 +8,7 @@ import (
 
 type domainsManager interface {
 	GetAppDomainsReport(appName string) (*AppDomainsReport, error)
-	GetGlobalDomainsReport() (*AppDomainsReport, error)
+	GetGlobalDomainsReport() (*GlobalDomainsReport, error)
 	GetDomainsReport() (DomainsReport, error)
 
 	EnableAppDomains(appName string) error
