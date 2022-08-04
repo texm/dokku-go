@@ -35,7 +35,26 @@ func (m *StorageBindMount) String() string {
 	return fmt.Sprintf("%s:%s", m.HostDir, m.ContainerDir)
 }
 
-type AppStorageReport struct{}
+type rawAppStorageReport struct {
+	BuildMounts  string `dokku:"Storage build mounts"`
+	DeployMounts string `dokku:"Storage deploy mounts"`
+	RunMounts    string `dokku:"Storage run mounts"`
+}
+type rawStorageReport map[string]*rawAppStorageReport
+
+func (rr *rawAppStorageReport) Parse() *AppStorageReport {
+	return &AppStorageReport{
+		BuildMounts:  strings.Split(rr.BuildMounts, " "),
+		DeployMounts: strings.Split(rr.DeployMounts, " "),
+		RunMounts:    strings.Split(rr.RunMounts, " "),
+	}
+}
+
+type AppStorageReport struct {
+	BuildMounts  []string
+	DeployMounts []string
+	RunMounts    []string
+}
 type StorageReport map[string]*AppStorageReport
 
 const (
@@ -93,12 +112,12 @@ func (c *DefaultClient) GetAppStorageReport(appName string) (*AppStorageReport, 
 		return nil, err
 	}
 
-	var report *AppStorageReport
-	if err := reports.ParseInto(out, &report); err != nil {
+	var rawReport *rawAppStorageReport
+	if err := reports.ParseInto(out, &rawReport); err != nil {
 		return nil, err
 	}
 
-	return report, nil
+	return rawReport.Parse(), nil
 }
 
 func (c *DefaultClient) GetStorageReport() (StorageReport, error) {
@@ -108,9 +127,14 @@ func (c *DefaultClient) GetStorageReport() (StorageReport, error) {
 		return nil, err
 	}
 
-	var report StorageReport
-	if err := reports.ParseIntoMap(out, &report); err != nil {
+	var rawReport rawStorageReport
+	if err := reports.ParseIntoMap(out, &rawReport); err != nil {
 		return nil, err
+	}
+
+	report := StorageReport{}
+	for i, raw := range rawReport {
+		report[i] = raw.Parse()
 	}
 
 	return report, nil
