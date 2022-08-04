@@ -44,9 +44,9 @@ type rawStorageReport map[string]*rawAppStorageReport
 
 func (rr *rawAppStorageReport) Parse() *AppStorageReport {
 	return &AppStorageReport{
-		BuildMounts:  strings.Split(rr.BuildMounts, " "),
-		DeployMounts: strings.Split(rr.DeployMounts, " "),
-		RunMounts:    strings.Split(rr.RunMounts, " "),
+		BuildMounts:  strings.Split(strings.TrimSpace(rr.BuildMounts), " "),
+		DeployMounts: strings.Split(strings.TrimSpace(rr.DeployMounts), " "),
+		RunMounts:    strings.Split(strings.TrimSpace(rr.RunMounts), " "),
 	}
 }
 
