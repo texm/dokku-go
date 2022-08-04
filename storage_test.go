@@ -7,6 +7,10 @@ func (s *DokkuTestSuite) TestManageStorage() {
 
 	r.NoError(s.Client.CreateApp(appName))
 
+	storageReport, err := s.Client.GetAppStorageReport(appName)
+	r.NoError(err)
+	r.Len(storageReport.RunMounts, 0)
+
 	storage := StorageBindMount{
 		HostDir:      "testAppStorage",
 		ContainerDir: "/data",

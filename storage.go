@@ -42,11 +42,19 @@ type rawAppStorageReport struct {
 }
 type rawStorageReport map[string]*rawAppStorageReport
 
+func parseMount(mounts string) []string {
+	mountsList := []string{}
+	if mounts != "" {
+		mountsList = strings.Split(strings.TrimSpace(mounts), " ")
+	}
+	return mountsList
+}
+
 func (rr *rawAppStorageReport) Parse() *AppStorageReport {
 	return &AppStorageReport{
-		BuildMounts:  strings.Split(strings.TrimSpace(rr.BuildMounts), " "),
-		DeployMounts: strings.Split(strings.TrimSpace(rr.DeployMounts), " "),
-		RunMounts:    strings.Split(strings.TrimSpace(rr.RunMounts), " "),
+		BuildMounts:  parseMount(rr.BuildMounts),
+		DeployMounts: parseMount(rr.DeployMounts),
+		RunMounts:    parseMount(rr.RunMounts),
 	}
 }
 
