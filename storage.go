@@ -42,10 +42,17 @@ type rawAppStorageReport struct {
 }
 type rawStorageReport map[string]*rawAppStorageReport
 
-func parseMount(mounts string) []string {
-	mountsList := []string{}
-	if mounts != "" {
-		mountsList = strings.Split(strings.TrimSpace(mounts), " ")
+func parseMount(mounts string) []StorageBindMount {
+	var mountsList []StorageBindMount
+	for _, mount := range strings.Split(mounts, "-v") {
+		parts := strings.SplitN(strings.TrimSpace(mount), ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		mountsList = append(mountsList, StorageBindMount{
+			HostDir:      parts[0],
+			ContainerDir: parts[1],
+		})
 	}
 	return mountsList
 }
@@ -59,9 +66,9 @@ func (rr *rawAppStorageReport) Parse() *AppStorageReport {
 }
 
 type AppStorageReport struct {
-	BuildMounts  []string
-	DeployMounts []string
-	RunMounts    []string
+	BuildMounts  []StorageBindMount
+	DeployMounts []StorageBindMount
+	RunMounts    []StorageBindMount
 }
 type StorageReport map[string]*AppStorageReport
 

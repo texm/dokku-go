@@ -22,4 +22,15 @@ func (s *DokkuTestSuite) TestManageStorage() {
 	r.NoError(err)
 	r.Len(storageList, 1)
 	r.Equal(storage, storageList[0])
+
+	storage2 := StorageBindMount{
+		HostDir:      "testAppStorage2",
+		ContainerDir: "/data2",
+	}
+	r.NoError(s.Client.EnsureStorageDirectory(storage2.HostDir, StorageChownOptionHerokuish))
+	r.NoError(s.Client.MountAppStorage(appName, storage2))
+
+	storageReport, err = s.Client.GetAppStorageReport(appName)
+	r.NoError(err)
+	r.Contains(storageReport.RunMounts, storage2)
 }
