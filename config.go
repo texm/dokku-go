@@ -78,7 +78,6 @@ const (
 	configUnsetCmd  = "config:unset %s %s %s"
 )
 
-// TODO: test alphanum + underscore only
 func encodeKeyValPair(key, val string) (string, error) {
 	for _, r := range key {
 		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' {
@@ -148,7 +147,17 @@ func (c *DefaultClient) GetAppConfig(appName string) (map[string]string, error) 
 		return nil, err
 	}
 
-	return reports.ParseSingle(out)
+	lines := strings.Split(out, "\n")
+	config := map[string]string{}
+	for i := 1; i < len(lines); i++ {
+		split := strings.SplitN(lines[i], ":", 2)
+		if len(split) < 2 {
+			continue
+		}
+		key := strings.TrimSpace(split[0])
+		config[key] = strings.TrimSpace(split[1])
+	}
+	return config, nil
 }
 
 func (c *DefaultClient) ClearAppConfig(appName string, restart bool) error {
@@ -191,7 +200,6 @@ func (c *DefaultClient) GetGlobalConfigValue(key string, quoted bool) (string, e
 	return c.GetAppConfigValue("--global", key, quoted)
 }
 
-// TODO: test val with spaces for encoding
 func (c *DefaultClient) SetAppConfigValue(appName string, key string, value string, restart bool) error {
 	restartFlag := getOptionalFlag("--no-restart", !restart)
 	pair, err := encodeKeyValPair(key, value)

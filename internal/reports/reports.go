@@ -39,6 +39,7 @@ func rowPair(row string) (string, string) {
 func ParseSingle(sReport string) (map[string]string, error) {
 	report := Report{}
 	lines := strings.Split(sReport, "\n")
+	fmt.Println("lines", lines)
 	for i, line := range lines {
 		if strings.HasPrefix(line, sectionStartDenom) {
 			appNameMatches := appNameRe.FindStringSubmatch(line)
@@ -46,6 +47,7 @@ func ParseSingle(sReport string) (map[string]string, error) {
 				return nil, errors.New("invalid report line: '" + line)
 			}
 			if len(lines) > i+1 && !strings.HasPrefix(lines[i+1], infoIndent) {
+				fmt.Println("skipping", line)
 				continue
 			}
 		} else if strings.HasPrefix(line, infoIndent) {
