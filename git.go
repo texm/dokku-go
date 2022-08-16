@@ -3,7 +3,6 @@ package dokku
 import (
 	"fmt"
 	"github.com/texm/dokku-go/internal/reports"
-	"time"
 )
 
 type gitManager interface {
@@ -26,12 +25,12 @@ type gitManager interface {
 }
 
 type GitAppReport struct {
-	DeployBranch       string    `json:"deploy_branch" dokku:"Git deploy branch"`
-	GlobalDeployBranch string    `json:"global_deploy_branch" dokku:"Git global deploy branch"`
-	KeepGitDir         bool      `json:"keep_git_dir" dokku:"Git keep git dir"`
-	RevisionEnvVar     string    `json:"rev_env_var" dokku:"Git rev env var"`
-	SHA                string    `json:"sha" dokku:"Git sha"`
-	LastUpdatedAt      time.Time `json:"last_updated_at" dokku:"Git last updated at"`
+	DeployBranch       string `json:"deploy_branch" dokku:"Git deploy branch"`
+	GlobalDeployBranch string `json:"global_deploy_branch" dokku:"Git global deploy branch"`
+	KeepGitDir         bool   `json:"keep_git_dir" dokku:"Git keep git dir"`
+	RevisionEnvVar     string `json:"rev_env_var" dokku:"Git rev env var"`
+	SHA                string `json:"sha" dokku:"Git sha"`
+	LastUpdatedAt      string `json:"last_updated_at" dokku:"Git last updated at"`
 }
 
 type GitReport map[string]*GitAppReport
