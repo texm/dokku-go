@@ -36,7 +36,7 @@ func newExitCodeErr(output string, err *ssh.ExitError) *ExitCodeError {
 }
 
 func (xe *ExitCodeError) Error() string {
-	return fmt.Sprintf("dokku error: %s", xe.sshErr.Error())
+	return fmt.Sprintf("dokku error: '%s'", xe.CommandOutput())
 }
 
 func (xe *ExitCodeError) Unwrap() error {
