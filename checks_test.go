@@ -1,6 +1,19 @@
 package dokku
 
-func (s *DokkuTestSuite) TestGetChecksReport() {
+import (
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
+
+type checksManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunChecksManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(checksManagerTestSuite))
+}
+
+func (s *checksManagerTestSuite) TestGetChecksReport() {
 	r := s.Require()
 
 	testAppName := "test-deploy-app"

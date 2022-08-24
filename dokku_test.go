@@ -3,24 +3,23 @@ package dokku
 import (
 	"context"
 	"fmt"
-	"testing"
-
 	"github.com/texm/dokku-go/internal/testutils"
 
 	"github.com/stretchr/testify/suite"
 )
 
-func TestRunDokkuTestSuite(t *testing.T) {
-	suite.Run(t, new(DokkuTestSuite))
-}
-
-type DokkuTestSuite struct {
+type dokkuTestSuite struct {
 	suite.Suite
-	Dokku  *testutils.DokkuContainer
-	Client Client
+	Dokku                     *testutils.DokkuContainer
+	AttachContainerTestLogger bool
+	Client                    Client
 }
 
-func (s *DokkuTestSuite) SetupTest() {
+func (s *dokkuTestSuite) SetupTest() {
+
+}
+
+func (s *dokkuTestSuite) SetupSuite() {
 	ctx := context.Background()
 
 	if err := s.CreateTestContainer(ctx); err != nil {
@@ -32,18 +31,20 @@ func (s *DokkuTestSuite) SetupTest() {
 	}
 }
 
-func (s *DokkuTestSuite) TearDownTest() {
+func (s *dokkuTestSuite) TearDownSuite() {
 	ctx := context.Background()
 
-	/*apps, err := s.Client.ListApps()
+	apps, err := s.Client.ListApps()
 	if err != nil {
 		fmt.Println("failed to list apps")
 	}
 	for _, app := range apps {
-		if err := s.Client.DestroyApp(app); err != nil {
-			fmt.Printf("failed to destroy app %s: %s\n", app, err.Error())
+		containers, err := s.Client.ListAppRunContainers(app)
+		if err != nil {
+			fmt.Println("failed to get containers for app")
 		}
-	}*/
+		fmt.Println("app", app, "containers", containers)
+	}
 
 	if s.Dokku != nil {
 		s.Dokku.Cleanup(ctx)
@@ -54,20 +55,21 @@ func (s *DokkuTestSuite) TearDownTest() {
 	}
 }
 
-func (s *DokkuTestSuite) CreateTestContainer(ctx context.Context) error {
-	dc, err := testutils.CreateDokkuContainer(ctx)
+func (s *dokkuTestSuite) CreateTestContainer(ctx context.Context) error {
+	dc, err := testutils.CreateDokkuContainer(ctx, s.AttachContainerTestLogger)
 	if err != nil {
 		return err
 	}
-	if err := dc.AttachLogConsumer(ctx); err != nil {
-		return err
+	s.Dokku = dc
+
+	if s.AttachContainerTestLogger {
+		return dc.AttachTestLogger(ctx, s.T())
 	}
 
-	s.Dokku = dc
 	return nil
 }
 
-func (s *DokkuTestSuite) CreateTestClient(ctx context.Context, admin bool) error {
+func (s *dokkuTestSuite) CreateTestClient(ctx context.Context, admin bool) error {
 	keyPair, err := testutils.GenerateRSAKeyPair()
 	if err != nil {
 		return err
@@ -99,22 +101,4 @@ func (s *DokkuTestSuite) CreateTestClient(ctx context.Context, admin bool) error
 
 	s.Client = client
 	return nil
-}
-
-func (s *DokkuTestSuite) GrantAdminPriveleges() error {
-	if err := s.Client.Close(); err != nil {
-		return err
-	}
-
-	ctx := context.Background()
-
-	chownCmd := []string{"/usr/bin/dokku", "ssh-keys:remove", "test"}
-	retCode, err := s.Dokku.Exec(ctx, chownCmd)
-	if err != nil {
-		return fmt.Errorf("failed to remove ssh key: %w", err)
-	} else if retCode != 0 {
-		return fmt.Errorf("failed to remove ssh key: got exit code %d", retCode)
-	}
-
-	return s.CreateTestClient(ctx, true)
 }

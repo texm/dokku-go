@@ -1,6 +1,19 @@
 package dokku
 
-func (s *DokkuTestSuite) TestGetAppConfig() {
+import (
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
+
+type nginxManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunNginxManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(networkManagerTestSuite))
+}
+
+func (s *nginxManagerTestSuite) TestGetAppConfig() {
 	r := s.Require()
 
 	testApp := "test-nginx-app"

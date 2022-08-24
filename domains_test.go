@@ -1,6 +1,19 @@
 package dokku
 
-func (s *DokkuTestSuite) TestGetAppDomains() {
+import (
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
+
+type domainsManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunDomainsManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(domainsManagerTestSuite))
+}
+
+func (s *domainsManagerTestSuite) TestGetAppDomains() {
 	r := s.Require()
 
 	testAppName := "test-domains-app"

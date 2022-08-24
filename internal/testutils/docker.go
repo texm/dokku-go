@@ -3,42 +3,53 @@ package testutils
 import (
 	"context"
 	"fmt"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"os"
 	"os/user"
 	"path"
 	"runtime"
 	"time"
-
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 const (
-	testingImage            = "ghcr.io/texm/dokku-go:test-env"
-	startupTimeout          = time.Second * 5
-	defaultDockerSocketFile = "/var/run/docker.sock"
+	testingImage     = "dokku/dokku:latest"
+	dockerSocketFile = "/var/run/docker.sock"
 )
 
-func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
+type nullLogger struct{}
+
+func (l nullLogger) Printf(format string, args ...any) {}
+
+func CreateDokkuContainer(ctx context.Context, withLogs bool) (*DokkuContainer, error) {
 	if runtime.GOOS == "darwin" {
 		if err := setupColimaEnv(); err != nil {
 			return nil, err
 		}
 	}
 
-	// mounting the docker socket into the container is insecure, but nobody else should run this
-	socketMount := testcontainers.BindMount(defaultDockerSocketFile, defaultDockerSocketFile)
+	mounts := testcontainers.ContainerMounts{
+		// mounting the docker socket into the container is insecure, but nobody else should run this
+		testcontainers.BindMount(dockerSocketFile, dockerSocketFile),
+		// testcontainers.VolumeMount("dokku-data", "/mnt/dokku"),
+	}
 
 	req := testcontainers.ContainerRequest{
 		Image:        testingImage,
-		Privileged:   false,
-		ExposedPorts: []string{"22/tcp"},
-		Mounts:       testcontainers.ContainerMounts{socketMount},
-		WaitingFor:   wait.ForListeningPort("22").WithStartupTimeout(startupTimeout),
+		ExposedPorts: []string{"22/tcp", "80/tcp", "443/tcp"},
+		Mounts:       mounts,
+		WaitingFor:   wait.ForListeningPort("22").WithStartupTimeout(30 * time.Second),
 	}
+
+	var logger testcontainers.Logging
+	if !withLogs {
+		logger = nullLogger{}
+	}
+
 	gReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
+		Logger:           logger,
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, gReq)
@@ -55,7 +66,7 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 		return nil, maybeTerminateContainerAfterError(ctx, container, err)
 	}
 
-	mappedPort, err := container.MappedPort(ctx, "22")
+	mappedSSHPort, err := container.MappedPort(ctx, "22")
 	if err != nil {
 		return nil, maybeTerminateContainerAfterError(ctx, container, err)
 	}
@@ -63,7 +74,7 @@ func CreateDokkuContainer(ctx context.Context) (*DokkuContainer, error) {
 	dc := &DokkuContainer{
 		Container: container,
 		Host:      host,
-		SSHPort:   mappedPort.Port(),
+		SSHPort:   mappedSSHPort.Port(),
 	}
 
 	return dc, nil

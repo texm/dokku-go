@@ -3,8 +3,18 @@ package dokku
 import (
 	"context"
 	"fmt"
+	"github.com/stretchr/testify/suite"
 	"github.com/texm/dokku-go/internal/testutils"
+	"testing"
 )
+
+type letsEncryptManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunLetsEncryptManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(letsEncryptManagerTestSuite))
+}
 
 func setupLetsEncryptPlugin(dc *testutils.DokkuContainer) error {
 	ctx := context.Background()
@@ -22,7 +32,7 @@ func setupLetsEncryptPlugin(dc *testutils.DokkuContainer) error {
 	return nil
 }
 
-func (s *DokkuTestSuite) TestLetsEncrypt() {
+func (s *letsEncryptManagerTestSuite) TestLetsEncrypt() {
 	r := s.Require()
 
 	r.NoError(setupLetsEncryptPlugin(s.Dokku))

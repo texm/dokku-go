@@ -1,8 +1,20 @@
 package dokku
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
 
-func (s *DokkuTestSuite) TestManageAppResources() {
+type resourceManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunResourceManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(resourceManagerTestSuite))
+}
+
+func (s *resourceManagerTestSuite) TestManageAppResources() {
 	r := s.Require()
 	var err error
 
@@ -38,7 +50,7 @@ func (s *DokkuTestSuite) TestManageAppResources() {
 	r.NotNil(report2.Defaults.Limits.Memory)
 }
 
-func (s *DokkuTestSuite) TestManageAppProcessResources() {
+func (s *resourceManagerTestSuite) TestManageAppProcessResources() {
 	r := s.Require()
 	var err error
 

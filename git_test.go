@@ -1,6 +1,19 @@
 package dokku
 
-func (s *DokkuTestSuite) TestGitReport() {
+import (
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
+
+type gitManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunGitManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(gitManagerTestSuite))
+}
+
+func (s *gitManagerTestSuite) TestGitReport() {
 	r := s.Require()
 	var err error
 
@@ -14,7 +27,7 @@ func (s *DokkuTestSuite) TestGitReport() {
 	r.Equal("master", report.DeployBranch)
 }
 
-func (s *DokkuTestSuite) TestSyncGitRepo() {
+func (s *gitManagerTestSuite) TestSyncGitRepo() {
 	r := s.Require()
 	var err error
 

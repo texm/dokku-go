@@ -1,8 +1,20 @@
 package dokku
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
 
-func (s *DokkuTestSuite) TestManageAppConfig() {
+type configManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunConfigManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(configManagerTestSuite))
+}
+
+func (s *configManagerTestSuite) TestManageAppConfig() {
 	r := s.Require()
 
 	testApp := "test-config-app"
@@ -38,7 +50,7 @@ func (s *DokkuTestSuite) TestManageAppConfig() {
 	r.ElementsMatch(keys, []string{key, key2})
 }
 
-func (s *DokkuTestSuite) TestManageGlobalConfig() {
+func (s *configManagerTestSuite) TestManageGlobalConfig() {
 	r := s.Require()
 
 	key := "key"

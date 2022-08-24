@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"testing"
 
 	"github.com/testcontainers/testcontainers-go"
 	"golang.org/x/crypto/ssh"
@@ -17,44 +18,34 @@ const (
 
 type DokkuContainer struct {
 	testcontainers.Container
-	Host        string
-	SSHPort     string
-	logConsumer *testLogConsumer
+	Host    string
+	SSHPort string
+	logger  *logAccepter
 }
 
-type testLogConsumer struct {
-	Msgs []string
+type logAccepter struct {
+	printFunc func(string, ...any)
 }
 
-func (g *testLogConsumer) Accept(l testcontainers.Log) {
-	fmt.Printf("%s: %s\n", l.LogType, string(l.Content))
-	g.Msgs = append(g.Msgs, string(l.Content))
+func (la *logAccepter) Accept(l testcontainers.Log) {
+	la.printFunc(string(l.Content))
 }
 
 func (dc *DokkuContainer) Cleanup(ctx context.Context) {
 	dc.Terminate(ctx)
-	if dc.logConsumer != nil {
+	if dc.logger != nil {
 		dc.StopLogProducer()
 	}
 }
 
-func (dc *DokkuContainer) GetLogs() []string {
-	if dc.logConsumer != nil {
-		return dc.logConsumer.Msgs
-	}
-	return []string{}
-}
-
-func (dc *DokkuContainer) AttachLogConsumer(ctx context.Context) error {
-	dc.logConsumer = &testLogConsumer{
-		Msgs: []string{},
-	}
+func (dc *DokkuContainer) AttachTestLogger(ctx context.Context, tb testing.TB) error {
+	dc.logger = &logAccepter{printFunc: tb.Logf}
 
 	if err := dc.StartLogProducer(ctx); err != nil {
 		return err
 	}
 
-	dc.FollowOutput(dc.logConsumer)
+	dc.FollowOutput(dc.logger)
 
 	return nil
 }

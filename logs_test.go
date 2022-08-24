@@ -1,10 +1,20 @@
 package dokku
 
 import (
+	"github.com/stretchr/testify/suite"
 	"io/ioutil"
+	"testing"
 )
 
-func (s *DokkuTestSuite) TestGetEventLogs() {
+type logsManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunLogsManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(logsManagerTestSuite))
+}
+
+func (s *logsManagerTestSuite) TestGetEventLogs() {
 	r := s.Require()
 	var err error
 
@@ -29,7 +39,7 @@ func (s *DokkuTestSuite) TestGetEventLogs() {
 	r.NotEmpty(events)
 }
 
-func (s *DokkuTestSuite) TestGetAppLogs() {
+func (s *logsManagerTestSuite) TestGetAppLogs() {
 	r := s.Require()
 	var err error
 
@@ -41,7 +51,7 @@ func (s *DokkuTestSuite) TestGetAppLogs() {
 	r.ErrorIs(err, AppNotDeployedError)
 }
 
-func (s *DokkuTestSuite) TestTailAppLogs() {
+func (s *logsManagerTestSuite) TestTailAppLogs() {
 	r := s.Require()
 	var err error
 

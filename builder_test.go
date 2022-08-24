@@ -1,6 +1,19 @@
 package dokku
 
-func (s *DokkuTestSuite) TestBuilderReport() {
+import (
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
+
+type builderManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunBuilderManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(builderManagerTestSuite))
+}
+
+func (s *builderManagerTestSuite) TestReports() {
 	r := s.Require()
 
 	testAppName := "test-builder-app"

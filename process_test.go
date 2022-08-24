@@ -1,6 +1,19 @@
 package dokku
 
-func (s *DokkuTestSuite) TestGetProcessInfo() {
+import (
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
+
+type processManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunProcessManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(processManagerTestSuite))
+}
+
+func (s *processManagerTestSuite) TestGetProcessInfo() {
 	r := s.Require()
 	var err error
 
@@ -13,7 +26,7 @@ func (s *DokkuTestSuite) TestGetProcessInfo() {
 	r.ErrorIs(err, AppNotDeployedError, "did not detect app not being deployed")
 }
 
-func (s *DokkuTestSuite) TestGetProcessReport() {
+func (s *processManagerTestSuite) TestGetProcessReport() {
 	r := s.Require()
 	var err error
 
@@ -31,7 +44,7 @@ func (s *DokkuTestSuite) TestGetProcessReport() {
 	r.Contains(report, testAppName)
 }
 
-func (s *DokkuTestSuite) TestGetProcessScale() {
+func (s *processManagerTestSuite) TestGetProcessScale() {
 	r := s.Require()
 	var err error
 
@@ -46,7 +59,7 @@ func (s *DokkuTestSuite) TestGetProcessScale() {
 	r.Equal(scaleReport["web"], 1)
 }
 
-func (s *DokkuTestSuite) TestSetProcessScale() {
+func (s *processManagerTestSuite) TestSetProcessScale() {
 	r := s.Require()
 	var err error
 

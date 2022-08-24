@@ -1,6 +1,19 @@
 package dokku
 
-func (s *DokkuTestSuite) TestManageStorage() {
+import (
+	"github.com/stretchr/testify/suite"
+	"testing"
+)
+
+type storageManagerTestSuite struct {
+	dokkuTestSuite
+}
+
+func TestRunStorageManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(storageManagerTestSuite))
+}
+
+func (s *storageManagerTestSuite) TestManageStorage() {
 	r := s.Require()
 
 	appName := "test-storage-app"
