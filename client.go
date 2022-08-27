@@ -6,31 +6,32 @@ import (
 )
 
 type BaseClient struct {
-	stdout bytes.Buffer
-	stderr bytes.Buffer
-
 	executor commandExecutor
 }
 
 type commandExecutor interface {
-	Exec(command string) (string, error)
-	ExecStreaming(command string) (*CommandOutputStream, error)
-	ExecWithStdin(command string, input io.Reader) (string, error)
+	exec(command string, input *bytes.Reader) (string, error)
+	execStreaming(command string, input *bytes.Reader) (*CommandOutputStream, error)
 }
 
 type CommandOutputStream struct {
 	Stdout io.Reader
 	Stderr io.Reader
+	Error  error
 }
 
 func (c *BaseClient) Exec(command string) (string, error) {
-	return c.executor.Exec(command)
+	return c.executor.exec(command, nil)
 }
 
 func (c *BaseClient) ExecStreaming(command string) (*CommandOutputStream, error) {
-	return c.executor.ExecStreaming(command)
+	return c.executor.execStreaming(command, nil)
 }
 
-func (c *BaseClient) ExecWithStdin(command string, input io.Reader) (string, error) {
-	return c.executor.ExecWithStdin(command, input)
+func (c *BaseClient) ExecWithInput(command string, input *bytes.Reader) (string, error) {
+	return c.executor.exec(command, input)
+}
+
+func (c *BaseClient) ExecWithInputStreaming(command string, input *bytes.Reader) (*CommandOutputStream, error) {
+	return c.executor.execStreaming(command, input)
 }

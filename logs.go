@@ -46,7 +46,6 @@ func (c *BaseClient) TailAppLogs(appName string) (io.Reader, error) {
 		return nil, err
 	}
 
-	// TODO: actually use and test this
 	pr, pw := io.Pipe()
 	go func() {
 		errBuf := bufio.NewReader(stream.Stderr)

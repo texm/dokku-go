@@ -32,7 +32,7 @@ const (
 func (c *BaseClient) AddSSHKey(name string, key []byte) error {
 	cmd := fmt.Sprintf(sshKeysAddCmd, name)
 	reader := bytes.NewReader(key)
-	output, err := c.ExecWithStdin(cmd, reader)
+	output, err := c.ExecWithInput(cmd, reader)
 	fmt.Println(output)
 	return err
 }

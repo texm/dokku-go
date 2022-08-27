@@ -1,6 +1,7 @@
 package dokku
 
 import (
+	"bytes"
 	"crypto/rsa"
 	"errors"
 	"fmt"
@@ -129,10 +130,18 @@ func (c *SSHClient) Close() error {
 	return nil
 }
 
-func (e *sshExecutor) Exec(cmd string) (string, error) {
+func (e *sshExecutor) exec(cmd string, input *bytes.Reader) (string, error) {
 	session, err := e.conn.NewSession()
 	if err != nil {
 		return "", err
+	}
+
+	if input != nil {
+		stdin, err := session.StdinPipe()
+		if err != nil {
+			return "", err
+		}
+		go io.Copy(stdin, input)
 	}
 
 	output, cmdErr := session.CombinedOutput(cmd)
@@ -162,45 +171,20 @@ func (e *sshExecutor) Exec(cmd string) (string, error) {
 	return cleaned, nil
 }
 
-func (e *sshExecutor) ExecWithStdin(cmd string, input io.Reader) (string, error) {
-	session, err := e.conn.NewSession()
-	if err != nil {
-		return "", err
-	}
-
-	stdin, err := session.StdinPipe()
-	if err != nil {
-		return "", err
-	}
-	go io.Copy(stdin, input)
-
-	output, cmdErr := session.CombinedOutput(cmd)
-	cleaned := strings.TrimSpace(string(output))
-
-	if sessErr := closeSession(session); sessErr != nil {
-		return cleaned, sessErr
-	}
-
-	if err := checkGenericErrors(cleaned); err != nil {
-		return cleaned, err
-	}
-
-	if cmdErr != nil {
-		var exitCodeErr *ssh.ExitError
-		if errors.As(cmdErr, &exitCodeErr) {
-			return cleaned, fmt.Errorf("dokku error: '%w'", cmdErr)
-		}
-		return cleaned, err
-	}
-
-	return cleaned, nil
-}
-
-func (e *sshExecutor) ExecStreaming(cmd string) (*CommandOutputStream, error) {
+func (e *sshExecutor) execStreaming(cmd string, input *bytes.Reader) (*CommandOutputStream, error) {
 	session, err := e.conn.NewSession()
 	if err != nil {
 		return nil, err
 	}
+
+	if input != nil {
+		stdin, err := session.StdinPipe()
+		if err != nil {
+			return nil, err
+		}
+		go io.Copy(stdin, input)
+	}
+
 	stream := &CommandOutputStream{}
 
 	stream.Stdout, err = session.StdoutPipe()
@@ -213,10 +197,19 @@ func (e *sshExecutor) ExecStreaming(cmd string) (*CommandOutputStream, error) {
 		return nil, err
 	}
 
-	go func() {
-		_ = session.Run(cmd)
-		_ = closeSession(session)
-	}()
+	go func(stream *CommandOutputStream) {
+		cmdErr := session.Run(cmd)
+		if stream != nil {
+			stream.Error = cmdErr
+		}
+		if sshErr := closeSession(session); sshErr != nil && stream != nil {
+			if cmdErr != nil {
+				stream.Error = fmt.Errorf("ssh close err '%s' after command error: %w", sshErr.Error(), cmdErr)
+			} else {
+				stream.Error = fmt.Errorf("ssh close err: %w", sshErr)
+			}
+		}
+	}(stream)
 
 	return stream, nil
 }
