@@ -30,7 +30,7 @@ func CreateDokkuContainer(ctx context.Context, withLogs bool) (*DokkuContainer, 
 	mounts := testcontainers.ContainerMounts{
 		// mounting the docker socket into the container is insecure, but nobody else should run this
 		testcontainers.BindMount(dockerSocketFile, dockerSocketFile),
-		// testcontainers.VolumeMount("dokku-data", "/mnt/dokku"),
+		testcontainers.VolumeMount("dokku-ssl", "/mnt/dokku/etc/nginx"),
 	}
 
 	req := testcontainers.ContainerRequest{
