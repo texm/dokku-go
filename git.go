@@ -8,9 +8,9 @@ import (
 type gitManager interface {
 	GitInitializeApp(appName string) error
 	GitGetPublicKey() (string, error)
-	GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error
-	GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) error
-	GitCreateFromImage(appName string, image string, opt *GitImageOptions) error
+	GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) (*CommandOutputStream, error)
+	GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) (*CommandOutputStream, error)
+	GitCreateFromImage(appName string, image string, opt *GitImageOptions) (*CommandOutputStream, error)
 	GitSetAuth(host string, username string, password string) error
 	GitRemoveAuth(host string) error
 	GitSetAppProperty(appName string, property GitProperty, val string) error
