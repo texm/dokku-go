@@ -3,15 +3,17 @@ package dokku
 import (
 	"context"
 	"fmt"
-	"github.com/texm/dokku-go/internal/testutils"
-
 	"github.com/stretchr/testify/suite"
+	"github.com/texm/dokku-go/internal/testutils"
+	"os/exec"
+	"strings"
 )
 
 type dokkuTestSuite struct {
 	suite.Suite
 	Dokku                     *testutils.DokkuContainer
 	AttachContainerTestLogger bool
+	DefaultAppName            string
 	Client                    Client
 }
 
@@ -29,6 +31,12 @@ func (s *dokkuTestSuite) SetupSuite() {
 	if err := s.CreateTestClient(ctx, false); err != nil {
 		s.T().Fatal("Failed to create default dokku client: ", err)
 	}
+
+	if s.DefaultAppName != "" {
+		if err := s.Client.CreateApp(s.DefaultAppName); err != nil {
+			s.T().Fatal("failed to create default app")
+		}
+	}
 }
 
 func (s *dokkuTestSuite) TearDownSuite() {
@@ -38,13 +46,23 @@ func (s *dokkuTestSuite) TearDownSuite() {
 	if err != nil {
 		fmt.Println("failed to list apps")
 	}
-	for _, app := range apps {
-		containers, err := s.Client.ListAppRunContainers(app)
+	for _, appName := range apps {
+		filter := fmt.Sprintf("label=com.dokku.app-name=%s", appName)
+		out, err := exec.Command("docker", "ps", "-a", "-f", filter).Output()
 		if err != nil {
-			fmt.Println("failed to get containers for app")
+			fmt.Println("failed to list containers for app ", appName)
 		}
-		fmt.Println("app", app, "containers", containers)
+
+		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+		for _, line := range lines[1:] {
+			containerID := strings.Split(line, " ")[0]
+			cmd := exec.Command("docker", "rm", containerID)
+			if err := cmd.Run(); err != nil {
+				fmt.Printf("failed to remove container (id=%s) for app %s\n", containerID, appName)
+			}
+		}
 	}
+	//
 
 	if s.Dokku != nil {
 		s.Dokku.Cleanup(ctx)

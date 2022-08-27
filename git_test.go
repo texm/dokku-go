@@ -1,6 +1,7 @@
 package dokku
 
 import (
+	"context"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -10,19 +11,19 @@ type gitManagerTestSuite struct {
 }
 
 func TestRunGitManagerTestSuite(t *testing.T) {
-	suite.Run(t, new(gitManagerTestSuite))
+	suite.Run(t, &gitManagerTestSuite{
+		dokkuTestSuite{
+			DefaultAppName:            "test-git-app",
+			AttachContainerTestLogger: true,
+		},
+	})
 }
 
 func (s *gitManagerTestSuite) TestGitReport() {
 	r := s.Require()
 	var err error
 
-	testAppName := "test-git-app"
-
-	err = s.Client.CreateApp(testAppName)
-	r.NoError(err, "failed to create app")
-
-	report, err := s.Client.GitGetAppReport(testAppName)
+	report, err := s.Client.GitGetAppReport(s.DefaultAppName)
 	r.NoError(err)
 	r.Equal("master", report.DeployBranch)
 }
@@ -31,18 +32,16 @@ func (s *gitManagerTestSuite) TestSyncGitRepo() {
 	r := s.Require()
 	var err error
 
-	testAppName := "test-git-app"
+	//ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
+	r.NoError(s.Dokku.InstallBuildPacksCLI(context.Background()))
 
-	err = s.Client.CreateApp(testAppName)
-	r.NoError(err, "failed to create app")
-
-	r.NoError(s.Client.DisableAppDeployChecks(testAppName))
+	r.NoError(s.Client.DisableAppDeployChecks(s.DefaultAppName))
 
 	testRepo := "https://github.com/texm/go-hello-world-http.git"
 	options := &GitSyncOptions{
 		Build:  true,
 		GitRef: "main",
 	}
-	err = s.Client.GitSyncAppRepo(testAppName, testRepo, options)
+	err = s.Client.GitSyncAppRepo(s.DefaultAppName, testRepo, options)
 	r.NoError(err)
 }

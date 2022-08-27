@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net"
+	"net/http"
 	"testing"
 
 	"github.com/testcontainers/testcontainers-go"
@@ -12,8 +15,9 @@ import (
 )
 
 const (
-	testKeyPath     = "/home/dokku/test_key.pub"
-	testKeyFileMode = 0666
+	testKeyPath               = "/home/dokku/test_key.pub"
+	testKeyFileMode           = 0666
+	buildpackInstallScriptURL = "https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-linux.tgz"
 )
 
 type DokkuContainer struct {
@@ -36,6 +40,28 @@ func (dc *DokkuContainer) Cleanup(ctx context.Context) {
 	if dc.logger != nil {
 		dc.StopLogProducer()
 	}
+}
+
+func (dc *DokkuContainer) InstallBuildPacksCLI(ctx context.Context) error {
+	response, e := http.Get(buildpackInstallScriptURL)
+	if e != nil {
+		log.Fatal(e)
+	}
+	// todo: errors
+	defer response.Body.Close()
+	cliBytes, _ := ioutil.ReadAll(response.Body)
+	dc.CopyToContainer(ctx, cliBytes, "/home/dokku/pack.tgz", 0666)
+	installCmd := []string{"/usr/bin/tar",
+		"-C", "/usr/local/bin/", "--no-same-owner", "-xzv", "pack", "-f", "/home/dokku/pack.tgz"}
+
+	code, err := dc.Exec(ctx, installCmd)
+	if err != nil {
+		return fmt.Errorf("failed to install buildpacks: %w", err)
+	} else if code != 0 {
+		return fmt.Errorf("failed to install buildpacks: got exit code %d", code)
+	}
+
+	return nil
 }
 
 func (dc *DokkuContainer) AttachTestLogger(ctx context.Context, tb testing.TB) error {

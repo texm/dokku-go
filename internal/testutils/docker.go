@@ -6,7 +6,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"os"
-	"os/user"
 	"path"
 	"runtime"
 	"time"
@@ -100,19 +99,14 @@ func setupColimaEnv() error {
 }
 
 func ensureMatchingDockerGroupId(ctx context.Context, container testcontainers.Container) error {
-	var hostGid string
-	if runtime.GOOS == "darwin" {
-		// need to 'colima ssh' and groupmod ping to 998, groupmod docker 999
-		hostGid = "999"
-	} else {
-		dockerGroup, err := user.LookupGroup("docker")
-		if err != nil {
-			return err
-		}
-		hostGid = dockerGroup.Gid
+	exitCode, err := container.Exec(ctx, []string{"groupmod", "-g", "99", "systemd-timesync"})
+	if exitCode != 0 {
+		return fmt.Errorf("failed to change gid of containerized systemd-timesync group, got exit code %d\n", exitCode)
+	} else if err != nil {
+		return err
 	}
 
-	exitCode, err := container.Exec(ctx, []string{"groupmod", "-g", hostGid, "docker"})
+	exitCode, err = container.Exec(ctx, []string{"groupmod", "-g", "101", "docker"})
 	if exitCode != 0 {
 		return fmt.Errorf("failed to change gid of containerized docker group, got exit code %d\n", exitCode)
 	}
