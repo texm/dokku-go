@@ -94,7 +94,7 @@ func (c *BaseClient) GitGetPublicKey() (string, error) {
 	return c.Exec(gitPublicKeyCmd)
 }
 
-func (c *BaseClient) GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error {
+func (c *BaseClient) GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(gitSyncCmd, appName, repo)
 	if opt != nil {
 		var buildFlag string
@@ -103,11 +103,10 @@ func (c *BaseClient) GitSyncAppRepo(appName string, repo string, opt *GitSyncOpt
 		}
 		cmd = fmt.Sprintf(gitSyncWithOptionsCmd, buildFlag, appName, repo, opt.GitRef)
 	}
-	_, err := c.Exec(cmd)
-	return err
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) error {
+func (c *BaseClient) GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) (*CommandOutputStream, error) {
 	var authorDetails string
 	archiveType := "tar"
 	if opt != nil {
@@ -119,11 +118,10 @@ func (c *BaseClient) GitCreateFromArchive(appName string, url string, opt *GitAr
 		}
 	}
 	cmd := fmt.Sprintf(gitFromArchiveCmd, archiveType, appName, url, authorDetails)
-	_, err := c.Exec(cmd)
-	return err
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) GitCreateFromImage(appName string, image string, opt *GitImageOptions) error {
+func (c *BaseClient) GitCreateFromImage(appName string, image string, opt *GitImageOptions) (*CommandOutputStream, error) {
 	var authorDetails string
 	buildDir := ""
 	if opt != nil {
@@ -135,8 +133,7 @@ func (c *BaseClient) GitCreateFromImage(appName string, image string, opt *GitIm
 		}
 	}
 	cmd := fmt.Sprintf(gitFromImageCmd, appName, image, buildDir, authorDetails)
-	_, err := c.Exec(cmd)
-	return err
+	return c.ExecStreaming(cmd)
 }
 
 func (c *BaseClient) GitSetAuth(host string, username string, password string) error {
