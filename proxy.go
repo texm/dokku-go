@@ -81,27 +81,27 @@ const (
 	proxySetTypeCmd     = "proxy:set %s %s"
 )
 
-func (c *DefaultClient) BuildAllProxyConfig(parallel *ParallelismOptions) error {
+func (c *BaseClient) BuildAllProxyConfig(parallel *ParallelismOptions) error {
 	return c.BuildAppProxyConfig("--all", parallel)
 }
 
-func (c *DefaultClient) BuildAppProxyConfig(appName string, parallel *ParallelismOptions) error {
+func (c *BaseClient) BuildAppProxyConfig(appName string, parallel *ParallelismOptions) error {
 	cmd := fmt.Sprintf(proxyBuildConfigCmd, getParallelism(parallel), appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAllProxyConfig() error {
+func (c *BaseClient) ClearAllProxyConfig() error {
 	return c.ClearAppProxyConfig("--all")
 }
 
-func (c *DefaultClient) ClearAppProxyConfig(appName string) error {
+func (c *BaseClient) ClearAppProxyConfig(appName string) error {
 	cmd := fmt.Sprintf(proxyClearConfigCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppProxyReport(appName string) (*AppProxyReport, error) {
+func (c *BaseClient) GetAppProxyReport(appName string) (*AppProxyReport, error) {
 	cmd := fmt.Sprintf(proxyReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -116,7 +116,7 @@ func (c *DefaultClient) GetAppProxyReport(appName string) (*AppProxyReport, erro
 	return &report, nil
 }
 
-func (c *DefaultClient) GetAllAppProxyReport() (ProxyReport, error) {
+func (c *BaseClient) GetAllAppProxyReport() (ProxyReport, error) {
 	cmd := fmt.Sprintf(proxyReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -131,19 +131,19 @@ func (c *DefaultClient) GetAllAppProxyReport() (ProxyReport, error) {
 	return report, nil
 }
 
-func (c *DefaultClient) SetAppProxyEnabled(appName string) error {
+func (c *BaseClient) SetAppProxyEnabled(appName string) error {
 	cmd := fmt.Sprintf(proxyEnableAppCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppProxyDisabled(appName string) error {
+func (c *BaseClient) SetAppProxyDisabled(appName string) error {
 	cmd := fmt.Sprintf(proxyDisableAppCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppProxyPortMappings(appName string) ([]ProxyPortMapping, error) {
+func (c *BaseClient) GetAppProxyPortMappings(appName string) ([]ProxyPortMapping, error) {
 	cmd := fmt.Sprintf(proxyPortsCmd, appName)
 	out, err := c.Exec(cmd)
 	if out == proxyNoPortMappingsMsg {
@@ -174,43 +174,43 @@ func (c *DefaultClient) GetAppProxyPortMappings(appName string) ([]ProxyPortMapp
 	return mappings, nil
 }
 
-func (c *DefaultClient) AddAppProxyPort(appName string, port ProxyPortMapping) error {
+func (c *BaseClient) AddAppProxyPort(appName string, port ProxyPortMapping) error {
 	cmd := fmt.Sprintf(proxyPortsAddCmd, appName, port.String())
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) AddAppProxyPorts(appName string, ports []ProxyPortMapping) error {
+func (c *BaseClient) AddAppProxyPorts(appName string, ports []ProxyPortMapping) error {
 	cmd := fmt.Sprintf(proxyPortsAddCmd, appName, concatPortList(ports))
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppProxyPorts(appName string) error {
+func (c *BaseClient) ClearAppProxyPorts(appName string) error {
 	cmd := fmt.Sprintf(proxyPortsClearCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveAppProxyPort(appName string, port ProxyPortMapping) error {
+func (c *BaseClient) RemoveAppProxyPort(appName string, port ProxyPortMapping) error {
 	cmd := fmt.Sprintf(proxyPortsRemoveCmd, appName, port.String())
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveAppProxyPorts(appName string, ports []ProxyPortMapping) error {
+func (c *BaseClient) RemoveAppProxyPorts(appName string, ports []ProxyPortMapping) error {
 	cmd := fmt.Sprintf(proxyPortsRemoveCmd, appName, concatPortList(ports))
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppProxyPorts(appName string, ports []ProxyPortMapping) error {
+func (c *BaseClient) SetAppProxyPorts(appName string, ports []ProxyPortMapping) error {
 	cmd := fmt.Sprintf(proxyPortsSetCmd, appName, concatPortList(ports))
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppProxyType(appName string, proxyType ProxyType) error {
+func (c *BaseClient) SetAppProxyType(appName string, proxyType ProxyType) error {
 	cmd := fmt.Sprintf(proxySetTypeCmd, appName, proxyType)
 	_, err := c.Exec(cmd)
 	return err

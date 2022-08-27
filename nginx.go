@@ -78,7 +78,7 @@ const (
 	nginxValidateConfigCmd = "nginx:validate-config %s"
 )
 
-func (c *DefaultClient) GetAppNginxConfig(appName string) (string, error) {
+func (c *BaseClient) GetAppNginxConfig(appName string) (string, error) {
 	cmd := fmt.Sprintf(nginxShowConfigCmd, appName)
 	out, err := c.Exec(cmd)
 	if strings.HasPrefix(out, nginxNoConfigMsgPrefix) {
@@ -90,17 +90,17 @@ func (c *DefaultClient) GetAppNginxConfig(appName string) (string, error) {
 	return out, nil
 }
 
-func (c *DefaultClient) GetAppNginxAccessLogs(appName string) (string, error) {
+func (c *BaseClient) GetAppNginxAccessLogs(appName string) (string, error) {
 	cmd := fmt.Sprintf(nginxAccessLogsCmd, appName)
 	return c.Exec(cmd)
 }
 
-func (c *DefaultClient) GetAppNginxErrorLogs(appName string) (string, error) {
+func (c *BaseClient) GetAppNginxErrorLogs(appName string) (string, error) {
 	cmd := fmt.Sprintf(nginxErrorLogsCmd, appName)
 	return c.Exec(cmd)
 }
 
-func (c *DefaultClient) GetAppNginxReport(appName string) (*AppNginxReport, error) {
+func (c *BaseClient) GetAppNginxReport(appName string) (*AppNginxReport, error) {
 	cmd := fmt.Sprintf(nginxReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -115,7 +115,7 @@ func (c *DefaultClient) GetAppNginxReport(appName string) (*AppNginxReport, erro
 	return &report, nil
 }
 
-func (c *DefaultClient) GetGlobalNginxReport() (NginxReport, error) {
+func (c *BaseClient) GetGlobalNginxReport() (NginxReport, error) {
 	cmd := fmt.Sprintf(nginxReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -130,11 +130,11 @@ func (c *DefaultClient) GetGlobalNginxReport() (NginxReport, error) {
 	return report, nil
 }
 
-func (c *DefaultClient) ValidateAllNginxConfig(clean bool) error {
+func (c *BaseClient) ValidateAllNginxConfig(clean bool) error {
 	return c.ValidateAppNginxConfig("", clean)
 }
 
-func (c *DefaultClient) ValidateAppNginxConfig(appName string, clean bool) error {
+func (c *BaseClient) ValidateAppNginxConfig(appName string, clean bool) error {
 	cmd := fmt.Sprintf(nginxValidateConfigCmd, appName)
 	if clean {
 		cmd += " --clean"
@@ -143,7 +143,7 @@ func (c *DefaultClient) ValidateAppNginxConfig(appName string, clean bool) error
 	return err
 }
 
-func (c *DefaultClient) SetAppNginxProperty(appName string, property NginxProperty, value string) error {
+func (c *BaseClient) SetAppNginxProperty(appName string, property NginxProperty, value string) error {
 	cmd := fmt.Sprintf(nginxSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err

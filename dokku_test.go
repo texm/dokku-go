@@ -14,7 +14,7 @@ type dokkuTestSuite struct {
 	Dokku                     *testutils.DokkuContainer
 	AttachContainerTestLogger bool
 	DefaultAppName            string
-	Client                    Client
+	Client                    *SSHClient
 }
 
 func (s *dokkuTestSuite) SetupTest() {
@@ -113,18 +113,14 @@ func (s *dokkuTestSuite) CreateTestClient(ctx context.Context, admin bool) error
 		return err
 	}
 
-	cfg := &ClientConfig{
+	cfg := &SSHClientConfig{
 		Host:            s.Dokku.Host,
 		Port:            s.Dokku.SSHPort,
 		PrivateKey:      keyPair.PrivateKey,
 		HostKeyCallback: s.Dokku.HostKeyFunc(),
 	}
-	client, err := NewClient(cfg)
+	client, err := NewSSHClient(cfg)
 	if err != nil {
-		return err
-	}
-
-	if err := client.Dial(); err != nil {
 		return err
 	}
 

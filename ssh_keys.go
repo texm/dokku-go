@@ -1,6 +1,7 @@
 package dokku
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -28,18 +29,19 @@ const (
 
 // https://dokku.com/docs/deployment/user-management/#granting-other-unix-user-accounts-dokku-access
 
-func (c *DefaultClient) AddSSHKey(name string, key []byte) error {
+func (c *BaseClient) AddSSHKey(name string, key []byte) error {
 	cmd := fmt.Sprintf(sshKeysAddCmd, name)
-	output, err := c.ExecWithStdin(cmd, key)
+	reader := bytes.NewReader(key)
+	output, err := c.ExecWithStdin(cmd, reader)
 	fmt.Println(output)
 	return err
 }
 
-func (c *DefaultClient) ListSSHKeys() ([]SSHKey, error) {
+func (c *BaseClient) ListSSHKeys() ([]SSHKey, error) {
 	return c.ListSSHKeysForName("")
 }
 
-func (c *DefaultClient) ListSSHKeysForName(name string) ([]SSHKey, error) {
+func (c *BaseClient) ListSSHKeysForName(name string) ([]SSHKey, error) {
 	cmd := fmt.Sprintf(sshKeysListCmd, name)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -53,13 +55,13 @@ func (c *DefaultClient) ListSSHKeysForName(name string) ([]SSHKey, error) {
 	return keys, nil
 }
 
-func (c *DefaultClient) RemoveSSHKeyByName(name string) error {
+func (c *BaseClient) RemoveSSHKeyByName(name string) error {
 	cmd := fmt.Sprintf(sshKeysRemoveNameCmd, name)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveSSHKeyByFingerprint(fingerprint string) error {
+func (c *BaseClient) RemoveSSHKeyByFingerprint(fingerprint string) error {
 	cmd := fmt.Sprintf(sshKeysRemoveFingerprintCmd, fingerprint)
 	_, err := c.Exec(cmd)
 	return err

@@ -80,17 +80,17 @@ const (
 	dockerRunListCmd     = "run:list %s"
 )
 
-func (c *DefaultClient) DockerCleanup(appName string) error {
+func (c *BaseClient) DockerCleanup(appName string) error {
 	cmd := fmt.Sprintf(cleanupCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) DockerCleanupAll() error {
+func (c *BaseClient) DockerCleanupAll() error {
 	return c.DockerCleanup("")
 }
 
-func (c *DefaultClient) GetAppDockerOptionsReport(appName string) (*AppDockerOptionsReport, error) {
+func (c *BaseClient) GetAppDockerOptionsReport(appName string) (*AppDockerOptionsReport, error) {
 	cmd := fmt.Sprintf(dockerOptionsReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -105,7 +105,7 @@ func (c *DefaultClient) GetAppDockerOptionsReport(appName string) (*AppDockerOpt
 	return &report, nil
 }
 
-func (c *DefaultClient) GetGlobalDockerOptionsReport() (DockerOptionsReport, error) {
+func (c *BaseClient) GetGlobalDockerOptionsReport() (DockerOptionsReport, error) {
 	cmd := fmt.Sprintf(dockerOptionsReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -120,31 +120,31 @@ func (c *DefaultClient) GetGlobalDockerOptionsReport() (DockerOptionsReport, err
 	return report, nil
 }
 
-func (c *DefaultClient) AddAppPhaseDockerOption(appName string, phase string, option string) error {
+func (c *BaseClient) AddAppPhaseDockerOption(appName string, phase string, option string) error {
 	cmd := fmt.Sprintf(dockerOptionsAddCmd, appName, phase, option)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppPhaseDockerOptions(appName string, phase string) error {
+func (c *BaseClient) ClearAppPhaseDockerOptions(appName string, phase string) error {
 	cmd := fmt.Sprintf(dockerOptionsClearCmd, appName, phase)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveAppPhaseDockerOption(appName string, phase string, option string) error {
+func (c *BaseClient) RemoveAppPhaseDockerOption(appName string, phase string, option string) error {
 	cmd := fmt.Sprintf(dockerOptionsRemoveCmd, appName, phase, option)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) LoginDockerRegistry(server string, username string, password string) error {
+func (c *BaseClient) LoginDockerRegistry(server string, username string, password string) error {
 	cmd := fmt.Sprintf(dockerRegistryLoginCmd, server, username, password)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppDockerRegistryReport(appName string) (*AppDockerRegistryReport, error) {
+func (c *BaseClient) GetAppDockerRegistryReport(appName string) (*AppDockerRegistryReport, error) {
 	cmd := fmt.Sprintf(dockerRegistryReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -159,7 +159,7 @@ func (c *DefaultClient) GetAppDockerRegistryReport(appName string) (*AppDockerRe
 	return report, nil
 }
 
-func (c *DefaultClient) GetDockerRegistryReport() (DockerRegistryReport, error) {
+func (c *BaseClient) GetDockerRegistryReport() (DockerRegistryReport, error) {
 	cmd := fmt.Sprintf(dockerRegistryReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -174,17 +174,17 @@ func (c *DefaultClient) GetDockerRegistryReport() (DockerRegistryReport, error) 
 	return report, nil
 }
 
-func (c *DefaultClient) SetAppDockerRegistryProperty(appName string, property DockerRegistryProperty, value string) error {
+func (c *BaseClient) SetAppDockerRegistryProperty(appName string, property DockerRegistryProperty, value string) error {
 	cmd := fmt.Sprintf(dockerRegistrySetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppDockerRegistryProperty(appName string, property DockerRegistryProperty) error {
+func (c *BaseClient) ClearAppDockerRegistryProperty(appName string, property DockerRegistryProperty) error {
 	return c.SetAppDockerRegistryProperty(appName, property, "")
 }
 
-func (c *DefaultClient) RunAppCommand(appName string, runCmd string, options *DockerRunOptions) (string, error) {
+func (c *BaseClient) RunAppCommand(appName string, runCmd string, options *DockerRunOptions) (string, error) {
 	tpl := dockerRunCmd
 	envArg := ""
 	if options != nil {
@@ -204,7 +204,7 @@ func (c *DefaultClient) RunAppCommand(appName string, runCmd string, options *Do
 }
 
 // TODO: implement
-func (c *DefaultClient) ListAppRunContainers(appName string) ([]string, error) {
+func (c *BaseClient) ListAppRunContainers(appName string) ([]string, error) {
 	cmd := fmt.Sprintf(dockerRunListCmd, appName)
 	_, err := c.Exec(cmd)
 

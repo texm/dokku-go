@@ -85,26 +85,26 @@ var (
 	ResourceNvidiaGPU           = ResourceSpec{"nvidia-gpu", ""}
 )
 
-func (c *DefaultClient) SetAppDefaultResourceLimit(appName string, resource ResourceSpec, limit int) error {
+func (c *BaseClient) SetAppDefaultResourceLimit(appName string, resource ResourceSpec, limit int) error {
 	amt := fmt.Sprintf("%d%s", limit, resource.Suffix)
 	cmd := fmt.Sprintf(resourceLimitCmd, appName, resource.Name, amt)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppDefaultResourceLimit(appName string, resource ResourceSpec) error {
+func (c *BaseClient) ClearAppDefaultResourceLimit(appName string, resource ResourceSpec) error {
 	cmd := fmt.Sprintf(resourceLimitCmd, appName, resource.Name, "clear")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppDefaultResourceLimits(appName string) error {
+func (c *BaseClient) ClearAppDefaultResourceLimits(appName string) error {
 	cmd := fmt.Sprintf(resourceLimitClearCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppProcessResourceLimit(appName string, process string, resource ResourceSpec, limit int) error {
+func (c *BaseClient) SetAppProcessResourceLimit(appName string, process string, resource ResourceSpec, limit int) error {
 	amt := fmt.Sprintf("%d%s", limit, resource.Suffix)
 	cmd := fmt.Sprintf(resourceLimitProcessCmd, appName, process, resource.Name, amt)
 	fmt.Println(cmd)
@@ -113,51 +113,51 @@ func (c *DefaultClient) SetAppProcessResourceLimit(appName string, process strin
 	return err
 }
 
-func (c *DefaultClient) ClearAppProcessResourceLimit(appName string, process string, resource ResourceSpec) error {
+func (c *BaseClient) ClearAppProcessResourceLimit(appName string, process string, resource ResourceSpec) error {
 	cmd := fmt.Sprintf(resourceLimitProcessCmd, appName, process, resource.Name, "clear")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppProcessResourceLimits(appName string, process string) error {
+func (c *BaseClient) ClearAppProcessResourceLimits(appName string, process string) error {
 	cmd := fmt.Sprintf(resourceLimitClearProcessCmd, appName, process)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppResourceReservation(appName string, resource ResourceSpec, reserve int) error {
+func (c *BaseClient) SetAppResourceReservation(appName string, resource ResourceSpec, reserve int) error {
 	amt := fmt.Sprintf("%d%s", reserve, resource.Suffix)
 	cmd := fmt.Sprintf(resourceReserveCmd, appName, resource.Name, amt)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppResourceReservation(appName string, resource ResourceSpec) error {
+func (c *BaseClient) ClearAppResourceReservation(appName string, resource ResourceSpec) error {
 	cmd := fmt.Sprintf(resourceReserveCmd, appName, resource.Name, "clear")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppResourceReservations(appName string) error {
+func (c *BaseClient) ClearAppResourceReservations(appName string) error {
 	cmd := fmt.Sprintf(resourceReserveClearCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppProcessResourceReservation(appName string, process string, resource ResourceSpec, reserve int) error {
+func (c *BaseClient) SetAppProcessResourceReservation(appName string, process string, resource ResourceSpec, reserve int) error {
 	amt := fmt.Sprintf("%d%s", reserve, resource.Suffix)
 	cmd := fmt.Sprintf(resourceReserveProcessCmd, appName, process, resource.Name, amt)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppProcessResourceReservation(appName string, process string, resource ResourceSpec) error {
+func (c *BaseClient) ClearAppProcessResourceReservation(appName string, process string, resource ResourceSpec) error {
 	cmd := fmt.Sprintf(resourceReserveProcessCmd, appName, process, resource.Name, "clear")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppProcessResourceReservations(appName string, process string) error {
+func (c *BaseClient) ClearAppProcessResourceReservations(appName string, process string) error {
 	cmd := fmt.Sprintf(resourceReserveClearProcessCmd, appName, process)
 	_, err := c.Exec(cmd)
 	return err
@@ -259,7 +259,7 @@ func parseAppResourceReport(reportMap map[string]string) (*AppResourceReport, er
 	return report, nil
 }
 
-func (c *DefaultClient) GetAppResourceReport(appName string) (*AppResourceReport, error) {
+func (c *BaseClient) GetAppResourceReport(appName string) (*AppResourceReport, error) {
 	cmd := fmt.Sprintf(resourceReportAppCmd, appName)
 	output, err := c.Exec(cmd)
 
@@ -275,7 +275,7 @@ func (c *DefaultClient) GetAppResourceReport(appName string) (*AppResourceReport
 	return parseAppResourceReport(reportMap)
 }
 
-func (c *DefaultClient) GetResourceReport() (ResourceReport, error) {
+func (c *BaseClient) GetResourceReport() (ResourceReport, error) {
 	output, err := c.Exec(resourceReportCmd)
 
 	if err != nil {

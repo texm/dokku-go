@@ -80,13 +80,13 @@ const (
 	storageUnmountCmd         = "storage:unmount %s %s"
 )
 
-func (c *DefaultClient) EnsureStorageDirectory(directory string, chown StorageChownOption) error {
+func (c *BaseClient) EnsureStorageDirectory(directory string, chown StorageChownOption) error {
 	cmd := fmt.Sprintf(storageEnsureDirectoryCmd, chown, directory)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ListAppStorage(appName string) ([]StorageBindMount, error) {
+func (c *BaseClient) ListAppStorage(appName string) ([]StorageBindMount, error) {
 	cmd := fmt.Sprintf(storageListAppCmd, appName)
 	out, err := c.Exec(cmd)
 
@@ -108,19 +108,19 @@ func (c *DefaultClient) ListAppStorage(appName string) ([]StorageBindMount, erro
 	return mounts, err
 }
 
-func (c *DefaultClient) MountAppStorage(appName string, mount StorageBindMount) error {
+func (c *BaseClient) MountAppStorage(appName string, mount StorageBindMount) error {
 	cmd := fmt.Sprintf(storageMountAppCmd, appName, mount.String())
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) UnmountAppStorage(appName string, mount StorageBindMount) error {
+func (c *BaseClient) UnmountAppStorage(appName string, mount StorageBindMount) error {
 	cmd := fmt.Sprintf(storageUnmountCmd, appName, mount.String())
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppStorageReport(appName string) (*AppStorageReport, error) {
+func (c *BaseClient) GetAppStorageReport(appName string) (*AppStorageReport, error) {
 	cmd := fmt.Sprintf(storageReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -135,7 +135,7 @@ func (c *DefaultClient) GetAppStorageReport(appName string) (*AppStorageReport, 
 	return rawReport.Parse(), nil
 }
 
-func (c *DefaultClient) GetStorageReport() (StorageReport, error) {
+func (c *BaseClient) GetStorageReport() (StorageReport, error) {
 	cmd := fmt.Sprintf(storageReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {

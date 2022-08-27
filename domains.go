@@ -77,7 +77,7 @@ func parseRawAppDomainsReport(rawReport rawAppDomainsReport) (*AppDomainsReport,
 	}, nil
 }
 
-func (c *DefaultClient) GetAppDomainsReport(appName string) (*AppDomainsReport, error) {
+func (c *BaseClient) GetAppDomainsReport(appName string) (*AppDomainsReport, error) {
 	cmd := fmt.Sprintf(domainsReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -92,7 +92,7 @@ func (c *DefaultClient) GetAppDomainsReport(appName string) (*AppDomainsReport, 
 	return parseRawAppDomainsReport(rawReport)
 }
 
-func (c *DefaultClient) GetGlobalDomainsReport() (*GlobalDomainsReport, error) {
+func (c *BaseClient) GetGlobalDomainsReport() (*GlobalDomainsReport, error) {
 	cmd := fmt.Sprintf(domainsReportCmd, "--global")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -112,7 +112,7 @@ func (c *DefaultClient) GetGlobalDomainsReport() (*GlobalDomainsReport, error) {
 	}, nil
 }
 
-func (c *DefaultClient) GetDomainsReport() (DomainsReport, error) {
+func (c *BaseClient) GetDomainsReport() (DomainsReport, error) {
 	cmd := fmt.Sprintf(domainsReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -136,61 +136,61 @@ func (c *DefaultClient) GetDomainsReport() (DomainsReport, error) {
 	return reportMap, nil
 }
 
-func (c *DefaultClient) EnableAppDomains(appName string) error {
+func (c *BaseClient) EnableAppDomains(appName string) error {
 	cmd := fmt.Sprintf(domainsEnableAppCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) DisableAppDomains(appName string) error {
+func (c *BaseClient) DisableAppDomains(appName string) error {
 	cmd := fmt.Sprintf(domainsDisableAppCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) AddAppDomain(appName string, domain string) error {
+func (c *BaseClient) AddAppDomain(appName string, domain string) error {
 	cmd := fmt.Sprintf(domainsAddAppCmd, appName, domain)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveAppDomain(appName string, domain string) error {
+func (c *BaseClient) RemoveAppDomain(appName string, domain string) error {
 	cmd := fmt.Sprintf(domainsRemoveAppCmd, appName, domain)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppDomains(appName string, domains []string) error {
+func (c *BaseClient) SetAppDomains(appName string, domains []string) error {
 	cmd := fmt.Sprintf(domainsSetAppCmd, appName, strings.Join(domains, " "))
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearAppDomains(appName string) error {
+func (c *BaseClient) ClearAppDomains(appName string) error {
 	cmd := fmt.Sprintf(domainsClearAppCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) AddGlobalDomain(domain string) error {
+func (c *BaseClient) AddGlobalDomain(domain string) error {
 	cmd := fmt.Sprintf(domainsAddGlobalCmd, domain)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveGlobalDomain(domain string) error {
+func (c *BaseClient) RemoveGlobalDomain(domain string) error {
 	cmd := fmt.Sprintf(domainsRemoveGlobalCmd, domain)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetGlobalDomains(domains []string) error {
+func (c *BaseClient) SetGlobalDomains(domains []string) error {
 	cmd := fmt.Sprintf(domainsSetGlobalCmd, strings.Join(domains, " "))
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearGlobalDomains() error {
+func (c *BaseClient) ClearGlobalDomains() error {
 	_, err := c.Exec(domainsClearGlobalCmd)
 	return err
 }

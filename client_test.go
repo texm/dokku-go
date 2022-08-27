@@ -12,3 +12,7 @@ type dokkuClientTestSuite struct {
 func TestRunDokkuClientTestSuite(t *testing.T) {
 	suite.Run(t, new(dokkuClientTestSuite))
 }
+
+func (s *checksManagerTestSuite) TestCreateSSHClient() {
+
+}

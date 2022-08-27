@@ -39,9 +39,9 @@ const (
 	eventsOffCmd  = "events:off"
 )
 
-func (c *DefaultClient) TailAppLogs(appName string) (io.Reader, error) {
+func (c *BaseClient) TailAppLogs(appName string) (io.Reader, error) {
 	cmd := fmt.Sprintf(appTailLogsCmd, appName)
-	stream, err := c.StreamingExec(cmd)
+	stream, err := c.ExecStreaming(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -75,30 +75,30 @@ func (c *DefaultClient) TailAppLogs(appName string) (io.Reader, error) {
 	return pr, nil
 }
 
-func (c *DefaultClient) GetNAppLogs(appName string, numLines int) (string, error) {
+func (c *BaseClient) GetNAppLogs(appName string, numLines int) (string, error) {
 	cmd := fmt.Sprintf(appLogsCmd, appName)
 	return c.Exec(cmd)
 }
 
-func (c *DefaultClient) GetAppLogs(appName string) (string, error) {
+func (c *BaseClient) GetAppLogs(appName string) (string, error) {
 	return c.GetNAppLogs(appName, 50)
 }
 
-func (c *DefaultClient) GetAppProcessLogs(appName, process string) (string, error) {
+func (c *BaseClient) GetAppProcessLogs(appName, process string) (string, error) {
 	cmd := fmt.Sprintf(appLogsProcessCmd, appName, process)
 	return c.Exec(cmd)
 }
 
-func (c *DefaultClient) GetAppFailedDeployLogs(appName string) (string, error) {
+func (c *BaseClient) GetAppFailedDeployLogs(appName string) (string, error) {
 	cmd := fmt.Sprintf(appFailedDeployLogsCmd, appName)
 	return c.Exec(cmd)
 }
 
-func (c *DefaultClient) GetAllFailedDeployLogs() (string, error) {
+func (c *BaseClient) GetAllFailedDeployLogs() (string, error) {
 	return c.Exec(allFailedDeployLogsCmd)
 }
 
-func (c *DefaultClient) SetEventLoggingEnabled(enabled bool) error {
+func (c *BaseClient) SetEventLoggingEnabled(enabled bool) error {
 	var err error
 	var output string
 	if !enabled {
@@ -115,11 +115,11 @@ func (c *DefaultClient) SetEventLoggingEnabled(enabled bool) error {
 	return err
 }
 
-func (c *DefaultClient) GetEventLogs() (string, error) {
+func (c *BaseClient) GetEventLogs() (string, error) {
 	return c.Exec(eventsCmd)
 }
 
-func (c *DefaultClient) ListLoggedEvents() ([]string, error) {
+func (c *BaseClient) ListLoggedEvents() ([]string, error) {
 	var events []string
 	sEvents, err := c.Exec(eventsListCmd)
 	if err != nil {

@@ -86,7 +86,7 @@ const (
 	buildpacksSetPropertyCmd = "buildpacks:set-property %s %s %s"
 )
 
-func (c *DefaultClient) GetAppBuilderDockerfileReport(appName string) (*AppBuilderDockerfileReport, error) {
+func (c *BaseClient) GetAppBuilderDockerfileReport(appName string) (*AppBuilderDockerfileReport, error) {
 	cmd := fmt.Sprintf(builderDockerfileReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -101,13 +101,13 @@ func (c *DefaultClient) GetAppBuilderDockerfileReport(appName string) (*AppBuild
 	return &report, err
 }
 
-func (c *DefaultClient) SetAppBuilderDockerfileProperty(appName string, property DockerfileProperty, value string) error {
+func (c *BaseClient) SetAppBuilderDockerfileProperty(appName string, property DockerfileProperty, value string) error {
 	cmd := fmt.Sprintf(builderDockerfileSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppBuilderPackReport(appName string) (*AppBuilderPackReport, error) {
+func (c *BaseClient) GetAppBuilderPackReport(appName string) (*AppBuilderPackReport, error) {
 	cmd := fmt.Sprintf(builderPackReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -122,13 +122,13 @@ func (c *DefaultClient) GetAppBuilderPackReport(appName string) (*AppBuilderPack
 	return &report, err
 }
 
-func (c *DefaultClient) SetAppBuilderPackProperty(appName string, property BuildpackProperty, value string) error {
+func (c *BaseClient) SetAppBuilderPackProperty(appName string, property BuildpackProperty, value string) error {
 	cmd := fmt.Sprintf(builderPackSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppBuilderReport(appName string) (*AppBuilderReport, error) {
+func (c *BaseClient) GetAppBuilderReport(appName string) (*AppBuilderReport, error) {
 	cmd := fmt.Sprintf(builderReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -143,29 +143,29 @@ func (c *DefaultClient) GetAppBuilderReport(appName string) (*AppBuilderReport, 
 	return &report, err
 }
 
-func (c *DefaultClient) SetAppBuilderProperty(appName string, property BuilderProperty, value string) error {
+func (c *BaseClient) SetAppBuilderProperty(appName string, property BuilderProperty, value string) error {
 	cmd := fmt.Sprintf(builderSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) AddAppBuildpackAtIndex(appName string, buildpack string, index int) error {
+func (c *BaseClient) AddAppBuildpackAtIndex(appName string, buildpack string, index int) error {
 	cmd := fmt.Sprintf(buildpacksAddCmd, index, appName, buildpack)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) AddAppBuildpack(appName string, buildpack string) error {
+func (c *BaseClient) AddAppBuildpack(appName string, buildpack string) error {
 	return c.AddAppBuildpackAtIndex(appName, buildpack, 1)
 }
 
-func (c *DefaultClient) ClearAppBuildpacks(appName string) error {
+func (c *BaseClient) ClearAppBuildpacks(appName string) error {
 	cmd := fmt.Sprintf(buildpacksClearCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ListAppBuildpacks(appName string) ([]string, error) {
+func (c *BaseClient) ListAppBuildpacks(appName string) ([]string, error) {
 	cmd := fmt.Sprintf(buildpacksListCmd, appName)
 	out, err := c.Exec(cmd)
 
@@ -180,13 +180,13 @@ func (c *DefaultClient) ListAppBuildpacks(appName string) ([]string, error) {
 	return packs, err
 }
 
-func (c *DefaultClient) RemoveAppBuildpack(appName string, buildpack string) error {
+func (c *BaseClient) RemoveAppBuildpack(appName string, buildpack string) error {
 	cmd := fmt.Sprintf(buildpacksRemoveCmd, appName, buildpack)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppBuildpacksReport(appName string) (*AppBuildpacksReport, error) {
+func (c *BaseClient) GetAppBuildpacksReport(appName string) (*AppBuildpacksReport, error) {
 	cmd := fmt.Sprintf(buildpacksReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -201,22 +201,22 @@ func (c *DefaultClient) GetAppBuildpacksReport(appName string) (*AppBuildpacksRe
 	return &report, err
 }
 
-func (c *DefaultClient) SetAppBuildpackIndex(appName string, buildpack string, index int) error {
+func (c *BaseClient) SetAppBuildpackIndex(appName string, buildpack string, index int) error {
 	cmd := fmt.Sprintf(buildpacksSetCmd, index, appName, buildpack)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppBuildpack(appName string, buildpack string) error {
+func (c *BaseClient) SetAppBuildpack(appName string, buildpack string) error {
 	return c.SetAppBuildpackIndex(appName, buildpack, 1)
 }
 
-func (c *DefaultClient) SetAppBuildpacksProperty(appName string, property BuildpackProperty, value string) error {
+func (c *BaseClient) SetAppBuildpacksProperty(appName string, property BuildpackProperty, value string) error {
 	cmd := fmt.Sprintf(buildpacksSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetGlobalBuildpacksProperty(property BuildpackProperty, value string) error {
+func (c *BaseClient) SetGlobalBuildpacksProperty(property BuildpackProperty, value string) error {
 	return c.SetAppBuildpacksProperty("--global", property, value)
 }

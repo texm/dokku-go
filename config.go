@@ -96,17 +96,17 @@ func getOptionalFlag(flag string, enabled bool) string {
 	return flag
 }
 
-func (c *DefaultClient) GetDokkuVersion() (string, error) {
+func (c *BaseClient) GetDokkuVersion() (string, error) {
 	return c.Exec(versionCmd)
 }
 
-func (c *DefaultClient) SetAppJsonProperty(appName string, property AppJsonProperty, value string) error {
+func (c *BaseClient) SetAppJsonProperty(appName string, property AppJsonProperty, value string) error {
 	cmd := fmt.Sprintf(appJsonSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppJsonReport(appName string) (*AppAppJsonReport, error) {
+func (c *BaseClient) GetAppJsonReport(appName string) (*AppAppJsonReport, error) {
 	cmd := fmt.Sprintf(appJsonReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -121,7 +121,7 @@ func (c *DefaultClient) GetAppJsonReport(appName string) (*AppAppJsonReport, err
 	return report, nil
 }
 
-func (c *DefaultClient) GetAllAppJsonReport() (AppJsonReport, error) {
+func (c *BaseClient) GetAllAppJsonReport() (AppJsonReport, error) {
 	cmd := fmt.Sprintf(appJsonReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -136,11 +136,11 @@ func (c *DefaultClient) GetAllAppJsonReport() (AppJsonReport, error) {
 	return report, nil
 }
 
-func (c *DefaultClient) GetGlobalConfig() (map[string]string, error) {
+func (c *BaseClient) GetGlobalConfig() (map[string]string, error) {
 	return c.GetAppConfig("--global")
 }
 
-func (c *DefaultClient) GetAppConfig(appName string) (map[string]string, error) {
+func (c *BaseClient) GetAppConfig(appName string) (map[string]string, error) {
 	cmd := fmt.Sprintf(configShowCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -160,18 +160,18 @@ func (c *DefaultClient) GetAppConfig(appName string) (map[string]string, error) 
 	return config, nil
 }
 
-func (c *DefaultClient) ClearAppConfig(appName string, restart bool) error {
+func (c *BaseClient) ClearAppConfig(appName string, restart bool) error {
 	restartFlag := getOptionalFlag("--no-restart", !restart)
 	cmd := fmt.Sprintf(configClearCmd, restartFlag, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) ClearGlobalConfig(restart bool) error {
+func (c *BaseClient) ClearGlobalConfig(restart bool) error {
 	return c.ClearAppConfig("--global", restart)
 }
 
-func (c *DefaultClient) ExportAppConfig(appName string, format ConfigExportFormat) (string, error) {
+func (c *BaseClient) ExportAppConfig(appName string, format ConfigExportFormat) (string, error) {
 	var cmd string
 	switch format {
 	case ConfigExportFormatEval:
@@ -186,21 +186,21 @@ func (c *DefaultClient) ExportAppConfig(appName string, format ConfigExportForma
 	return c.Exec(cmd)
 }
 
-func (c *DefaultClient) ExportGlobalConfig(format ConfigExportFormat) (string, error) {
+func (c *BaseClient) ExportGlobalConfig(format ConfigExportFormat) (string, error) {
 	return c.ExportAppConfig("--global", format)
 }
 
-func (c *DefaultClient) GetAppConfigValue(appName string, key string, quoted bool) (string, error) {
+func (c *BaseClient) GetAppConfigValue(appName string, key string, quoted bool) (string, error) {
 	quoteFlag := getOptionalFlag("--quoted", quoted)
 	cmd := fmt.Sprintf(configGetCmd, quoteFlag, appName, key)
 	return c.Exec(cmd)
 }
 
-func (c *DefaultClient) GetGlobalConfigValue(key string, quoted bool) (string, error) {
+func (c *BaseClient) GetGlobalConfigValue(key string, quoted bool) (string, error) {
 	return c.GetAppConfigValue("--global", key, quoted)
 }
 
-func (c *DefaultClient) SetAppConfigValue(appName string, key string, value string, restart bool) error {
+func (c *BaseClient) SetAppConfigValue(appName string, key string, value string, restart bool) error {
 	restartFlag := getOptionalFlag("--no-restart", !restart)
 	pair, err := encodeKeyValPair(key, value)
 	if err != nil {
@@ -211,22 +211,22 @@ func (c *DefaultClient) SetAppConfigValue(appName string, key string, value stri
 	return err
 }
 
-func (c *DefaultClient) UnsetAppConfigValue(appName string, key string, restart bool) error {
+func (c *BaseClient) UnsetAppConfigValue(appName string, key string, restart bool) error {
 	restartFlag := getOptionalFlag("--no-restart", !restart)
 	cmd := fmt.Sprintf(configUnsetCmd, restartFlag, appName, key)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetGlobalConfigValue(key string, value string, restart bool) error {
+func (c *BaseClient) SetGlobalConfigValue(key string, value string, restart bool) error {
 	return c.SetAppConfigValue("--global", key, value, restart)
 }
 
-func (c *DefaultClient) UnsetGlobalConfigValue(key string, restart bool) error {
+func (c *BaseClient) UnsetGlobalConfigValue(key string, restart bool) error {
 	return c.UnsetAppConfigValue("--global", key, restart)
 }
 
-func (c *DefaultClient) SetAppConfigValues(appName string, config map[string]string, restart bool) error {
+func (c *BaseClient) SetAppConfigValues(appName string, config map[string]string, restart bool) error {
 	var pairs []string
 	for k, v := range config {
 		pair, err := encodeKeyValPair(k, v)
@@ -242,19 +242,19 @@ func (c *DefaultClient) SetAppConfigValues(appName string, config map[string]str
 	return err
 }
 
-func (c *DefaultClient) UnsetAppConfigValues(appName string, keys []string, restart bool) error {
+func (c *BaseClient) UnsetAppConfigValues(appName string, keys []string, restart bool) error {
 	return c.UnsetAppConfigValue(appName, strings.Join(keys, " "), restart)
 }
 
-func (c *DefaultClient) SetGlobalConfigValues(config map[string]string, restart bool) error {
+func (c *BaseClient) SetGlobalConfigValues(config map[string]string, restart bool) error {
 	return c.SetAppConfigValues("--global", config, restart)
 }
 
-func (c *DefaultClient) UnsetGlobalConfigValues(keys []string, restart bool) error {
+func (c *BaseClient) UnsetGlobalConfigValues(keys []string, restart bool) error {
 	return c.UnsetAppConfigValues("--global", keys, restart)
 }
 
-func (c *DefaultClient) GetAppConfigKeys(appName string) ([]string, error) {
+func (c *BaseClient) GetAppConfigKeys(appName string) ([]string, error) {
 	cmd := fmt.Sprintf(configKeysCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -263,6 +263,6 @@ func (c *DefaultClient) GetAppConfigKeys(appName string) ([]string, error) {
 	return strings.Split(out, "\n"), nil
 }
 
-func (c *DefaultClient) GetGlobalConfigKeys() ([]string, error) {
+func (c *BaseClient) GetGlobalConfigKeys() ([]string, error) {
 	return c.GetAppConfigKeys("--global")
 }
