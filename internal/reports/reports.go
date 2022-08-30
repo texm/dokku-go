@@ -123,8 +123,8 @@ func ParseIntoMap(rawReport string, reportPtr interface{}) error {
 			WeaklyTypedInput: true,
 			Result:           &appReport,
 			TagName:          dokkuTagName,
-			ErrorUnused:      true,
-			ErrorUnset:       true,
+			ErrorUnused:      false,
+			ErrorUnset:       false,
 		}
 		decoder, err := mapstructure.NewDecoder(decoderCfg)
 		if err != nil {
