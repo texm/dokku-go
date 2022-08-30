@@ -8,9 +8,9 @@ import (
 type gitManager interface {
 	GitInitializeApp(appName string) error
 	GitGetPublicKey() (string, error)
-	GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error
-	GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) error
-	GitCreateFromImage(appName string, image string, opt *GitImageOptions) error
+	GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) (*CommandOutputStream, error)
+	GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) (*CommandOutputStream, error)
+	GitCreateFromImage(appName string, image string, opt *GitImageOptions) (*CommandOutputStream, error)
 	GitSetAuth(host string, username string, password string) error
 	GitRemoveAuth(host string) error
 	GitSetAppProperty(appName string, property GitProperty, val string) error
@@ -84,17 +84,17 @@ type GitSyncOptions struct {
 	GitRef string
 }
 
-func (c *DefaultClient) GitInitializeApp(appName string) error {
+func (c *BaseClient) GitInitializeApp(appName string) error {
 	cmd := fmt.Sprintf(gitInitializeCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GitGetPublicKey() (string, error) {
+func (c *BaseClient) GitGetPublicKey() (string, error) {
 	return c.Exec(gitPublicKeyCmd)
 }
 
-func (c *DefaultClient) GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) error {
+func (c *BaseClient) GitSyncAppRepo(appName string, repo string, opt *GitSyncOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(gitSyncCmd, appName, repo)
 	if opt != nil {
 		var buildFlag string
@@ -103,11 +103,10 @@ func (c *DefaultClient) GitSyncAppRepo(appName string, repo string, opt *GitSync
 		}
 		cmd = fmt.Sprintf(gitSyncWithOptionsCmd, buildFlag, appName, repo, opt.GitRef)
 	}
-	_, err := c.Exec(cmd)
-	return err
+	return c.ExecStreaming(cmd)
 }
 
-func (c *DefaultClient) GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) error {
+func (c *BaseClient) GitCreateFromArchive(appName string, url string, opt *GitArchiveOptions) (*CommandOutputStream, error) {
 	var authorDetails string
 	archiveType := "tar"
 	if opt != nil {
@@ -119,11 +118,10 @@ func (c *DefaultClient) GitCreateFromArchive(appName string, url string, opt *Gi
 		}
 	}
 	cmd := fmt.Sprintf(gitFromArchiveCmd, archiveType, appName, url, authorDetails)
-	_, err := c.Exec(cmd)
-	return err
+	return c.ExecStreaming(cmd)
 }
 
-func (c *DefaultClient) GitCreateFromImage(appName string, image string, opt *GitImageOptions) error {
+func (c *BaseClient) GitCreateFromImage(appName string, image string, opt *GitImageOptions) (*CommandOutputStream, error) {
 	var authorDetails string
 	buildDir := ""
 	if opt != nil {
@@ -135,40 +133,39 @@ func (c *DefaultClient) GitCreateFromImage(appName string, image string, opt *Gi
 		}
 	}
 	cmd := fmt.Sprintf(gitFromImageCmd, appName, image, buildDir, authorDetails)
-	_, err := c.Exec(cmd)
-	return err
+	return c.ExecStreaming(cmd)
 }
 
-func (c *DefaultClient) GitSetAuth(host string, username string, password string) error {
+func (c *BaseClient) GitSetAuth(host string, username string, password string) error {
 	authDetails := fmt.Sprintf("%s %s", username, password)
 	cmd := fmt.Sprintf(gitAuthCmd, host, authDetails)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GitRemoveAuth(host string) error {
+func (c *BaseClient) GitRemoveAuth(host string) error {
 	cmd := fmt.Sprintf(gitAuthCmd, host, "")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GitSetAppProperty(appName string, property GitProperty, val string) error {
+func (c *BaseClient) GitSetAppProperty(appName string, property GitProperty, val string) error {
 	cmd := fmt.Sprintf(gitSetCmd, appName, property, val)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GitRemoveAppProperty(appName string, property GitProperty) error {
+func (c *BaseClient) GitRemoveAppProperty(appName string, property GitProperty) error {
 	return c.GitSetAppProperty(appName, property, "")
 }
 
-func (c *DefaultClient) GitAllowHost(host string) error {
+func (c *BaseClient) GitAllowHost(host string) error {
 	cmd := fmt.Sprintf(gitAllowHostCmd, host)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GitUnlockApp(appName string, force bool) error {
+func (c *BaseClient) GitUnlockApp(appName string, force bool) error {
 	var forceStr string
 	if force {
 		forceStr = "--force"
@@ -178,7 +175,7 @@ func (c *DefaultClient) GitUnlockApp(appName string, force bool) error {
 	return err
 }
 
-func (c *DefaultClient) GitGetAppReport(appName string) (*GitAppReport, error) {
+func (c *BaseClient) GitGetAppReport(appName string) (*GitAppReport, error) {
 	cmd := fmt.Sprintf(gitReportCmd, appName)
 	output, err := c.Exec(cmd)
 
@@ -190,7 +187,7 @@ func (c *DefaultClient) GitGetAppReport(appName string) (*GitAppReport, error) {
 	return &gitReport, err
 }
 
-func (c *DefaultClient) GitGetReport() (GitReport, error) {
+func (c *BaseClient) GitGetReport() (GitReport, error) {
 	cmd := fmt.Sprintf(gitReportCmd, "")
 	output, err := c.Exec(cmd)
 
@@ -202,13 +199,13 @@ func (c *DefaultClient) GitGetReport() (GitReport, error) {
 	return gitReport, err
 }
 
-func (c *DefaultClient) GitRunRepoGC(appName string) error {
+func (c *BaseClient) GitRunRepoGC(appName string) error {
 	cmd := fmt.Sprintf(gitRepoGcCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GitPurgeRepoCache(appName string) error {
+func (c *BaseClient) GitPurgeRepoCache(appName string) error {
 	cmd := fmt.Sprintf(gitRepoPurgeCacheCmd, appName)
 	_, err := c.Exec(cmd)
 	return err

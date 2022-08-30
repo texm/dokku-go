@@ -42,6 +42,7 @@ func (s *gitManagerTestSuite) TestSyncGitRepo() {
 		Build:  true,
 		GitRef: "main",
 	}
-	err = s.Client.GitSyncAppRepo(s.DefaultAppName, testRepo, options)
+	stream, err := s.Client.GitSyncAppRepo(s.DefaultAppName, testRepo, options)
 	r.NoError(err)
+	r.NotEmpty(stream.Stdout)
 }

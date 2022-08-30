@@ -11,7 +11,11 @@ type configManagerTestSuite struct {
 }
 
 func TestRunConfigManagerTestSuite(t *testing.T) {
-	suite.Run(t, new(configManagerTestSuite))
+	suite.Run(t, &configManagerTestSuite{
+		dokkuTestSuite{
+			AttachContainerTestLogger: true,
+		},
+	})
 }
 
 func (s *configManagerTestSuite) TestManageAppConfig() {

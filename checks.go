@@ -36,37 +36,37 @@ const (
 	checksReportCmd         = "checks:report %s"
 )
 
-func (c *DefaultClient) EnableAppDeployChecks(appName string) error {
+func (c *BaseClient) EnableAppDeployChecks(appName string) error {
 	cmd := fmt.Sprintf(checksEnableCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) EnableAppProcessesDeployChecks(appName string, processes []string) error {
+func (c *BaseClient) EnableAppProcessesDeployChecks(appName string, processes []string) error {
 	cmd := fmt.Sprintf(checksEnableProcessCmd, appName, strings.Join(processes, ","))
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) DisableAppDeployChecks(appName string) error {
+func (c *BaseClient) DisableAppDeployChecks(appName string) error {
 	cmd := fmt.Sprintf(checksDisableCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) DisableAppProcessesDeployChecks(appName string, processes []string) error {
+func (c *BaseClient) DisableAppProcessesDeployChecks(appName string, processes []string) error {
 	cmd := fmt.Sprintf(checksDisableProcessCmd, appName, strings.Join(processes, ","))
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppDeployChecksSkipped(appName string) error {
+func (c *BaseClient) SetAppDeployChecksSkipped(appName string) error {
 	cmd := fmt.Sprintf(checksSkipCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetAppProcessesDeployChecksSkipped(appName string, processes []string) error {
+func (c *BaseClient) SetAppProcessesDeployChecksSkipped(appName string, processes []string) error {
 	cmd := fmt.Sprintf(checksSkipProcessCmd, appName, strings.Join(processes, ","))
 	_, err := c.Exec(cmd)
 	return err
@@ -94,7 +94,7 @@ func parseRawReport(r appChecksRawReport) *AppChecksReport {
 	return report
 }
 
-func (c *DefaultClient) GetAppDeployChecksReport(appName string) (*AppChecksReport, error) {
+func (c *BaseClient) GetAppDeployChecksReport(appName string) (*AppChecksReport, error) {
 	cmd := fmt.Sprintf(checksReportCmd, appName)
 	output, err := c.Exec(cmd)
 	if err != nil {
@@ -109,7 +109,7 @@ func (c *DefaultClient) GetAppDeployChecksReport(appName string) (*AppChecksRepo
 	return parseRawReport(rawReport), nil
 }
 
-func (c *DefaultClient) GetDeployChecksReport() (ChecksReport, error) {
+func (c *BaseClient) GetDeployChecksReport() (ChecksReport, error) {
 	cmd := fmt.Sprintf(checksReportCmd, "")
 	output, err := c.Exec(cmd)
 	if err != nil {

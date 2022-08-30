@@ -39,31 +39,31 @@ const (
 
 func exitCodeReturn(err error) (bool, error) {
 	exitErr, ok := err.(*ExitCodeError)
-	if ok && exitErr.sshErr.ExitStatus() == 1 {
+	if ok && exitErr.ExitStatus() == 1 {
 		return false, nil
 	}
 	return false, err
 }
 
-func (c *DefaultClient) LetsEncryptAutoRenewApp(appName string) error {
+func (c *BaseClient) LetsEncryptAutoRenewApp(appName string) error {
 	cmd := fmt.Sprintf(letsEncryptAutoRenewCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) LetsEncryptAutoRenew() error {
+func (c *BaseClient) LetsEncryptAutoRenew() error {
 	cmd := fmt.Sprintf(letsEncryptAutoRenewCmd, "")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) LetsEncryptCleanup(appName string) error {
+func (c *BaseClient) LetsEncryptCleanup(appName string) error {
 	cmd := fmt.Sprintf(letsEncryptCleanupCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetLetsEncryptCronJobEnabled() (bool, error) {
+func (c *BaseClient) GetLetsEncryptCronJobEnabled() (bool, error) {
 	// https://github.com/dokku/dokku-letsencrypt/issues/221
 	cmd := fmt.Sprintf(letsEncryptCronCmd, "")
 	out, err := c.Exec(cmd)
@@ -71,19 +71,19 @@ func (c *DefaultClient) GetLetsEncryptCronJobEnabled() (bool, error) {
 	return false, err
 }
 
-func (c *DefaultClient) AddLetsEncryptCronJob() error {
+func (c *BaseClient) AddLetsEncryptCronJob() error {
 	cmd := fmt.Sprintf(letsEncryptCronCmd, "--add")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveLetsEncryptCronJob() error {
+func (c *BaseClient) RemoveLetsEncryptCronJob() error {
 	cmd := fmt.Sprintf(letsEncryptCronCmd, "--remove")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppLetsEncryptEnabled(appName string) (bool, error) {
+func (c *BaseClient) GetAppLetsEncryptEnabled(appName string) (bool, error) {
 	cmd := fmt.Sprintf(letsEncryptActiveCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil && out == "" {
@@ -92,25 +92,25 @@ func (c *DefaultClient) GetAppLetsEncryptEnabled(appName string) (bool, error) {
 	return true, nil
 }
 
-func (c *DefaultClient) EnableAppLetsEncrypt(appName string) error {
+func (c *BaseClient) EnableAppLetsEncrypt(appName string) error {
 	cmd := fmt.Sprintf(letsEncryptEnableAppCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) DisableAppLetsEncrypt(appName string) error {
+func (c *BaseClient) DisableAppLetsEncrypt(appName string) error {
 	cmd := fmt.Sprintf(letsEncryptDisableAppCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RevokeAppLetsEncryptCertificate(appName string) error {
+func (c *BaseClient) RevokeAppLetsEncryptCertificate(appName string) error {
 	cmd := fmt.Sprintf(letsEncryptRevokeAppCmd, appName)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetLetsEncryptAppList() ([]LetsEncryptAppInfo, error) {
+func (c *BaseClient) GetLetsEncryptAppList() ([]LetsEncryptAppInfo, error) {
 	out, err := c.Exec(letsEncryptListCmd)
 	if err != nil {
 		return nil, err

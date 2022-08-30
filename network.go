@@ -84,19 +84,19 @@ const (
 	networkSetPropertyCmd = "network:set %s %s %s"
 )
 
-func (c *DefaultClient) CreateNetwork(name string) error {
+func (c *BaseClient) CreateNetwork(name string) error {
 	cmd := fmt.Sprintf(networkCreateCmd, name)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) DestroyNetwork(name string) error {
+func (c *BaseClient) DestroyNetwork(name string) error {
 	cmd := fmt.Sprintf(networkDestroyCmd, name)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) CheckNetworkExists(name string) (bool, error) {
+func (c *BaseClient) CheckNetworkExists(name string) (bool, error) {
 	cmd := fmt.Sprintf(networkExistsCmd, name)
 	out, err := c.Exec(cmd)
 	if out == "Network does not exist" {
@@ -107,12 +107,12 @@ func (c *DefaultClient) CheckNetworkExists(name string) (bool, error) {
 	return false, err
 }
 
-func (c *DefaultClient) GetNetworkInfo(name string) (interface{}, error) {
+func (c *BaseClient) GetNetworkInfo(name string) (interface{}, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (c *DefaultClient) ListNetworks() ([]string, error) {
+func (c *BaseClient) ListNetworks() ([]string, error) {
 	out, err := c.Exec(networkListCmd)
 	if err != nil {
 		return nil, err
@@ -120,18 +120,18 @@ func (c *DefaultClient) ListNetworks() ([]string, error) {
 	return strings.Split(out, "\n"), nil
 }
 
-func (c *DefaultClient) RebuildNetwork(name string) error {
+func (c *BaseClient) RebuildNetwork(name string) error {
 	cmd := fmt.Sprintf(networkRebuildCmd, name)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RebuildAllNetworks() error {
+func (c *BaseClient) RebuildAllNetworks() error {
 	_, err := c.Exec(networkRebuildAllCmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppNetworkReport(appName string) (*AppNetworkReport, error) {
+func (c *BaseClient) GetAppNetworkReport(appName string) (*AppNetworkReport, error) {
 	cmd := fmt.Sprintf(networkReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -146,7 +146,7 @@ func (c *DefaultClient) GetAppNetworkReport(appName string) (*AppNetworkReport, 
 	return &report, nil
 }
 
-func (c *DefaultClient) GetNetworkReport() (NetworkReport, error) {
+func (c *BaseClient) GetNetworkReport() (NetworkReport, error) {
 	cmd := fmt.Sprintf(networkReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -161,25 +161,25 @@ func (c *DefaultClient) GetNetworkReport() (NetworkReport, error) {
 	return reportMap, nil
 }
 
-func (c *DefaultClient) SetAppNetworkProperty(appName string, property NetworkProperty, value string) error {
+func (c *BaseClient) SetAppNetworkProperty(appName string, property NetworkProperty, value string) error {
 	cmd := fmt.Sprintf(networkSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveAppNetworkProperty(appName string, property NetworkProperty) error {
+func (c *BaseClient) RemoveAppNetworkProperty(appName string, property NetworkProperty) error {
 	cmd := fmt.Sprintf(networkSetPropertyCmd, appName, property, "")
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) SetGlobalNetworkProperty(property NetworkProperty, value string) error {
+func (c *BaseClient) SetGlobalNetworkProperty(property NetworkProperty, value string) error {
 	cmd := fmt.Sprintf(networkSetPropertyCmd, "--global", property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) RemoveGlobalNetworkProperty(property NetworkProperty) error {
+func (c *BaseClient) RemoveGlobalNetworkProperty(property NetworkProperty) error {
 	cmd := fmt.Sprintf(networkSetPropertyCmd, "--global", property, "")
 	_, err := c.Exec(cmd)
 	return err

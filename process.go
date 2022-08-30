@@ -105,7 +105,7 @@ const (
 	psStopCommand              = "ps:stop --parallel %d %s"
 )
 
-func (c *DefaultClient) GetProcessInfo(appName string) error {
+func (c *BaseClient) GetProcessInfo(appName string) error {
 	cmd := fmt.Sprintf(psInspectCommand, appName)
 	output, err := c.Exec(cmd)
 	if err != nil {
@@ -118,7 +118,7 @@ func (c *DefaultClient) GetProcessInfo(appName string) error {
 	return NotImplementedError
 }
 
-func (c *DefaultClient) GetAppProcessReport(appName string) (*AppProcessReport, error) {
+func (c *BaseClient) GetAppProcessReport(appName string) (*AppProcessReport, error) {
 	cmd := fmt.Sprintf(psReportAppCommand, appName)
 	output, err := c.Exec(cmd)
 
@@ -134,7 +134,7 @@ func (c *DefaultClient) GetAppProcessReport(appName string) (*AppProcessReport, 
 	return &report, nil
 }
 
-func (c *DefaultClient) GetAllProcessReport() (ProcessReport, error) {
+func (c *BaseClient) GetAllProcessReport() (ProcessReport, error) {
 	output, err := c.Exec(psReportCommand)
 	report := ProcessReport{}
 
@@ -151,7 +151,7 @@ func (c *DefaultClient) GetAllProcessReport() (ProcessReport, error) {
 	return report, nil
 }
 
-func (c *DefaultClient) GetAppProcessScale(appName string) (map[string]int, error) {
+func (c *BaseClient) GetAppProcessScale(appName string) (map[string]int, error) {
 	cmd := fmt.Sprintf(psScaleCommand, appName, "")
 	output, err := c.Exec(cmd)
 	if err != nil {
@@ -179,7 +179,7 @@ func (c *DefaultClient) GetAppProcessScale(appName string) (map[string]int, erro
 	return scaleReport, nil
 }
 
-func (c *DefaultClient) SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error {
+func (c *BaseClient) SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error {
 	scaleAssignment := fmt.Sprintf("%s=%d", processName, scale)
 	cmd := fmt.Sprintf(psScaleCommand, appName, scaleAssignment)
 	if skipDeploy {
@@ -194,7 +194,7 @@ func (c *DefaultClient) SetAppProcessScale(appName string, processName string, s
 	return nil
 }
 
-func (c *DefaultClient) StartApp(appName string, p *ParallelismOptions) error {
+func (c *BaseClient) StartApp(appName string, p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psStartCommand, getParallelism(p), appName)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -203,7 +203,7 @@ func (c *DefaultClient) StartApp(appName string, p *ParallelismOptions) error {
 	return nil
 }
 
-func (c *DefaultClient) StartAllApps(p *ParallelismOptions) error {
+func (c *BaseClient) StartAllApps(p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psStartCommand, getParallelism(p), "--all")
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -212,7 +212,7 @@ func (c *DefaultClient) StartAllApps(p *ParallelismOptions) error {
 	return nil
 }
 
-func (c *DefaultClient) StopApp(appName string, p *ParallelismOptions) error {
+func (c *BaseClient) StopApp(appName string, p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psStopCommand, getParallelism(p), appName)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -221,7 +221,7 @@ func (c *DefaultClient) StopApp(appName string, p *ParallelismOptions) error {
 	return nil
 }
 
-func (c *DefaultClient) StopAllApps(p *ParallelismOptions) error {
+func (c *BaseClient) StopAllApps(p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psStopCommand, getParallelism(p), "--all")
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -230,7 +230,7 @@ func (c *DefaultClient) StopAllApps(p *ParallelismOptions) error {
 	return nil
 }
 
-func (c *DefaultClient) RebuildApp(appName string, p *ParallelismOptions) error {
+func (c *BaseClient) RebuildApp(appName string, p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psRebuildCommand, getParallelism(p), appName)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -239,7 +239,7 @@ func (c *DefaultClient) RebuildApp(appName string, p *ParallelismOptions) error 
 	return nil
 }
 
-func (c *DefaultClient) RebuildAllApps(p *ParallelismOptions) error {
+func (c *BaseClient) RebuildAllApps(p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psRebuildCommand, getParallelism(p), "--all")
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -248,7 +248,7 @@ func (c *DefaultClient) RebuildAllApps(p *ParallelismOptions) error {
 	return nil
 }
 
-func (c *DefaultClient) RestartApp(appName string, p *ParallelismOptions) error {
+func (c *BaseClient) RestartApp(appName string, p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psRestartCommand, getParallelism(p), appName)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -257,7 +257,7 @@ func (c *DefaultClient) RestartApp(appName string, p *ParallelismOptions) error 
 	return nil
 }
 
-func (c *DefaultClient) RestartAppProcess(appName string, process string, p *ParallelismOptions) error {
+func (c *BaseClient) RestartAppProcess(appName string, process string, p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psRestartAppProcessCommand, getParallelism(p), appName, process)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -266,7 +266,7 @@ func (c *DefaultClient) RestartAppProcess(appName string, process string, p *Par
 	return nil
 }
 
-func (c *DefaultClient) RestartAllApps(p *ParallelismOptions) error {
+func (c *BaseClient) RestartAllApps(p *ParallelismOptions) error {
 	cmd := fmt.Sprintf(psRestartCommand, getParallelism(p), "--all")
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -275,7 +275,7 @@ func (c *DefaultClient) RestartAllApps(p *ParallelismOptions) error {
 	return nil
 }
 
-func (c *DefaultClient) setAppProcessProperty(appName string, key string, value string) error {
+func (c *BaseClient) setAppProcessProperty(appName string, key string, value string) error {
 	cmd := fmt.Sprintf(psSetCommand, appName, key, value)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -284,7 +284,7 @@ func (c *DefaultClient) setAppProcessProperty(appName string, key string, value 
 	return nil
 }
 
-func (c *DefaultClient) setGlobalProcessProperty(key string, value string) error {
+func (c *BaseClient) setGlobalProcessProperty(key string, value string) error {
 	cmd := fmt.Sprintf(psSetCommand, "--global", key, value)
 	_, err := c.Exec(cmd)
 	if err != nil {
@@ -293,18 +293,18 @@ func (c *DefaultClient) setGlobalProcessProperty(key string, value string) error
 	return nil
 }
 
-func (c *DefaultClient) SetAppProcfilePath(appName string, procPath string) error {
+func (c *BaseClient) SetAppProcfilePath(appName string, procPath string) error {
 	return c.setAppProcessProperty(appName, "procfile-path", procPath)
 }
 
-func (c *DefaultClient) SetGlobalProcfilePath(procPath string) error {
+func (c *BaseClient) SetGlobalProcfilePath(procPath string) error {
 	return c.setGlobalProcessProperty("procfile-path", procPath)
 }
 
-func (c *DefaultClient) SetAppRestartPolicy(appName string, p RestartPolicy) error {
+func (c *BaseClient) SetAppRestartPolicy(appName string, p RestartPolicy) error {
 	return c.setAppProcessProperty(appName, "restart-policy", p.GetPolicy())
 }
 
-func (c *DefaultClient) SetGlobalRestartPolicy(p RestartPolicy) error {
+func (c *BaseClient) SetGlobalRestartPolicy(p RestartPolicy) error {
 	return c.setGlobalProcessProperty("restart-policy", p.GetPolicy())
 }

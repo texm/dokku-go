@@ -29,7 +29,7 @@ const (
 	cronAppReportCmd = "cron:report %s"
 )
 
-func (c *DefaultClient) ListAppCronTasks(appName string) ([]CronTask, error) {
+func (c *BaseClient) ListAppCronTasks(appName string) ([]CronTask, error) {
 	cmd := fmt.Sprintf(cronAppListCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -56,7 +56,7 @@ func (c *DefaultClient) ListAppCronTasks(appName string) ([]CronTask, error) {
 	return crons, nil
 }
 
-func (c *DefaultClient) GetAppCronReport(appName string) (*AppCronReport, error) {
+func (c *BaseClient) GetAppCronReport(appName string) (*AppCronReport, error) {
 	cmd := fmt.Sprintf(cronAppReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -71,7 +71,7 @@ func (c *DefaultClient) GetAppCronReport(appName string) (*AppCronReport, error)
 	return &report, nil
 }
 
-func (c *DefaultClient) GetAllAppCronReport() (CronReport, error) {
+func (c *BaseClient) GetAllAppCronReport() (CronReport, error) {
 	out, err := c.Exec(cronReportCmd)
 	if err != nil {
 		return nil, err

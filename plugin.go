@@ -43,7 +43,7 @@ const (
 	pluginUpdateCmd              = "plugin:update %s %s"
 )
 
-func (c *DefaultClient) ListPlugins() ([]PluginInfo, error) {
+func (c *BaseClient) ListPlugins() ([]PluginInfo, error) {
 	out, err := c.Exec(pluginListCmd)
 	lines := strings.Split(out, "\n")
 	plugins := make([]PluginInfo, len(lines))
@@ -67,53 +67,53 @@ func (c *DefaultClient) ListPlugins() ([]PluginInfo, error) {
 }
 
 /*
-func (c *DefaultClient) CheckPluginInstalled(plugin string) (bool, error) {
+func (c *BaseClient) CheckPluginInstalled(plugin string) (bool, error) {
 	cmd := fmt.Sprintf(pluginEnableCmd, plugin)
 	out, err := c.Exec(cmd)
 	fmt.Println(out)
 	return false, err
 }
 
-func (c *DefaultClient) EnablePlugin(plugin string) error {
+func (c *BaseClient) EnablePlugin(plugin string) error {
 	cmd := fmt.Sprintf(pluginEnableCmd, plugin)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) DisablePlugin(plugin string) error {
+func (c *BaseClient) DisablePlugin(plugin string) error {
 	cmd := fmt.Sprintf(pluginDisableCmd, plugin)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) InstallPlugin(options PluginInstallOptions) error {
+func (c *BaseClient) InstallPlugin(options PluginInstallOptions) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (c *DefaultClient) InstallPluginDependencies() error {
+func (c *BaseClient) InstallPluginDependencies() error {
 	_, err := c.Exec(pluginInstallDependenciesCmd)
 	return err
 }
 
-func (c *DefaultClient) UninstallPlugin(plugin string) error {
+func (c *BaseClient) UninstallPlugin(plugin string) error {
 	cmd := fmt.Sprintf(pluginUninstallCmd, plugin)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) UpdatePlugin(plugin string) error {
+func (c *BaseClient) UpdatePlugin(plugin string) error {
 	cmd := fmt.Sprintf(pluginUpdateCmd, plugin)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) UpdatePlugins() error {
+func (c *BaseClient) UpdatePlugins() error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (c *DefaultClient) TriggerPluginHook(hookArgs []string) error {
+func (c *BaseClient) TriggerPluginHook(hookArgs []string) error {
 	//TODO implement me
 	panic("implement me")
 }

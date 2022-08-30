@@ -65,25 +65,25 @@ func (o *AppManagementOptions) asFlags() string {
 	return flags
 }
 
-func (c *DefaultClient) CloneApp(oldName string, newName string, opts *AppManagementOptions) error {
+func (c *BaseClient) CloneApp(oldName string, newName string, opts *AppManagementOptions) error {
 	cmd := fmt.Sprintf(appCloneCommand, oldName, newName) + opts.asFlags()
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) CreateApp(name string) error {
+func (c *BaseClient) CreateApp(name string) error {
 	cmd := fmt.Sprintf(appCreateCommand, name)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) DestroyApp(name string) error {
+func (c *BaseClient) DestroyApp(name string) error {
 	cmd := fmt.Sprintf(appDestroyCommand, name)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) CheckAppExists(name string) (bool, error) {
+func (c *BaseClient) CheckAppExists(name string) (bool, error) {
 	cmd := fmt.Sprintf(appExistsCommand, name)
 	_, err := c.Exec(cmd)
 	if err == InvalidAppError {
@@ -95,7 +95,7 @@ func (c *DefaultClient) CheckAppExists(name string) (bool, error) {
 	return true, nil
 }
 
-func (c *DefaultClient) ListApps() ([]string, error) {
+func (c *BaseClient) ListApps() ([]string, error) {
 	output, err := c.Exec(appListCommand)
 	if err != nil {
 		if errors.Is(err, NoDeployedAppsError) {
@@ -110,36 +110,37 @@ func (c *DefaultClient) ListApps() ([]string, error) {
 	return appList, nil
 }
 
-func (c *DefaultClient) LockApp(name string) error {
+func (c *BaseClient) LockApp(name string) error {
 	cmd := fmt.Sprintf(appLockCommand, name)
 	out, err := c.Exec(cmd)
 	if err != nil {
 		return err
 	}
-	if out != lockCreatedMessage {
+	if out != lockCreatedMsg {
 		return UnexpectedMessageError
 	}
 	return nil
 }
 
-func (c *DefaultClient) IsLocked(name string) (bool, error) {
+func (c *BaseClient) IsLocked(name string) (bool, error) {
 	cmd := fmt.Sprintf(appIsLockedCommand, name)
 	out, err := c.Exec(cmd)
-	if out == deployLockNotExistsMessage {
+	if out == deployLockNotExistsMsg {
 		return false, nil
-	} else if err != nil {
+	}
+	if err != nil {
 		return false, err
 	}
 	return out == "Deploy lock exists", nil
 }
 
-func (c *DefaultClient) RenameApp(oldName string, newName string, opts *AppManagementOptions) error {
+func (c *BaseClient) RenameApp(oldName string, newName string, opts *AppManagementOptions) error {
 	cmd := fmt.Sprintf(appRenameCommand, oldName, newName) + opts.asFlags()
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppReport(name string) (*AppReport, error) {
+func (c *BaseClient) GetAppReport(name string) (*AppReport, error) {
 	cmd := fmt.Sprintf(appReportCommand, name)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -154,7 +155,7 @@ func (c *DefaultClient) GetAppReport(name string) (*AppReport, error) {
 	return &report, nil
 }
 
-func (c *DefaultClient) GetAllAppReport() (AppsReport, error) {
+func (c *BaseClient) GetAllAppReport() (AppsReport, error) {
 	cmd := fmt.Sprintf(appReportAllCommand)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -169,7 +170,7 @@ func (c *DefaultClient) GetAllAppReport() (AppsReport, error) {
 	return report, nil
 }
 
-func (c *DefaultClient) UnlockApp(name string) error {
+func (c *BaseClient) UnlockApp(name string) error {
 	cmd := fmt.Sprintf(appUnlockCommand, name)
 	_, err := c.Exec(cmd)
 	return err

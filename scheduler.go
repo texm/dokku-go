@@ -46,7 +46,7 @@ const (
 	schedulerSetPropertyCmd = "scheduler:set %s %s %s"
 )
 
-func (c *DefaultClient) GetAppSchedulerDockerLocalReport(appName string) (*AppSchedulerDockerLocalReport, error) {
+func (c *BaseClient) GetAppSchedulerDockerLocalReport(appName string) (*AppSchedulerDockerLocalReport, error) {
 	cmd := fmt.Sprintf(schedulerDockerLocalReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -61,7 +61,7 @@ func (c *DefaultClient) GetAppSchedulerDockerLocalReport(appName string) (*AppSc
 	return report, nil
 }
 
-func (c *DefaultClient) GetSchedulerDockerLocalReport() (SchedulerDockerLocalReport, error) {
+func (c *BaseClient) GetSchedulerDockerLocalReport() (SchedulerDockerLocalReport, error) {
 	cmd := fmt.Sprintf(schedulerDockerLocalReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -76,13 +76,13 @@ func (c *DefaultClient) GetSchedulerDockerLocalReport() (SchedulerDockerLocalRep
 	return report, nil
 }
 
-func (c *DefaultClient) SetSchedulerDockerLocalProperty(appName string, property DockerLocalSchedulerProperty, value string) error {
+func (c *BaseClient) SetSchedulerDockerLocalProperty(appName string, property DockerLocalSchedulerProperty, value string) error {
 	cmd := fmt.Sprintf(schedulerDockerLocalSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
 }
 
-func (c *DefaultClient) GetAppSchedulerReport(appName string) (*AppSchedulerReport, error) {
+func (c *BaseClient) GetAppSchedulerReport(appName string) (*AppSchedulerReport, error) {
 	cmd := fmt.Sprintf(schedulerReportCmd, appName)
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -97,7 +97,7 @@ func (c *DefaultClient) GetAppSchedulerReport(appName string) (*AppSchedulerRepo
 	return report, nil
 }
 
-func (c *DefaultClient) GetSchedulerReport() (SchedulerReport, error) {
+func (c *BaseClient) GetSchedulerReport() (SchedulerReport, error) {
 	cmd := fmt.Sprintf(schedulerReportCmd, "")
 	out, err := c.Exec(cmd)
 	if err != nil {
@@ -112,7 +112,7 @@ func (c *DefaultClient) GetSchedulerReport() (SchedulerReport, error) {
 	return report, nil
 }
 
-func (c *DefaultClient) SetAppSchedulerProperty(appName string, property SchedulerProperty, value string) error {
+func (c *BaseClient) SetAppSchedulerProperty(appName string, property SchedulerProperty, value string) error {
 	cmd := fmt.Sprintf(schedulerSetPropertyCmd, appName, property, value)
 	_, err := c.Exec(cmd)
 	return err
