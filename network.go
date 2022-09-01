@@ -77,7 +77,7 @@ const (
 	networkDestroyCmd     = "network:destroy --force %s"
 	networkExistsCmd      = "network:exists %s"
 	networkInfoCmd        = "network:info %s"
-	networkListCmd        = "network:list --quiet"
+	networkListCmd        = "--quiet network:list"
 	networkRebuildCmd     = "network:rebuild %s"
 	networkRebuildAllCmd  = "network:rebuildall"
 	networkReportCmd      = "network:report %s"
