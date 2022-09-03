@@ -28,6 +28,7 @@ const (
 
 const (
 	appLogsCmd             = "logs %s --quiet"
+	appNLogsCmd            = "logs %s -n %d --quiet"
 	appTailLogsCmd         = "logs %s --tail --quiet"
 	appLogsProcessCmd      = "logs %s --quiet --ps %s"
 	appFailedDeployLogsCmd = "logs:failed %s"
@@ -75,7 +76,7 @@ func (c *BaseClient) TailAppLogs(appName string) (io.Reader, error) {
 }
 
 func (c *BaseClient) GetNAppLogs(appName string, numLines int) (string, error) {
-	cmd := fmt.Sprintf(appLogsCmd, appName)
+	cmd := fmt.Sprintf(appNLogsCmd, appName, numLines)
 	return c.Exec(cmd)
 }
 
