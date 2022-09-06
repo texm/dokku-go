@@ -13,15 +13,15 @@ type processManager interface {
 	GetAllProcessReport() (ProcessReport, error)
 	GetAppProcessScale(appName string) (map[string]int, error)
 	SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) (*CommandOutputStream, error)
-	StartApp(appName string, p *ParallelismOptions) error
-	StartAllApps(p *ParallelismOptions) error
-	StopApp(appName string, p *ParallelismOptions) error
-	StopAllApps(p *ParallelismOptions) error
-	RebuildApp(appName string, p *ParallelismOptions) error
-	RebuildAllApps(p *ParallelismOptions) error
-	RestartApp(appName string, p *ParallelismOptions) error
-	RestartAppProcess(appName string, process string, p *ParallelismOptions) error
-	RestartAllApps(p *ParallelismOptions) error
+	StartApp(appName string, p *ParallelismOptions) (*CommandOutputStream, error)
+	StartAllApps(p *ParallelismOptions) (*CommandOutputStream, error)
+	StopApp(appName string, p *ParallelismOptions) (*CommandOutputStream, error)
+	StopAllApps(p *ParallelismOptions) (*CommandOutputStream, error)
+	RebuildApp(appName string, p *ParallelismOptions) (*CommandOutputStream, error)
+	RebuildAllApps(p *ParallelismOptions) (*CommandOutputStream, error)
+	RestartApp(appName string, p *ParallelismOptions) (*CommandOutputStream, error)
+	RestartAppProcess(appName string, process string, p *ParallelismOptions) (*CommandOutputStream, error)
+	RestartAllApps(p *ParallelismOptions) (*CommandOutputStream, error)
 	SetAppProcfilePath(appName string, procPath string) error
 	SetGlobalProcfilePath(procPath string) error
 	SetAppRestartPolicy(appName string, policy RestartPolicy) error
@@ -188,85 +188,49 @@ func (c *BaseClient) SetAppProcessScale(appName string, processName string, scal
 	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) StartApp(appName string, p *ParallelismOptions) error {
+func (c *BaseClient) StartApp(appName string, p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psStartCommand, getParallelism(p), appName)
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) StartAllApps(p *ParallelismOptions) error {
+func (c *BaseClient) StartAllApps(p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psStartCommand, getParallelism(p), "--all")
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) StopApp(appName string, p *ParallelismOptions) error {
+func (c *BaseClient) StopApp(appName string, p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psStopCommand, getParallelism(p), appName)
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) StopAllApps(p *ParallelismOptions) error {
+func (c *BaseClient) StopAllApps(p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psStopCommand, getParallelism(p), "--all")
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) RebuildApp(appName string, p *ParallelismOptions) error {
+func (c *BaseClient) RebuildApp(appName string, p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psRebuildCommand, getParallelism(p), appName)
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) RebuildAllApps(p *ParallelismOptions) error {
+func (c *BaseClient) RebuildAllApps(p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psRebuildCommand, getParallelism(p), "--all")
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) RestartApp(appName string, p *ParallelismOptions) error {
+func (c *BaseClient) RestartApp(appName string, p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psRestartCommand, getParallelism(p), appName)
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) RestartAppProcess(appName string, process string, p *ParallelismOptions) error {
+func (c *BaseClient) RestartAppProcess(appName string, process string, p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psRestartAppProcessCommand, getParallelism(p), appName, process)
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
-func (c *BaseClient) RestartAllApps(p *ParallelismOptions) error {
+func (c *BaseClient) RestartAllApps(p *ParallelismOptions) (*CommandOutputStream, error) {
 	cmd := fmt.Sprintf(psRestartCommand, getParallelism(p), "--all")
-	_, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
 func (c *BaseClient) setAppProcessProperty(appName string, key string, value string) error {

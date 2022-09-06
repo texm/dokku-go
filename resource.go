@@ -107,9 +107,7 @@ func (c *BaseClient) ClearAppDefaultResourceLimits(appName string) error {
 func (c *BaseClient) SetAppProcessResourceLimit(appName string, process string, resource ResourceSpec, limit int) error {
 	amt := fmt.Sprintf("%d%s", limit, resource.Suffix)
 	cmd := fmt.Sprintf(resourceLimitProcessCmd, appName, process, resource.Name, amt)
-	fmt.Println(cmd)
-	out, err := c.Exec(cmd)
-	fmt.Println(out)
+	_, err := c.Exec(cmd)
 	return err
 }
 
