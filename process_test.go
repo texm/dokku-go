@@ -68,6 +68,6 @@ func (s *processManagerTestSuite) TestSetProcessScale() {
 	err = s.Client.CreateApp(testAppName)
 	r.NoError(err, "failed to create app")
 
-	err = s.Client.SetAppProcessScale(testAppName, "web", 2, true)
+	_, err = s.Client.SetAppProcessScale(testAppName, "web", 2, true)
 	r.NoError(err, "failed to set app scale")
 }

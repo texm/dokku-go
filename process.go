@@ -12,7 +12,7 @@ type processManager interface {
 	GetAppProcessReport(appName string) (*AppProcessReport, error)
 	GetAllProcessReport() (ProcessReport, error)
 	GetAppProcessScale(appName string) (map[string]int, error)
-	SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error
+	SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) (*CommandOutputStream, error)
 	StartApp(appName string, p *ParallelismOptions) error
 	StartAllApps(p *ParallelismOptions) error
 	StopApp(appName string, p *ParallelismOptions) error
@@ -179,19 +179,13 @@ func (c *BaseClient) GetAppProcessScale(appName string) (map[string]int, error) 
 	return scaleReport, nil
 }
 
-func (c *BaseClient) SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) error {
+func (c *BaseClient) SetAppProcessScale(appName string, processName string, scale int, skipDeploy bool) (*CommandOutputStream, error) {
 	scaleAssignment := fmt.Sprintf("%s=%d", processName, scale)
 	cmd := fmt.Sprintf(psScaleCommand, appName, scaleAssignment)
 	if skipDeploy {
 		cmd += " --skip-deploy"
 	}
-	fmt.Println(cmd)
-	output, err := c.Exec(cmd)
-	if err != nil {
-		return err
-	}
-	fmt.Println(output)
-	return nil
+	return c.ExecStreaming(cmd)
 }
 
 func (c *BaseClient) StartApp(appName string, p *ParallelismOptions) error {
