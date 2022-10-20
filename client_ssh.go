@@ -1,7 +1,6 @@
 package dokku
 
 import (
-	"bytes"
 	"crypto/rsa"
 	"errors"
 	"fmt"
@@ -130,7 +129,7 @@ func (c *SSHClient) Close() error {
 	return nil
 }
 
-func (e *sshExecutor) exec(cmd string, input *bytes.Reader) (string, error) {
+func (e *sshExecutor) exec(cmd string, input io.Reader) (string, error) {
 	session, err := e.conn.NewSession()
 	if err != nil {
 		return "", err
@@ -171,7 +170,7 @@ func (e *sshExecutor) exec(cmd string, input *bytes.Reader) (string, error) {
 	return cleaned, nil
 }
 
-func (e *sshExecutor) execStreaming(cmd string, input *bytes.Reader) (*CommandOutputStream, error) {
+func (e *sshExecutor) execStreaming(cmd string, input io.Reader) (*CommandOutputStream, error) {
 	session, err := e.conn.NewSession()
 	if err != nil {
 		return nil, err
