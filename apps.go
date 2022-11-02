@@ -38,14 +38,14 @@ type AppManagementOptions struct {
 type AppsReport map[string]*AppReport
 
 const (
-	appCloneCommand     = "apps:clone %s %s"
+	appCloneCommand     = "apps:clone %s %s %s"
 	appCreateCommand    = "apps:create %s"
 	appDestroyCommand   = "apps:destroy --force %s"
 	appExistsCommand    = "apps:exists %s"
 	appListCommand      = "apps:list"
 	appLockCommand      = "apps:lock %s"
 	appIsLockedCommand  = "apps:locked %s"
-	appRenameCommand    = "apps:rename --skip-deploy %s %s"
+	appRenameCommand    = "apps:rename %s %s %s"
 	appReportCommand    = "apps:report %s"
 	appReportAllCommand = "apps:report"
 	appUnlockCommand    = "apps:unlock %s"
@@ -55,18 +55,18 @@ func (o *AppManagementOptions) asFlags() string {
 	if o == nil {
 		return ""
 	}
-	flags := ""
+	var flags []string
 	if o.SkipDeploy {
-		flags += "--skip-deploy"
+		flags = append(flags, "--skip-deploy")
 	}
 	if o.IgnoreExisting {
-		flags += "--ignore-existing"
+		flags = append(flags, "--ignore-existing")
 	}
-	return flags
+	return strings.Join(flags, " ")
 }
 
 func (c *BaseClient) CloneApp(oldName string, newName string, opts *AppManagementOptions) error {
-	cmd := fmt.Sprintf(appCloneCommand, oldName, newName) + opts.asFlags()
+	cmd := fmt.Sprintf(appCloneCommand, oldName, newName, opts.asFlags())
 	_, err := c.Exec(cmd)
 	return err
 }
@@ -135,7 +135,7 @@ func (c *BaseClient) IsLocked(name string) (bool, error) {
 }
 
 func (c *BaseClient) RenameApp(oldName string, newName string, opts *AppManagementOptions) error {
-	cmd := fmt.Sprintf(appRenameCommand, oldName, newName) + opts.asFlags()
+	cmd := fmt.Sprintf(appRenameCommand, oldName, newName, opts.asFlags())
 	_, err := c.Exec(cmd)
 	return err
 }

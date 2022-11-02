@@ -13,6 +13,17 @@ func TestRunAppManagerTestSuite(t *testing.T) {
 	suite.Run(t, new(appManagerTestSuite))
 }
 
+func (s *appManagerTestSuite) TestManagementOptionsFlags() {
+	r := s.Require()
+
+	opts := AppManagementOptions{}
+	r.Equal("", opts.asFlags())
+	opts.SkipDeploy = true
+	r.Equal("--skip-deploy", opts.asFlags())
+	opts.IgnoreExisting = true
+	r.Equal("--skip-deploy --ignore-existing", opts.asFlags())
+}
+
 func (s *appManagerTestSuite) TestCreate() {
 	s.Require().NoError(
 		s.Client.CreateApp("test-create-app"))
@@ -46,12 +57,12 @@ func (s *appManagerTestSuite) TestDuplicateName() {
 }
 
 func (s *appManagerTestSuite) TestNoAppsError() {
-	//r := s.Require()
-	//var err error
-	//
-	//_, err = s.Client.GetAllAppReport()
-	//r.Error(err, "didnt error with no apps?")
-	//r.ErrorIs(err, NoDeployedAppsError)
+	r := s.Require()
+	var err error
+
+	_, err = s.Client.GetAllAppReport()
+	r.Error(err, "didnt error with no apps?")
+	r.ErrorIs(err, NoDeployedAppsError)
 }
 
 func (s *appManagerTestSuite) TestGetAppReport() {
@@ -65,11 +76,9 @@ func (s *appManagerTestSuite) TestGetAppReport() {
 	r.NoError(err, "failed to check if app exists")
 	r.False(exists, "incorrect result from exists check")
 
-	r.NoError(
-		s.Client.CreateApp(testAppName))
+	r.NoError(s.Client.CreateApp(testAppName))
 
-	r.NoError(
-		s.Client.CreateApp(testAppName2))
+	r.NoError(s.Client.CreateApp(testAppName2))
 
 	appReport, err := s.Client.GetAppReport(testAppName)
 	r.NoError(err, "Failed to get app info")
