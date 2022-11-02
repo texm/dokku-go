@@ -3,7 +3,6 @@ package dokku
 import (
 	"fmt"
 	"github.com/texm/dokku-go/internal/reports"
-	"regexp"
 	"strings"
 )
 
@@ -29,6 +28,27 @@ const (
 	cronAppReportCmd = "cron:report %s"
 )
 
+func parseCronOutput(output string) ([]CronTask, error) {
+	lines := strings.Split(output, "\n")
+	columnLine := lines[0]
+	scheduleIndex := strings.Index(columnLine, "Schedule")
+	commandIndex := strings.Index(columnLine, "Command")
+
+	crons := make([]CronTask, len(lines)-1)
+	for i, line := range lines[1:] {
+		id := strings.TrimSpace(line[:scheduleIndex])
+		schedule := strings.TrimSpace(line[scheduleIndex:commandIndex])
+		command := strings.TrimSpace(line[commandIndex:])
+
+		crons[i] = CronTask{
+			ID:       id,
+			Schedule: schedule,
+			Command:  command,
+		}
+	}
+	return crons, nil
+}
+
 func (c *BaseClient) ListAppCronTasks(appName string) ([]CronTask, error) {
 	cmd := fmt.Sprintf(cronAppListCmd, appName)
 	out, err := c.Exec(cmd)
@@ -36,24 +56,7 @@ func (c *BaseClient) ListAppCronTasks(appName string) ([]CronTask, error) {
 		return nil, err
 	}
 
-	var multipleWhitespaceRe = regexp.MustCompile("\\s\\s+")
-	var crons []CronTask
-	for i, line := range strings.Split(out, "\n") {
-		if i == 0 {
-			continue
-		}
-		cols := multipleWhitespaceRe.Split(line, 3)
-		if len(cols) < 3 {
-			return nil, fmt.Errorf("failed to parse cron line: '%s'", line)
-		}
-		crons = append(crons, CronTask{
-			ID:       cols[0],
-			Schedule: cols[1],
-			Command:  cols[2],
-		})
-	}
-
-	return crons, nil
+	return parseCronOutput(out)
 }
 
 func (c *BaseClient) GetAppCronReport(appName string) (*AppCronReport, error) {
