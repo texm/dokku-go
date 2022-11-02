@@ -218,7 +218,7 @@ func closeSession(session *ssh.Session) error {
 	// so it's always possible for correctly-written code to get an EOF error
 	// from calling Close() - so we ignore it
 	err := session.Close()
-	if err.Error() != "EOF" {
+	if !errors.Is(err, io.EOF) {
 		return fmt.Errorf("error closing ssh session: %w", err)
 	}
 	return nil
