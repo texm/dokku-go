@@ -1,7 +1,6 @@
 package dokku
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -49,7 +48,6 @@ func (s *sshKeysManagerTestSuite) TestListSSHKeys() {
 	r := s.Require()
 
 	keys, err := s.Client.ListSSHKeys()
-	fmt.Println(keys)
 	r.NoError(err)
 	r.NotEmpty(keys)
 	r.Equal("test", keys[0].Name)

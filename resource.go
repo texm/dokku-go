@@ -233,8 +233,6 @@ func parseAppResourceReport(reportMap map[string]string) (*AppResourceReport, er
 			resSettings = &settings
 		}
 
-		fmt.Printf("k:%s; v:%s\n", k, v)
-		fmt.Printf("before; %+v\n", resSettings)
 		var err error
 		if mType == "limit" {
 			err = updateResourceUnitSettings(&resSettings.Limits, resType, v)
@@ -243,7 +241,6 @@ func parseAppResourceReport(reportMap map[string]string) (*AppResourceReport, er
 		} else {
 			return nil, fmt.Errorf("unknown resource management '%s'", mType)
 		}
-		fmt.Printf("after; %+v\n", resSettings)
 
 		if err != nil {
 			return nil, err

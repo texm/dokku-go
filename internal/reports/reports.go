@@ -99,8 +99,7 @@ func ParseMultiple(rawReport string) (ReportMap, error) {
 func ParseIntoMap(rawReport string, reportPtr interface{}) error {
 	reportMaps, err := ParseMultiple(rawReport)
 	if err != nil {
-		fmt.Println("failed to parse report: ", err.Error())
-		return err
+		return fmt.Errorf("failed to parse report: %w", err)
 	}
 
 	// TODO: check reportPtr is a map, str->report
@@ -146,8 +145,7 @@ func ParseIntoMap(rawReport string, reportPtr interface{}) error {
 func ParseInto(singleReport string, reportPtr interface{}) error {
 	report, err := ParseSingle(singleReport)
 	if err != nil {
-		fmt.Println("failed to parse report: ", err.Error())
-		return err
+		return fmt.Errorf("failed to parse report: %w", err)
 	}
 
 	decoderCfg := &mapstructure.DecoderConfig{

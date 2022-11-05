@@ -1,7 +1,6 @@
 package dokku
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -34,7 +33,6 @@ func (s *resourceManagerTestSuite) TestManageAppResources() {
 
 	report, err := s.Client.GetAppResourceReport(testAppName)
 	r.NoError(err)
-	fmt.Printf("report: %+v\n", report)
 	r.Equal(cpuLimit, report.Defaults.Limits.CPU)
 	r.Equal(cpuReserved, report.Defaults.Reservations.CPU)
 	r.Equal(memLimit, report.Defaults.Limits.Memory)
