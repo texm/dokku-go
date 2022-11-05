@@ -71,11 +71,11 @@ type (
 )
 
 const (
-	AppBuilderDockerfile = AppBuilder("builder-dockerfile")
-	AppBuilderHerokuish  = AppBuilder("builder-herokuish")
-	AppBuilderLambda     = AppBuilder("builder-lambda")
-	AppBuilderNull       = AppBuilder("builder-null")
-	AppBuilderPack       = AppBuilder("builder-pack")
+	AppBuilderDockerfile = AppBuilder("dockerfile")
+	AppBuilderHerokuish  = AppBuilder("herokuish")
+	AppBuilderLambda     = AppBuilder("lambda")
+	AppBuilderNull       = AppBuilder("null")
+	AppBuilderPack       = AppBuilder("pack")
 
 	BuilderPropertySelected = BuilderProperty("selected")
 	BuilderPropertyBuildDir = BuilderProperty("build-dir")
