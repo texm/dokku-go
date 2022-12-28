@@ -34,3 +34,16 @@ func (s *domainsManagerTestSuite) TestGetAppDomains() {
 	r.Len(report.GlobalDomains, 1)
 	r.Equal(report.GlobalDomains[0], globalDomain)
 }
+
+func (s *domainsManagerTestSuite) TestListNoAppDomains() {
+	r := s.Require()
+
+	testAppName := "test-domains-app"
+	r.NoError(s.Client.CreateApp(testAppName))
+
+	r.NoError(s.Client.DisableAppDomains(testAppName))
+
+	report, err := s.Client.GetAppDomainsReport(testAppName)
+	r.NoError(err)
+	r.Len(report.AppDomains, 0)
+}

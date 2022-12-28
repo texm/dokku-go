@@ -66,8 +66,14 @@ type rawGlobalDomainsReport struct {
 }
 
 func parseRawAppDomainsReport(rawReport rawAppDomainsReport) (*AppDomainsReport, error) {
-	appDomains := strings.Split(rawReport.AppDomains, " ")
-	globalDomains := strings.Split(rawReport.GlobalDomains, " ")
+	var appDomains []string
+	if len(rawReport.AppDomains) > 0 {
+		appDomains = strings.Split(rawReport.AppDomains, " ")
+	}
+	var globalDomains []string
+	if len(rawReport.GlobalDomains) > 0 {
+		globalDomains = strings.Split(rawReport.GlobalDomains, " ")
+	}
 
 	return &AppDomainsReport{
 		AppEnabled:    rawReport.AppEnabled,
