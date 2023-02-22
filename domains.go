@@ -110,7 +110,10 @@ func (c *BaseClient) GetGlobalDomainsReport() (*GlobalDomainsReport, error) {
 		return nil, err
 	}
 
-	domains := strings.Split(rawReport.GlobalDomains, " ")
+	var domains []string
+	if len(strings.TrimSpace(rawReport.GlobalDomains)) > 0 {
+		domains = strings.Split(rawReport.GlobalDomains, " ")
+	}
 
 	return &GlobalDomainsReport{
 		Domains: domains,
