@@ -97,7 +97,11 @@ func getOptionalFlag(flag string, enabled bool) string {
 }
 
 func (c *BaseClient) GetDokkuVersion() (string, error) {
-	return c.Exec(versionCmd)
+	out, err := c.Exec(versionCmd)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimPrefix(out, "dokku version "), nil
 }
 
 func (c *BaseClient) SetAppJsonProperty(appName string, property AppJsonProperty, value string) error {
