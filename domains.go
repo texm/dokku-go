@@ -67,11 +67,11 @@ type rawGlobalDomainsReport struct {
 
 func parseRawAppDomainsReport(rawReport rawAppDomainsReport) (*AppDomainsReport, error) {
 	var appDomains []string
-	if len(rawReport.AppDomains) > 0 {
+	if len(strings.TrimSpace(rawReport.AppDomains)) > 0 {
 		appDomains = strings.Split(rawReport.AppDomains, " ")
 	}
 	var globalDomains []string
-	if len(rawReport.GlobalDomains) > 0 {
+	if len(strings.TrimSpace(rawReport.GlobalDomains)) > 0 {
 		globalDomains = strings.Split(rawReport.GlobalDomains, " ")
 	}
 
