@@ -166,7 +166,7 @@ func (c *BaseClient) GetDockerRegistryReport() (DockerRegistryReport, error) {
 		return nil, err
 	}
 
-	var report DockerRegistryReport
+	report := DockerRegistryReport{}
 	if err := reports.ParseIntoMap(out, &report); err != nil {
 		return nil, err
 	}
